@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 from .database import engine, Base
 from .routes.production import router as production_router
@@ -12,14 +11,10 @@ app = FastAPI()
 # Create DB tables
 Base.metadata.create_all(bind=engine)
 
-# Get frontend URL from environment, fallback to localhost for development
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-
 # CORS middleware (must be before routes)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        frontend_url,
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
