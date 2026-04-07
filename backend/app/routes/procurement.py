@@ -11,46 +11,61 @@ router = APIRouter(prefix="/procurement", tags=["Procurement"])
 # Get all procurement data
 @router.get("/all")
 def get_all_procurement(db: Session = Depends(get_db)):
+    try:
+        records = db.query(Procurement).all()
 
-    records = db.query(Procurement).all()
-
-    return [
-        {
-            "S.no": r.s_no,
-            "District": r.district,
-            "Crop": r.crop,
-            "Nos.of Centre": r.nos_of_centre,
-            "Target (in MT)": r.target_in_mt,
-            "No. of Farmer's /SHGs": r.no_of_farmers_shgs,
-            "Procurement quantity (in MT)": r.procurement_quantity_in_mt,
-            "Procurement (in %)": r.procurement_in_percent,
-            "Procurement by Pvt. agencies (in MT)": r.procurement_by_pvt_agencies_in_mt,
-        }
-        for r in records
-    ]
+        return [
+            {
+                "S.no": r.s_no,
+                "District": r.district,
+                "Crop": r.crop,
+                "Nos.of Centre": r.nos_of_centre,
+                "Target (in MT)": r.target_in_mt,
+                "No. of Farmer's /SHGs": r.no_of_farmers_shgs,
+                "Procurement quantity (in MT)": r.procurement_quantity_in_mt,
+                "Procurement (in %)": r.procurement_in_percent,
+                "Procurement by Pvt. agencies (in MT)": r.procurement_by_pvt_agencies_in_mt,
+            }
+            for r in records
+        ]
+    except Exception as e:
+        print(f"Error fetching procurement data: {e}")
+        return []
 
 
 # Get KPIs from procurement
 @router.get("/kpis")
 def get_procurement_kpis(db: Session = Depends(get_db)):
+    try:
+        total_districts = db.query(Procurement.district).distinct().count()
 
-    total_districts = db.query(Procurement.district).distinct().count()
+        total_centres = db.query(func.sum(Procurement.nos_of_centre)).scalar() or 0
+        total_target = db.query(func.sum(Procurement.target_in_mt)).scalar() or 0
+        total_farmers = db.query(func.sum(Procurement.no_of_farmers_shgs)).scalar() or 0
+        total_procurement = db.query(func.sum(Procurement.procurement_quantity_in_mt)).scalar() or 0
+        avg_procurement = db.query(func.avg(Procurement.procurement_in_percent)).scalar() or 0
+        pvt_agencies = db.query(func.sum(Procurement.procurement_by_pvt_agencies_in_mt)).scalar() or 0
+        crop_coverage = db.query(Procurement.crop).distinct().count()
 
-    total_centres = db.query(func.sum(Procurement.nos_of_centre)).scalar() or 0
-    total_target = db.query(func.sum(Procurement.target_in_mt)).scalar() or 0
-    total_farmers = db.query(func.sum(Procurement.no_of_farmers_shgs)).scalar() or 0
-    total_procurement = db.query(func.sum(Procurement.procurement_quantity_in_mt)).scalar() or 0
-    avg_procurement = db.query(func.avg(Procurement.procurement_in_percent)).scalar() or 0
-    pvt_agencies = db.query(func.sum(Procurement.procurement_by_pvt_agencies_in_mt)).scalar() or 0
-    crop_coverage = db.query(Procurement.crop).distinct().count()
-
-    return {
-        "total_districts": total_districts,
-        "total_centres": total_centres,
-        "total_target": total_target,
-        "total_farmers": total_farmers,
-        "total_procurement": total_procurement,
-        "avg_procurement": round(avg_procurement, 2),
-        "pvt_agencies_procurement": pvt_agencies,
-        "crop_coverage": round(crop_coverage, 2),
-    }
+        return {
+            "total_districts": total_districts,
+            "total_centres": total_centres,
+            "total_target": total_target,
+            "total_farmers": total_farmers,
+            "total_procurement": total_procurement,
+            "avg_procurement": round(avg_procurement, 2),
+            "pvt_agencies_procurement": pvt_agencies,
+            "crop_coverage": round(crop_coverage, 2),
+        }
+    except Exception as e:
+        print(f"Error fetching procurement KPIs: {e}")
+        return {
+            "total_districts": 0,
+            "total_centres": 0,
+            "total_target": 0,
+            "total_farmers": 0,
+            "total_procurement": 0,
+            "avg_procurement": 0,
+            "pvt_agencies_procurement": 0,
+            "crop_coverage": 0,
+        }

@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 function TopBar() {
   const navigate = useNavigate();
   const { language, toggleLanguage, t } = useLanguage();
+  const { isAuthenticated, logout } = useAuth();
   const [theme, setTheme] = useState('light');
   const [fontSize, setFontSize] = useState(16);
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userType');
+    logout();
     navigate('/');
+  };
+
+  const handleDashboardClick = () => {
+    navigate('/procurement');
   };
 
   const handleIncreaseFontSize = () => {
@@ -67,6 +72,9 @@ function TopBar() {
       </div>
 
       <div className="top-bar-right">
+        <button onClick={handleDashboardClick} className="topbar-btn dashboard-btn" title="View Dashboard">
+          Dashboard
+        </button>
         <button onClick={handleIncreaseFontSize} className="topbar-btn" title="Increase Font Size">
           A+
         </button>
@@ -82,9 +90,11 @@ function TopBar() {
         <button onClick={handleToggleLanguage} className="topbar-btn" title="Switch Language">
           {language === 'en' ? 'हिंदी' : 'Eng'}
         </button>
-        <button onClick={handleLogout} className="topbar-btn logout-btn" title="Logout">
-          {t('logout')}
-        </button>
+        {isAuthenticated && (
+          <button onClick={handleLogout} className="topbar-btn logout-btn" title="Logout">
+            {t('logout')}
+          </button>
+        )}
       </div>
     </div>
   );

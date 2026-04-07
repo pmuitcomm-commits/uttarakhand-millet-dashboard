@@ -6,6 +6,32 @@ const API = axios.create({
   baseURL: API_BASE_URL,
 });
 
+// Add auth token to requests if it exists
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auth APIs
+export const loginUser = (username, password) =>
+  API.post("/auth/login", { username, password });
+
+export const registerUser = (userData) =>
+  API.post("/auth/register", userData);
+
+export const getCurrentUser = () =>
+  API.get("/auth/me");
+
+export const logoutUser = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userInfo');
+  window.location.href = '/';
+};
+
+// Dashboard APIs
 export const getKPIs = () => API.get("/dashboard/kpis");
 
 export const getDistrictProduction = () =>

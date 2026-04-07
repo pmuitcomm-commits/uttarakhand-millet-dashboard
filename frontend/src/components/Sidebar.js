@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 function Sidebar() {
   const { t } = useLanguage();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <div className="sidebar">
@@ -13,6 +15,31 @@ function Sidebar() {
       </div>
 
       <nav>
+        {isAuthenticated && user?.role === 'admin' && (
+          <>
+            <Link to="/admin-dashboard" data-aos="fade-right" data-aos-delay="100">
+              Admin Dashboard
+            </Link>
+          </>
+        )}
+
+        {isAuthenticated && user?.role === 'district_officer' && (
+          <>
+            <Link to="/district-dashboard" data-aos="fade-right" data-aos-delay="100">
+              District Dashboard
+            </Link>
+          </>
+        )}
+
+        {isAuthenticated && user?.role === 'block_officer' && (
+          <>
+            <Link to="/block-dashboard" data-aos="fade-right" data-aos-delay="100">
+              Block Dashboard
+            </Link>
+          </>
+        )}
+
+        {/* Public menu items for all users (farmers) */}
         <Link to="/dashboard" data-aos="fade-right" data-aos-delay="100">{t('dashboard')}</Link>
         <Link to="/procurement" data-aos="fade-right" data-aos-delay="150">{t('procurement')}</Link>
         <Link to="/production" data-aos="fade-right" data-aos-delay="200">{t('production')}</Link>

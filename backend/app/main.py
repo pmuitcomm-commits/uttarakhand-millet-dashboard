@@ -5,6 +5,7 @@ from .database import engine, Base
 from .routes.production import router as production_router
 from .routes.dashboard import router as dashboard_router
 from .routes.procurement import router as procurement_router
+from .routes.auth import router as auth_router
 
 app = FastAPI()
 
@@ -17,8 +18,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://millet-dashboard-frontend.up.railway.app",
-        "https://millet-dashboard.up.railway.app",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(production_router)
 app.include_router(dashboard_router)
 app.include_router(procurement_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def root():

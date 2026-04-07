@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
-import _ from "lodash";
+import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,7 +15,7 @@ import TopBar from "../components/TopBar";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import DataTable from "../components/DataTable";
-import { getAllProcurement } from "../services/api";
+import { getAllProcurement, getProcurementKPIs } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 import "../styles/dashboard.css";
 
@@ -34,34 +33,78 @@ ChartJS.register(
 function Procurement() {
   const { t } = useLanguage();
   const [procurementData, setProcurementData] = useState([]);
+  const [procurementKPIs, setProcurementKPIs] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchKPIs();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const procurementRes = await getAllProcurement();
-      setProcurementData(procurementRes.data);
+      
+      // Handle both array and non-array responses
+      const data = Array.isArray(procurementRes.data) ? procurementRes.data : [];
+      
+      // Normalize field names if needed
+      const normalizedData = data.map(item => ({
+        "S.no": item["S.no"] || item.s_no || "",
+        "District": item["District"] || item.district || "",
+        "Crop": item["Crop"] || item.crop || "",
+        "Nos.of Centre": item["Nos.of Centre"] || item.nos_of_centre || 0,
+        "Target (in MT)": item["Target (in MT)"] || item.target_in_mt || 0,
+        "No. of Farmer's /SHGs": item["No. of Farmer's /SHGs"] || item.no_of_farmers_shgs || 0,
+        "Procurement quantity (in MT)": item["Procurement quantity (in MT)"] || item.procurement_quantity_in_mt || 0,
+        "Procurement (in %)": item["Procurement (in %)"] || item.procurement_in_percent || 0,
+        "Procurement by Pvt. agencies (in MT)": item["Procurement by Pvt. agencies (in MT)"] || item.procurement_by_pvt_agencies_in_mt || 0,
+      }));
+      
+      setProcurementData(normalizedData);
     } catch (error) {
       console.error("Procurement API Error:", error);
+      setError("Failed to fetch procurement data");
+      setProcurementData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const procurementKPIs = useMemo(() => {
-    if (procurementData.length === 0) return {};
-
-    return {
-      totalDistricts: _.uniqBy(procurementData, "District").length,
-      totalCentres: _.sumBy(procurementData, "Nos.of Centre"),
-      totalTarget: _.sumBy(procurementData, "Target (in MT)"),
-      totalFarmers: _.sumBy(procurementData, "No. of Farmer's /SHGs"),
-      totalProcurement: _.sumBy(procurementData, "Procurement quantity (in MT)"),
-      avgProcurement: _.meanBy(procurementData, "Procurement (in %)").toFixed(2),
-      pvtAgenciesProcurement: _.sumBy(procurementData, "Procurement by Pvt. agencies (in MT)"),
-      cropCoverage: _.uniqBy(procurementData, "Crop").length,
-    };
-  }, [procurementData]);
+  const fetchKPIs = async () => {
+    try {
+      const kpiRes = await getProcurementKPIs();
+      const kpiData = kpiRes.data;
+      
+      // Map backend KPI keys to frontend display format
+      setProcurementKPIs({
+        totalDistricts: kpiData.total_districts || 0,
+        totalCentres: kpiData.total_centres || 0,
+        totalTarget: kpiData.total_target || 0,
+        totalFarmers: kpiData.total_farmers || 0,
+        totalProcurement: kpiData.total_procurement || 0,
+        avgProcurement: kpiData.avg_procurement || 0,
+        pvtAgenciesProcurement: kpiData.pvt_agencies_procurement || 0,
+        cropCoverage: kpiData.crop_coverage || 0,
+      });
+    } catch (error) {
+      console.error("KPI Fetch Error:", error);
+      // Fallback to showing zeros if KPI fetch fails
+      setProcurementKPIs({
+        totalDistricts: 0,
+        totalCentres: 0,
+        totalTarget: 0,
+        totalFarmers: 0,
+        totalProcurement: 0,
+        avgProcurement: 0,
+        pvtAgenciesProcurement: 0,
+        cropCoverage: 0,
+      });
+    }
+  };
 
   const dashboardMetrics = [
     { label: t('totalDistricts'), value: procurementKPIs.totalDistricts || 0 },
@@ -86,6 +129,18 @@ function Procurement() {
             <h2>{t('procurementSummary')}</h2>
           </div>
 
+          {error && (
+            <div style={{ 
+              padding: '15px', 
+              marginBottom: '20px', 
+              backgroundColor: '#fee', 
+              color: '#c33', 
+              borderRadius: '4px' 
+            }}>
+              ⚠️ {error}
+            </div>
+          )}
+
           <div className="dashboard-metrics-row">
             {dashboardMetrics.map((metric) => (
               <div key={metric.label} className="dashboard-metric-card">
@@ -96,7 +151,13 @@ function Procurement() {
           </div>
 
           <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
-            <DataTable data={procurementData} />
+            {loading ? (
+              <p style={{ padding: '20px', textAlign: 'center' }}>Loading data...</p>
+            ) : procurementData.length === 0 ? (
+              <p style={{ padding: '20px', textAlign: 'center' }}>No procurement data available</p>
+            ) : (
+              <DataTable data={procurementData} />
+            )}
           </div>
         </div>
       </div>
