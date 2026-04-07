@@ -1,0 +1,43 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+
+# Build outputs
+/frontend/build/
+/frontend/dist/
+
+# Logs
+*.log
+*.err
+uvicorn.err.log
+uvicorn.out.log
+frontend.err.log
+frontend.out.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+thumbs.db
+
+# Deployment files (keep locally for reference only)
+Dockerfile
+docker-compose.yml
+.dockerignore
+railway.json
