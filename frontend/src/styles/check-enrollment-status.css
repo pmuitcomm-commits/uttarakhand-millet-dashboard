@@ -1,0 +1,355 @@
+/* Check Enrollment Status Page Styles */
+
+.ces-container {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.ces-background {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #f5f6f8 0%, #e8ecf1 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.ces-top-bar {
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, #0b5d3b 0%, #2db84c 50%, #0b5d3b 100%);
+}
+
+.ces-content-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.ces-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 48px 40px;
+  max-width: 500px;
+  width: 100%;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Styles */
+.ces-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.ces-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.ces-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Section Styles */
+.ces-section {
+  margin-bottom: 32px;
+}
+
+.ces-section-title {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.3px;
+}
+
+/* Radio Group Styles */
+.ces-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ces-radio-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.ces-radio-input {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d0d5dd;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.ces-radio-input:hover {
+  border-color: #0b5d3b;
+  box-shadow: 0 0 0 3px rgba(11, 93, 59, 0.1);
+}
+
+.ces-radio-input:checked {
+  background: #0b5d3b;
+  border-color: #0b5d3b;
+  box-shadow: inset 0 0 0 3px white;
+}
+
+.ces-radio-label {
+  margin: 0;
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ces-radio-input:checked + .ces-radio-label {
+  color: #0b5d3b;
+  font-weight: 600;
+}
+
+/* Form Group Styles */
+.ces-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ces-input-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.2px;
+}
+
+.ces-input-field {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  background: #fafbfc;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.ces-input-field::placeholder {
+  color: #999;
+}
+
+.ces-input-field:focus {
+  outline: none;
+  border-color: #0b5d3b;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(11, 93, 59, 0.1);
+}
+
+/* Button Styles */
+.ces-button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ces-check-btn,
+.ces-back-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+  font-family: inherit;
+}
+
+.ces-check-btn {
+  background: #2db84c;
+  color: white;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(45, 184, 76, 0.2);
+}
+
+.ces-check-btn:hover:not(.disabled) {
+  background: #24a03f;
+  box-shadow: 0 4px 12px rgba(45, 184, 76, 0.3);
+  transform: translateY(-2px);
+}
+
+.ces-check-btn:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.ces-check-btn.disabled {
+  background: #d0d5dd;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ces-back-btn {
+  background: white;
+  color: #0b5d3b;
+  border: 2px solid #0b5d3b;
+  min-width: 150px;
+}
+
+.ces-back-btn:hover {
+  background: #e8f5f0;
+  border-color: #0a4a2d;
+  box-shadow: 0 2px 8px rgba(11, 93, 59, 0.15);
+  transform: translateY(-2px);
+}
+
+.ces-back-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ces-content-wrapper {
+    padding: 24px 16px;
+    min-height: calc(100vh - 6px);
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+
+  .ces-card {
+    padding: 32px 24px;
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  .ces-title {
+    font-size: 24px;
+  }
+
+  .ces-subtitle {
+    font-size: 13px;
+  }
+
+  .ces-section {
+    margin-bottom: 24px;
+  }
+
+  .ces-section-title {
+    font-size: 15px;
+  }
+
+  .ces-radio-label {
+    font-size: 14px;
+  }
+
+  .ces-input-label {
+    font-size: 13px;
+  }
+
+  .ces-check-btn,
+  .ces-back-btn {
+    padding: 11px 20px;
+    font-size: 14px;
+    min-width: 130px;
+  }
+
+  .ces-button-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ces-check-btn,
+  .ces-back-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .ces-card {
+    padding: 24px 16px;
+  }
+
+  .ces-header {
+    margin-bottom: 28px;
+  }
+
+  .ces-title {
+    font-size: 20px;
+  }
+
+  .ces-subtitle {
+    font-size: 12px;
+  }
+
+  .ces-radio-group {
+    gap: 12px;
+  }
+
+  .ces-radio-input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ces-radio-label {
+    font-size: 13px;
+  }
+
+  .ces-input-field {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .ces-button-group {
+    margin-top: 32px;
+  }
+
+  .ces-check-btn,
+  .ces-back-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ces-button-group {
+    display: none;
+  }
+}
