@@ -23,6 +23,7 @@ function MilletChart({ data }) {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         position: 'right',

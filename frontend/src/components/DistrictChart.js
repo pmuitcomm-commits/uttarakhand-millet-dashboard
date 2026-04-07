@@ -43,6 +43,8 @@ function DistrictChart({ data }) {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
+    maxBarThickness: 40,
     plugins: {
       legend: {
         position: 'top',

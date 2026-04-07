@@ -147,6 +147,11 @@ function Dashboard({ page = "dashboard" }) {
 
   const procurementTrendOptions = {
     responsive: true,
+    maintainAspectRatio: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
         display: false,
@@ -250,6 +255,11 @@ function Dashboard({ page = "dashboard" }) {
 
   const milletTrendOptions = {
     responsive: true,
+    maintainAspectRatio: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
         display: false,
