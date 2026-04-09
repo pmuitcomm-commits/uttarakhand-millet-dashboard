@@ -46,6 +46,8 @@ function Dashboard({ page = "dashboard" }) {
   const [districtData, setDistrictData] = useState([]);
   const [milletData, setMilletData] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [selectedDistrict, setSelectedDistrict] = useState("all");
+  const [selectedMillet, setSelectedMillet] = useState("all");
 
   const pageTitles = {
     dashboard: t('overviewDashboard'),
@@ -78,61 +80,91 @@ function Dashboard({ page = "dashboard" }) {
     }
   };
 
-  const totalProduction = kpis.total_production || 0;
+  // Filter data based on selected district
+  const filteredDistrictData = selectedDistrict === "all" 
+    ? districtData 
+    : districtData.filter(item => item.district === selectedDistrict);
+
+  const filteredTableData = selectedDistrict === "all" 
+    ? tableData 
+    : tableData.filter(item => item.district === selectedDistrict);
+
+  const getUniqueDistricts = () => {
+    return [...new Set(districtData.map(item => item.district))].sort();
+  };
+
+  // Filter data based on selected millet
+  const filteredMilletData = selectedMillet === "all"
+    ? milletData
+    : milletData.filter(item => item.millet === selectedMillet);
+
+  const milletVarieties = ["Mandua", "Jhangora", "Ramdana", "Cheena", "Kauni"];
+
+  // For millet page, use filtered data; otherwise use all data
+  const dataForMilletMetrics = page === "millet" ? filteredMilletData : milletData;
+
+  // For district page, use filtered data; otherwise use all data
+  const dataForMetrics = page === "district" ? filteredDistrictData : districtData;
+  
+  const totalProduction = page === "district" 
+    ? (dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0)).toFixed(2)
+    : kpis.total_production || 0;
   const totalTarget = Math.max(Math.round(totalProduction * 1.8), 10000);
   const totalCentres = Math.max(districtData.length * 12, 210);
   const totalFarmers = 11837;
-  const avgProcurement = districtData.length
+  const avgProcurement = dataForMetrics.length
     ? (
-        districtData.reduce((sum, item) => sum + (item.production || 0), 0) /
-        districtData.length
+        dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0) /
+        dataForMetrics.length
       ).toFixed(2)
     : 0;
   const pvtAgencies = Math.round(totalProduction * 0.05);
   const cropCoverage = 1;
 
-  const avgDistrictProduction = districtData.length
+  const avgDistrictProduction = dataForMetrics.length
     ? (
-        districtData.reduce((sum, item) => sum + (item.production || 0), 0) / districtData.length
+        dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0) / dataForMetrics.length
       ).toFixed(2)
     : 0;
 
-  const highestDistrict = districtData.length
-    ? districtData.reduce((max, item) =>
+  const highestDistrict = dataForMetrics.length
+    ? dataForMetrics.reduce((max, item) =>
         item.production > max.production ? item : max,
-      districtData[0])
+      dataForMetrics[0])
     : null;
 
-  const lowestDistrict = districtData.length
-    ? districtData.reduce((min, item) =>
+  const lowestDistrict = dataForMetrics.length
+    ? dataForMetrics.reduce((min, item) =>
         item.production < min.production ? item : min,
-      districtData[0])
+      dataForMetrics[0])
     : null;
 
-  const districtsAboveAverage = districtData.length
-    ? districtData.filter((item) => item.production > avgDistrictProduction).length
+  const districtsAboveAverage = dataForMetrics.length
+    ? dataForMetrics.filter((item) => item.production > avgDistrictProduction).length
     : 0;
 
-  const topMilletItem = milletData.length
-    ? milletData.reduce((max, item) =>
+  const topMilletItem = dataForMilletMetrics.length
+    ? dataForMilletMetrics.reduce((max, item) =>
         item.production > max.production ? item : max,
-      milletData[0])
+      dataForMilletMetrics[0])
     : null;
 
   const topMilletShare = topMilletItem && totalProduction
     ? ((topMilletItem.production / totalProduction) * 100).toFixed(2)
     : "0";
 
-  const avgMilletProduction = milletData.length
-    ? (totalProduction / milletData.length).toFixed(2)
-    : 0;
+  const avgMilletProduction = page === "millet" && filteredMilletData.length
+    ? (filteredMilletData.reduce((sum, item) => sum + (item.production || 0), 0) / filteredMilletData.length).toFixed(2)
+    : (milletData.length
+        ? (milletData.reduce((sum, item) => sum + (item.production || 0), 0) / milletData.length).toFixed(2)
+        : 0);
 
   const procurementTrendData = {
-    labels: districtData.map((d) => d.district),
+    labels: dataForMetrics.map((d) => d.district),
     datasets: [
       {
         label: "Procurement %",
-        data: districtData.map((d) => {
+        data: dataForMetrics.map((d) => {
           const value = d.production || 0;
           return totalProduction ? Math.min((value / totalProduction) * 100, 100) : 0;
         }),
@@ -166,7 +198,8 @@ function Dashboard({ page = "dashboard" }) {
     scales: {
       x: {
         ticks: {
-          color: '#f8fafc',
+          color: '#000000',
+          font: { size: 12, weight: 600 },
         },
         grid: {
           color: 'rgba(255,255,255,0.08)',
@@ -175,7 +208,8 @@ function Dashboard({ page = "dashboard" }) {
       y: {
         beginAtZero: true,
         ticks: {
-          color: '#f8fafc',
+          color: '#000000',
+          font: { size: 12, weight: 600 },
           callback: (value) => `${value}%`,
         },
         grid: {
@@ -274,7 +308,8 @@ function Dashboard({ page = "dashboard" }) {
     scales: {
       x: {
         ticks: {
-          color: '#f8fafc',
+          color: '#000000',
+          font: { size: 12, weight: 600 },
         },
         grid: {
           color: 'rgba(255,255,255,0.08)',
@@ -283,7 +318,8 @@ function Dashboard({ page = "dashboard" }) {
       y: {
         beginAtZero: true,
         ticks: {
-          color: '#f8fafc',
+          color: '#000000',
+          font: { size: 12, weight: 600 },
         },
         grid: {
           color: 'rgba(255,255,255,0.08)',
@@ -297,7 +333,7 @@ function Dashboard({ page = "dashboard" }) {
   if (!isMilletPage) {
     chartCards.push(
       <div className="dashboard-chart-card" data-aos="fade-up" key="district-chart">
-        <DistrictChart data={districtData} />
+        <DistrictChart data={page === "district" ? filteredDistrictData : districtData} />
       </div>
     );
   }
@@ -305,7 +341,7 @@ function Dashboard({ page = "dashboard" }) {
   if (isProductionPage || !isDistrictPage) {
     chartCards.push(
       <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="100" key="millet-chart">
-        <MilletChart data={milletData} />
+        <MilletChart data={page === "millet" ? filteredMilletData : (page === "district" ? filteredDistrictData : milletData)} />
       </div>
     );
   }
@@ -336,6 +372,38 @@ function Dashboard({ page = "dashboard" }) {
           <Header />
           <div className="page-heading-row" data-aos="fade-up">
             <h2>{pageTitle}</h2>
+            {page === "district" && (
+              <div className="district-selector-wrapper">
+                <select 
+                  value={selectedDistrict} 
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  className="district-selector"
+                >
+                  <option value="all">All Districts</option>
+                  {getUniqueDistricts().map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {page === "millet" && (
+              <div className="millet-selector-wrapper">
+                <select 
+                  value={selectedMillet} 
+                  onChange={(e) => setSelectedMillet(e.target.value)}
+                  className="millet-selector"
+                >
+                  <option value="all">All Millets</option>
+                  {milletVarieties.map((millet) => (
+                    <option key={millet} value={millet}>
+                      {millet}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="dashboard-metrics-row">
@@ -352,7 +420,7 @@ function Dashboard({ page = "dashboard" }) {
           {showTable && (
             <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
               <DataTable
-                data={tableData}
+                data={page === "district" ? filteredTableData : tableData}
                 title={page === "production" ? "Production Records" : "Production Overview"}
               />
             </div>

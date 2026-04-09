@@ -11,6 +11,9 @@ import Procurement from "./pages/Procurement";
 import AdminDashboard from "./pages/AdminDashboard";
 import DistrictDashboard from "./pages/DistrictDashboard";
 import BlockDashboard from "./pages/BlockDashboard";
+import AdminLanding from "./pages/AdminLanding";
+import DistrictLanding from "./pages/DistrictLanding";
+import BlockLanding from "./pages/BlockLanding";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
@@ -33,13 +36,23 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
 }
 
 function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <Routes>
       <Route path="/" element={
-        isAuthenticated ? <Navigate to="/procurement" replace /> : <Login />
+        isAuthenticated ? (
+          user?.role === 'admin' ? <Navigate to="/admin-landing" replace /> :
+          user?.role === 'district_officer' ? <Navigate to="/district-landing" replace /> :
+          user?.role === 'block_officer' ? <Navigate to="/block-landing" replace /> :
+          <Navigate to="/procurement" replace />
+        ) : <Login />
       } />
+      
+      {/* Landing Pages - for officers (no auth check, rely on auto-redirect) */}
+      <Route path="/admin-landing" element={<AdminLanding />} />
+      <Route path="/district-landing" element={<DistrictLanding />} />
+      <Route path="/block-landing" element={<BlockLanding />} />
       
       {/* Public Routes - for farmers */}
       <Route path="/enrollment-status" element={<CheckEnrollment />} />

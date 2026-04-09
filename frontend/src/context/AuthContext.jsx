@@ -24,8 +24,18 @@ export const AuthProvider = ({ children }) => {
 
       if (token && storedUser) {
         try {
+          // Parse stored user and normalize role to lowercase
+          let parsedUser = JSON.parse(storedUser);
+          if (parsedUser.role) {
+            parsedUser.role = parsedUser.role.toLowerCase();
+          }
+          
           // Verify token is still valid
           const response = await getCurrentUser();
+          // Normalize the response user role to lowercase
+          if (response.data.role) {
+            response.data.role = response.data.role.toLowerCase();
+          }
           setUser(response.data);
           setIsAuthenticated(true);
         } catch (error) {

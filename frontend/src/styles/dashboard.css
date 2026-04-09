@@ -227,6 +227,74 @@
   font-weight: 700;
 }
 
+.district-selector-wrapper {
+  margin-top: 16px;
+}
+
+.district-selector {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 2px solid #024b37;
+  background-color: #ffffff;
+  color: #024b37;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.district-selector:hover {
+  border-color: #034d3a;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.15);
+}
+
+.district-selector:focus {
+  outline: none;
+  border-color: #034d3a;
+  box-shadow: 0 0 0 3px rgba(2, 75, 55, 0.1);
+}
+
+.district-selector option {
+  color: #024b37;
+  background-color: #ffffff;
+  padding: 8px;
+}
+
+.millet-selector-wrapper {
+  margin-top: 16px;
+}
+
+.millet-selector {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 2px solid #024b37;
+  background-color: #ffffff;
+  color: #024b37;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.millet-selector:hover {
+  border-color: #034d3a;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.15);
+}
+
+.millet-selector:focus {
+  outline: none;
+  border-color: #034d3a;
+  box-shadow: 0 0 0 3px rgba(2, 75, 55, 0.1);
+}
+
+.millet-selector option {
+  color: #024b37;
+  background-color: #ffffff;
+  padding: 8px;
+}
+
 .dashboard-metrics-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(200px, 1fr));

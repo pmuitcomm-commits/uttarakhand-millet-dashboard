@@ -8,7 +8,7 @@ function Login() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    captcha: '',
+    // captcha: '', // Commented out for later enablement
     email: '',
     fullName: '',
     district: ''
@@ -108,9 +108,10 @@ function Login() {
     if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
     }
-    if (!formData.captcha.trim()) {
-      newErrors.captcha = 'Please enter the captcha';
-    }
+    // Captcha validation commented out for later enablement
+    // if (!formData.captcha.trim()) {
+    //   newErrors.captcha = 'Please enter the captcha';
+    // }
     return newErrors;
   };
 
@@ -147,19 +148,18 @@ function Login() {
 
       const { access_token, user } = response.data;
       
-      // Store token and user info
-      localStorage.setItem('authToken', access_token);
-      localStorage.setItem('userInfo', JSON.stringify(user));
-      localStorage.setItem('userRole', user.role);
-      
-      // Navigate based on role to respective dashboards
-      const roleRoute = {
-        'admin': '/admin-dashboard',
-        'district_officer': '/district-dashboard',
-        'block_officer': '/block-dashboard'
+      // Store token and user info (normalize role to lowercase)
+      const normalizedUser = {
+        ...user,
+        role: user.role.toLowerCase()
       };
-
-      navigate(roleRoute[user.role] || '/dashboard');
+      localStorage.setItem('authToken', access_token);
+      localStorage.setItem('userInfo', JSON.stringify(normalizedUser));
+      localStorage.setItem('userRole', normalizedUser.role);
+      
+      // Reload the page to let AuthContext reinitialize with new auth
+      // This will allow the context to properly set up before navigation happens
+      window.location.href = '/';
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Authentication failed. Please try again.';
       setAuthError(errorMsg);
@@ -169,11 +169,12 @@ function Login() {
     }
   };
 
-  const generateCaptcha = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  };
-
-  const [captchaText] = useState(generateCaptcha());
+  // Captcha generation commented out for later enablement
+  // const generateCaptcha = () => {
+  //   return Math.random().toString(36).substring(2, 8).toUpperCase();
+  // };
+  //
+  // const [captchaText] = useState(generateCaptcha());
 
   return (
     <div className="login-container">
@@ -341,6 +342,7 @@ function Login() {
               {errors.password && <span className="error-text">{errors.password}</span>}
             </div>
 
+            {/* Captcha section commented out for later enablement
             {!isRegistering && (
               <div className="form-group">
                 <label htmlFor="captcha">Captcha</label>
@@ -359,6 +361,7 @@ function Login() {
                 {errors.captcha && <span className="error-text">{errors.captcha}</span>}
               </div>
             )}
+            */}
 
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? 'Please wait...' : (isRegistering ? 'Register' : 'Login')}

@@ -33,7 +33,7 @@ try:
             is_active=1
         )
         db.add(admin)
-        print("✓ Created Admin: admin_uttarakhand / Admin@123")
+        print("? Created Admin: admin_uttarakhand / Admin@123")
         
         # District officer - Nainital
         district_officer = User(
@@ -46,7 +46,7 @@ try:
             is_active=1
         )
         db.add(district_officer)
-        print("✓ Created District Officer: district_nainital / District@123")
+        print("? Created District Officer: district_nainital / District@123")
         
         # District officer - Almora
         district_officer_2 = User(
@@ -59,7 +59,7 @@ try:
             is_active=1
         )
         db.add(district_officer_2)
-        print("✓ Created District Officer: district_almora / District@123")
+        print("? Created District Officer: district_almora / District@123")
         
         # Block officer
         block_officer = User(
@@ -73,7 +73,7 @@ try:
             is_active=1
         )
         db.add(block_officer)
-        print("✓ Created Block Officer: block_nainital_city / Block@123")
+        print("? Created Block Officer: block_nainital_city / Block@123")
         
         # Farmer user
         farmer = User(
@@ -85,10 +85,10 @@ try:
             is_active=1
         )
         db.add(farmer)
-        print("✓ Created Farmer: farmer_uttarakhand / Farmer@123")
+        print("? Created Farmer: farmer_uttarakhand / Farmer@123")
         
         db.commit()
-        print("\n✓ All test users created successfully!")
+        print("\n? All test users created successfully!")
         print("\nYou can now login with these credentials:")
         print("  Admin:             admin_uttarakhand / Admin@123")
         print("  District Officer:  district_nainital / District@123")
@@ -99,6 +99,7 @@ try:
         
 except Exception as e:
     print(f"Error creating users: {e}")
-    db.rollback()
+    import traceback
+    traceback.print_exc()
 finally:
     db.close()

@@ -15,8 +15,9 @@ function TopBar() {
     navigate('/');
   };
 
-  const handleDashboardClick = () => {
-    navigate('/procurement');
+  const handleHomeClick = () => {
+    logout();
+    navigate('/');
   };
 
   const handleIncreaseFontSize = () => {
@@ -72,8 +73,8 @@ function TopBar() {
       </div>
 
       <div className="top-bar-right">
-        <button onClick={handleDashboardClick} className="topbar-btn dashboard-btn" title="View Dashboard">
-          Dashboard
+        <button onClick={handleHomeClick} className="topbar-btn dashboard-btn" title="Go to Home">
+          Home
         </button>
         <button onClick={handleIncreaseFontSize} className="topbar-btn" title="Increase Font Size">
           A+

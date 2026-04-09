@@ -16,16 +16,16 @@ try:
     from app.database import engine, Base, SessionLocal
     from app.models.user import User, UserRole
     
-    print("Dropping existing users table...")
+    print("Dropping existing tables with CASCADE...")
     with engine.connect() as conn:
-        # Drop users table if exists
-        conn.execute(text("DROP TABLE IF EXISTS users"))
+        # Drop users table if exists with CASCADE
+        conn.execute(text("DROP TABLE IF EXISTS users CASCADE"))
         conn.commit()
-        print("✓ Dropped users table")
+        print("? Dropped users table")
     
     print("\nCreating users table from model...")
     Base.metadata.create_all(bind=engine, tables=[User.__table__])
-    print("✓ Users table created")
+    print("? Users table created")
     
     # Verify table exists
     with engine.connect() as conn:
@@ -34,10 +34,10 @@ try:
             WHERE table_name = 'users'
         """))
         columns = [row[0] for row in result.fetchall()]
-        print(f"\n✓ Users table columns: {columns}")
+        print(f"\n? Users table columns: {columns}")
     
 except Exception as e:
-    print(f"✗ Error: {e}")
+    print(f"? Error: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)

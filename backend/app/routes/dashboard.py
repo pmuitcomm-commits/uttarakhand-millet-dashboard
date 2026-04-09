@@ -27,6 +27,10 @@ def get_kpis(db: Session = Depends(get_db)):
     total_area = db.query(
         func.sum(MilletProduction.farmer_count)
     ).scalar()
+    
+    # Debug log
+    print(f"DEBUG KPI: districts={total_districts}, millets={total_millets}, prod={total_production}, area={total_area}")
+    
     return {
         "total_districts": total_districts or 0,
         "total_millets": total_millets or 0,

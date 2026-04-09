@@ -86,7 +86,7 @@ async def get_current_user(credentials: HTTPAuthCredentials = Depends(security),
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    result = db.execute(text("SELECT * FROM users WHERE name = :username"), {"username": username})
+    result = db.execute(text("SELECT * FROM users WHERE username = :username"), {"username": username})
     user = result.first()
     
     if user is None:
@@ -118,7 +118,7 @@ def require_role(*allowed_role_ids):
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     """Register a new user"""
     # Check if user already exists
-    result = db.execute(text("SELECT id FROM users WHERE name = :username"), {"username": user_data.username})
+    result = db.execute(text("SELECT id FROM users WHERE username = :username"), {"username": user_data.username})
     if result.first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -128,19 +128,22 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
     # Create new user
     hashed_password = hash_password(user_data.password)
     db.execute(text("""
-        INSERT INTO users (name, email, password, role_id, district, created_at)
-        VALUES (:name, :email, :password, :role_id, :district, NOW())
+        INSERT INTO users (username, email, hashed_password, full_name, role, district, block, is_active)
+        VALUES (:username, :email, :hashed_password, :full_name, :role, :district, :block, :is_active)
     """), {
-        "name": user_data.username,
+        "username": user_data.username,
         "email": user_data.email,
-        "password": hashed_password,
-        "role_id": user_data.role_id,
-        "district": user_data.district
+        "hashed_password": hashed_password,
+        "full_name": user_data.full_name,
+        "role": ROLE_MAP.get(user_data.role_id, "farmer"),
+        "district": user_data.district,
+        "block": None,
+        "is_active": 1
     })
     db.commit()
     
     # Fetch created user
-    result = db.execute(text("SELECT id, name, email, role_id, district FROM users WHERE name = :username"), 
+    result = db.execute(text("SELECT id, username, email, hashed_password, role, district FROM users WHERE username = :username"),
                        {"username": user_data.username})
     user = result.first()
     
@@ -153,9 +156,9 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
         "user": {
             "id": user[0],
             "username": user[1],
-            "role": ROLE_MAP.get(user[3], "farmer"),
             "email": user[2],
-            "district": user[4],
+            "role": user[4],
+            "district": user[5],
         }
     }
 
@@ -163,30 +166,48 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenResponse)
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
     """Login user with username and password"""
-    result = db.execute(text("SELECT id, name, email, password, role_id, district FROM users WHERE name = :username"), 
-                       {"username": credentials.username})
-    user = result.first()
-    
-    if not user or not verify_password(credentials.password, user[3]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username or password"
-        )
-    
-    # Create access token
-    access_token = create_access_token(data={"sub": user[1]})
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": user[0],
-            "username": user[1],
-            "role": ROLE_MAP.get(user[4], "farmer"),
-            "email": user[2],
-            "district": user[5],
+    try:
+        result = db.execute(text("SELECT id, username, email, hashed_password, role, district FROM users WHERE username = :username"), 
+                           {"username": credentials.username})
+        user = result.first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid username or password"
+            )
+        
+        # Verify password
+        if not verify_password(credentials.password, user[3]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid username or password"
+            )
+        
+        # Create access token
+        access_token = create_access_token(data={"sub": user[1]})
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user[0],
+                "username": user[1],
+                "email": user[2],
+                "role": user[4],
+                "district": user[5],
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Login error: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
+        )
 
 
 @router.get("/me", response_model=dict)

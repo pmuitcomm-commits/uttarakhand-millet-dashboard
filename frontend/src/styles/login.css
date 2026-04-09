@@ -272,8 +272,8 @@
 .user-type-btn {
   flex: 1;
   padding: 10px 14px;
-  border: 2px solid rgba(2, 75, 55, 0.18);
-  background: #f5f5f5;
+  border: none;
+  background: transparent;
   border-radius: 999px;
   font-size: 0.9rem;
   font-weight: 700;
@@ -445,41 +445,63 @@
 /* New Authentication Styles */
 
 .role-selector {
-  margin-bottom: 20px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  margin-bottom: 24px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+.role-selector:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .role-selector label {
   display: block;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 0.88rem;
   margin-bottom: 8px;
-  color: white;
+  color: #024b37;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 1;
 }
 
 .role-select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #10b981;
-  border-radius: 6px;
-  background: white;
+  padding: 12px 14px;
+  border: 1px solid rgba(2, 75, 55, 0.18);
+  border-radius: 10px;
+  background: #f5f5f5;
   color: #024b37;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23024b37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  font-family: inherit;
 }
 
 .role-select:hover {
-  border-color: #059669;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: rgba(2, 75, 55, 0.3);
+  box-shadow: none;
+  transform: none;
 }
 
 .role-select:focus {
   outline: none;
-  border-color: #059669;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  border-color: rgba(2, 75, 55, 0.4);
+  box-shadow: none;
+  transform: none;
 }
 
 .error-banner {
