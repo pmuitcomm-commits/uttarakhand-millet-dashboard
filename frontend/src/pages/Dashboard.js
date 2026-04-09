@@ -10,7 +10,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 
 import TopBar from "../components/TopBar";
 import Header from "../components/Header";
@@ -352,6 +352,96 @@ function Dashboard({ page = "dashboard" }) {
         <Line data={milletTrendData} options={milletTrendOptions} />
       </div>
     );
+    
+    // Third chart for Millet page: District breakdown for selected millet
+    const milletDistrictData = {
+      labels: filteredMilletData.length > 0 ? [...new Set(filteredMilletData.map(d => d.district))].sort() : [],
+      datasets: [
+        {
+          label: `${selectedMillet === "all" ? "All Millets" : selectedMillet} by District`,
+          data: filteredMilletData.length > 0 
+            ? [...new Set(filteredMilletData.map(d => d.district))].sort().map(district => {
+                const districtRecords = filteredMilletData.filter(d => d.district === district);
+                return districtRecords.reduce((sum, item) => sum + (item.production || 0), 0);
+              })
+            : [],
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(75, 192, 192, 0.7)",
+            "rgba(153, 102, 255, 0.7)",
+            "rgba(255, 159, 64, 0.7)",
+            "rgba(100, 180, 120, 0.7)",
+            "rgba(200, 100, 150, 0.7)",
+            "rgba(100, 150, 200, 0.7)",
+            "rgba(150, 200, 100, 0.7)",
+            "rgba(200, 150, 100, 0.7)",
+            "rgba(100, 100, 150, 0.7)",
+            "rgba(150, 100, 100, 0.7)",
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(255, 159, 64, 1)",
+            "rgba(100, 180, 120, 1)",
+            "rgba(200, 100, 150, 1)",
+            "rgba(100, 150, 200, 1)",
+            "rgba(150, 200, 100, 1)",
+            "rgba(200, 150, 100, 1)",
+            "rgba(100, 100, 150, 1)",
+            "rgba(150, 100, 100, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    const milletDistrictOptions = {
+      responsive: true,
+      maintainAspectRatio: true,
+      indexAxis: 'y',
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: true,
+          text: `${selectedMillet === "all" ? "All Millets" : selectedMillet} Production by District`,
+          color: '#f8fafc',
+          font: { size: 16, weight: 700 },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#000000',
+            font: { size: 12, weight: 600 },
+          },
+          grid: {
+            color: 'rgba(255,255,255,0.08)',
+          },
+        },
+        y: {
+          ticks: {
+            color: '#000000',
+            font: { size: 12, weight: 600 },
+          },
+          grid: {
+            color: 'rgba(255,255,255,0.08)',
+          },
+        },
+      },
+    };
+
+    chartCards.push(
+      <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="300" key="millet-district-chart">
+        <Bar data={milletDistrictData} options={milletDistrictOptions} />
+      </div>
+    );
   } else {
     chartCards.push(
       <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="200" key="procurement-line-chart">
@@ -360,8 +450,21 @@ function Dashboard({ page = "dashboard" }) {
     );
   }
 
-  const showTable = page === "dashboard" || page === "production";
   const pageTitle = pageTitles[page] || pageTitles.dashboard;
+
+  // Determine table data based on page and filters
+  const getTableData = () => {
+    if (page === "district") return filteredTableData;
+    if (page === "millet") return filteredMilletData.length ? filteredMilletData : milletData;
+    return tableData;
+  };
+
+  const getTableTitle = () => {
+    if (page === "production") return "Production Records";
+    if (page === "district") return "District Production Records";
+    if (page === "millet") return "Millet Production Records";
+    return "Production Overview";
+  };
 
   return (
     <div className="page-wrapper">
@@ -417,14 +520,12 @@ function Dashboard({ page = "dashboard" }) {
 
           <div className="dashboard-chart-row">{chartCards}</div>
 
-          {showTable && (
-            <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
-              <DataTable
-                data={page === "district" ? filteredTableData : tableData}
-                title={page === "production" ? "Production Records" : "Production Overview"}
-              />
-            </div>
-          )}
+          <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
+            <DataTable
+              data={getTableData()}
+              title={getTableTitle()}
+            />
+          </div>
         </div>
       </div>
     </div>

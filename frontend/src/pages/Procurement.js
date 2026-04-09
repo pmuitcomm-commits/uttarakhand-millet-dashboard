@@ -10,6 +10,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { Line, Bar } from "react-chartjs-2";
 
 import TopBar from "../components/TopBar";
 import Header from "../components/Header";
@@ -117,6 +118,215 @@ function Procurement() {
     { label: t('cropCoverage'), value: procurementKPIs.cropCoverage || 0 },
   ];
 
+  // Chart 1: Procurement by District (Bar Chart)
+  const districtProcurement = procurementData.reduce((acc, item) => {
+    const district = item.District || "Unknown";
+    const procurement = parseFloat(item["Procurement quantity (in MT)"] || 0);
+    acc[district] = (acc[district] || 0) + procurement;
+    return acc;
+  }, {});
+
+  const procurementByDistrictData = {
+    labels: Object.keys(districtProcurement).sort(),
+    datasets: [
+      {
+        label: "Procurement (MT)",
+        data: Object.keys(districtProcurement).sort().map(key => districtProcurement[key]),
+        backgroundColor: "#024b37",
+        borderColor: "#035344",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const procurementByDistrictOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Procurement by District",
+        color: '#024b37',
+        font: { size: 16, weight: 700 },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+    },
+  };
+
+  // Chart 2: Target vs Actual Procurement (Line Chart)
+  const targetVsActual = procurementData.reduce((acc, item) => {
+    const crop = item.Crop || "Unknown";
+    if (!acc[crop]) {
+      acc[crop] = { target: 0, actual: 0 };
+    }
+    acc[crop].target += parseFloat(item["Target (in MT)"] || 0);
+    acc[crop].actual += parseFloat(item["Procurement quantity (in MT)"] || 0);
+    return acc;
+  }, {});
+
+  const targetVsActualData = {
+    labels: Object.keys(targetVsActual).sort(),
+    datasets: [
+      {
+        label: "Target (MT)",
+        data: Object.keys(targetVsActual).sort().map(key => targetVsActual[key].target),
+        borderColor: "#ff6b6b",
+        backgroundColor: "rgba(255, 107, 107, 0.1)",
+        tension: 0.35,
+        pointRadius: 4,
+        fill: true,
+      },
+      {
+        label: "Actual (MT)",
+        data: Object.keys(targetVsActual).sort().map(key => targetVsActual[key].actual),
+        borderColor: "#51cf66",
+        backgroundColor: "rgba(81, 207, 102, 0.1)",
+        tension: 0.35,
+        pointRadius: 4,
+        fill: true,
+      },
+    ],
+  };
+
+  const targetVsActualOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: "Target vs Actual Procurement by Crop",
+        color: '#024b37',
+        font: { size: 16, weight: 700 },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+    },
+  };
+
+  // Chart 3: Procurement Achievement % (Bar Chart)
+  const achievementData = procurementData.reduce((acc, item) => {
+    const district = item.District || "Unknown";
+    const procurementPct = parseFloat(item["Procurement (in %)"] || 0);
+    if (!acc[district]) {
+      acc[district] = [];
+    }
+    acc[district].push(procurementPct);
+    return acc;
+  }, {});
+
+  const avgAchievement = Object.keys(achievementData).reduce((acc, district) => {
+    acc[district] = achievementData[district].reduce((a, b) => a + b, 0) / achievementData[district].length;
+    return acc;
+  }, {});
+
+  const achievementPercentageData = {
+    labels: Object.keys(avgAchievement).sort(),
+    datasets: [
+      {
+        label: "Achievement %",
+        data: Object.keys(avgAchievement).sort().map(key => avgAchievement[key].toFixed(2)),
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.7)",
+          "rgba(54, 162, 235, 0.7)",
+          "rgba(255, 206, 86, 0.7)",
+          "rgba(75, 192, 192, 0.7)",
+          "rgba(153, 102, 255, 0.7)",
+          "rgba(255, 159, 64, 0.7)",
+          "rgba(100, 180, 120, 0.7)",
+          "rgba(200, 100, 150, 0.7)",
+          "rgba(100, 150, 200, 0.7)",
+          "rgba(150, 200, 100, 0.7)",
+          "rgba(200, 150, 100, 0.7)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)",
+          "rgba(100, 180, 120, 1)",
+          "rgba(200, 100, 150, 1)",
+          "rgba(100, 150, 200, 1)",
+          "rgba(150, 200, 100, 1)",
+          "rgba(200, 150, 100, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const achievementPercentageOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Procurement Achievement % by District",
+        color: '#024b37',
+        font: { size: 16, weight: 700 },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+          callback: (value) => `${value}%`,
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+      y: {
+        ticks: {
+          color: '#000000',
+          font: { size: 12, weight: 600 },
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+    },
+  };
+
   return (
     <div className="page-wrapper">
       <TopBar />
@@ -150,13 +360,25 @@ function Procurement() {
             ))}
           </div>
 
+          <div className="dashboard-chart-row">
+            <div className="dashboard-chart-card" data-aos="fade-up" key="procurement-by-district">
+              <Bar data={procurementByDistrictData} options={procurementByDistrictOptions} />
+            </div>
+            <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="100" key="target-vs-actual">
+              <Line data={targetVsActualData} options={targetVsActualOptions} />
+            </div>
+            <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
+              <Bar data={achievementPercentageData} options={achievementPercentageOptions} />
+            </div>
+          </div>
+
           <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
             {loading ? (
               <p style={{ padding: '20px', textAlign: 'center' }}>Loading data...</p>
             ) : procurementData.length === 0 ? (
               <p style={{ padding: '20px', textAlign: 'center' }}>No procurement data available</p>
             ) : (
-              <DataTable data={procurementData} />
+              <DataTable data={procurementData} title="Detailed Procurement Data" />
             )}
           </div>
         </div>

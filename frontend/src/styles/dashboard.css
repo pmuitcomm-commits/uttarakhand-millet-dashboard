@@ -557,3 +557,107 @@ body.dark-theme .dashboard-table-card tbody tr:hover {
 body.dark-theme .dashboard-table-card tbody tr:nth-child(even) {
   background: #252525;
 }
+
+/* Table Header with Pagination Info */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #024b37;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #666666;
+  font-weight: 500;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button {
+  padding: 8px 12px;
+  background: #024b37;
+  color: white;
+  border: 1px solid #024b37;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background: #035344;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.2);
+}
+
+.pagination-controls button:disabled {
+  background: #d0d0d0;
+  color: #999999;
+  cursor: not-allowed;
+  border-color: #d0d0d0;
+}
+
+.pagination-controls button.active {
+  background: #0a7c59;
+  border-color: #0a7c59;
+  font-weight: 700;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.page-numbers button {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  min-width: 36px;
+}
+
+/* Dark Theme Pagination */
+body.dark-theme .pagination-info {
+  color: #cccccc;
+}
+
+body.dark-theme .pagination-controls button {
+  background: #024b37;
+  color: white;
+  border-color: #024b37;
+}
+
+body.dark-theme .pagination-controls button:hover:not(:disabled) {
+  background: #035344;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.4);
+}
+
+body.dark-theme .pagination-controls button:disabled {
+  background: #444444;
+  color: #999999;
+  border-color: #444444;
+}
+
+body.dark-theme .pagination-controls button.active {
+  background: #0a7c59;
+  border-color: #0a7c59;
+}
