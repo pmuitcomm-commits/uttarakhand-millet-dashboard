@@ -1,47 +1,58 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 
+# Load environment variables
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Fallback for local development
 if not DATABASE_URL:
     db_host = os.getenv("DB_HOST")
-    db_port = os.getenv("DB_PORT")
+    db_port = os.getenv("DB_PORT", "5432")
     db_name = os.getenv("DB_NAME")
     db_user = os.getenv("DB_USER")
     db_password = os.getenv("DB_PASSWORD")
 
     if db_host and db_name and db_user:
-        password_part = f":{db_password}" if db_password else ""
-        port_part = f":{db_port}" if db_port else ""
-        DATABASE_URL = f"postgresql://{db_user}{password_part}@{db_host}{port_part}/{db_name}"
+        DATABASE_URL = (
+            f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        )
     else:
-        # Require explicit database configuration - don't silently fall back to SQLite
         raise ValueError(
-            "Database configuration required. Set DATABASE_URL or provide "
-            "DB_HOST, DB_NAME, and DB_USER environment variables."
+            "Database configuration required. Set DATABASE_URL or DB credentials."
         )
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+# Connection arguments
+connect_args = {}
 
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+elif DATABASE_URL.startswith("postgresql"):
+    connect_args = {"sslmode": "require"}
+
+# Engine
 engine = create_engine(
     DATABASE_URL,
+    pool_pre_ping=True,
     connect_args=connect_args
 )
 
+# Session
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine
 )
 
+# Base
 Base = declarative_base()
 
 
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
