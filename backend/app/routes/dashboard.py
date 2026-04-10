@@ -4,13 +4,14 @@ from sqlalchemy import func
 
 from ..database import get_db
 from ..models.millet_production import MilletProduction
+from .auth import get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
 # KPI Endpoint
 @router.get("/kpis")
-def get_kpis(db: Session = Depends(get_db)):
+def get_kpis(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
 
     total_districts = db.query(
         func.count(func.distinct(MilletProduction.district))
@@ -27,9 +28,6 @@ def get_kpis(db: Session = Depends(get_db)):
     total_area = db.query(
         func.sum(MilletProduction.farmer_count)
     ).scalar()
-    
-    # Debug log
-    print(f"DEBUG KPI: districts={total_districts}, millets={total_millets}, prod={total_production}, area={total_area}")
     
     return {
         "total_districts": total_districts or 0,

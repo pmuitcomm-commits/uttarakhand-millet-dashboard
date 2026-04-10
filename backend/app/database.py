@@ -20,7 +20,11 @@ if not DATABASE_URL:
         port_part = f":{db_port}" if db_port else ""
         DATABASE_URL = f"postgresql://{db_user}{password_part}@{db_host}{port_part}/{db_name}"
     else:
-        DATABASE_URL = "sqlite:///./millet.db"
+        # Require explicit database configuration - don't silently fall back to SQLite
+        raise ValueError(
+            "Database configuration required. Set DATABASE_URL or provide "
+            "DB_HOST, DB_NAME, and DB_USER environment variables."
+        )
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 

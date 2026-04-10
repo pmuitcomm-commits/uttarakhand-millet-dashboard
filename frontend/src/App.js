@@ -86,8 +86,10 @@ function AppRoutes() {
 function App() {
   useEffect(() => {
     AOS.init({
-      duration: 800,
-      once: true,
+      duration: 0,
+      once: false,
+      offset: 0,
+      disable: false,
     });
   }, []);
 

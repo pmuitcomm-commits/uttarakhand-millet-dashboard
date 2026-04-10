@@ -4,13 +4,14 @@ from sqlalchemy import func
 
 from ..database import get_db
 from ..models.millet_production import MilletProduction
+from .auth import get_current_user
 
 router = APIRouter(prefix="/production", tags=["Production"])
 
 
 # Get all production data
 @router.get("/all")
-def get_all_production(db: Session = Depends(get_db)):
+def get_all_production(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
 
     records = db.query(MilletProduction).all()
 
@@ -20,8 +21,8 @@ def get_all_production(db: Session = Depends(get_db)):
             "district": r.district,
             "block": r.block,
             "village": r.village,
-            "millet_type": r.millet_type,
-            "production_quintal": r.production_quintal,
+            "millet": r.millet_type,
+            "production": r.production_quintal,
             "year": r.year,
             "farmer_count": r.farmer_count,
         }
@@ -31,7 +32,7 @@ def get_all_production(db: Session = Depends(get_db)):
 
 # District production
 @router.get("/district")
-def district_production(db: Session = Depends(get_db)):
+def district_production(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
 
     data = (
         db.query(
@@ -53,7 +54,7 @@ def district_production(db: Session = Depends(get_db)):
 
 # Millet production
 @router.get("/millet")
-def millet_production(db: Session = Depends(get_db)):
+def millet_production(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
 
     data = (
         db.query(

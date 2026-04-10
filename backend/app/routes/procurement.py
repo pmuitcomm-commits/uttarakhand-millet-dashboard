@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.procurement import Procurement
+from .auth import get_current_user
 
 router = APIRouter(prefix="/procurement", tags=["Procurement"])
 
 
 # Get all procurement data
 @router.get("/all")
-def get_all_procurement(db: Session = Depends(get_db)):
+def get_all_procurement(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     try:
         records = db.query(Procurement).all()
 
@@ -29,13 +30,18 @@ def get_all_procurement(db: Session = Depends(get_db)):
             for r in records
         ]
     except Exception as e:
-        print(f"Error fetching procurement data: {e}")
-        return []
+        # Log error without leaking sensitive info
+        import logging
+        logging.error(f"Error fetching procurement data", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error fetching procurement data"
+        )
 
 
 # Get KPIs from procurement
 @router.get("/kpis")
-def get_procurement_kpis(db: Session = Depends(get_db)):
+def get_procurement_kpis(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     try:
         total_districts = db.query(Procurement.district).distinct().count()
 
@@ -58,14 +64,10 @@ def get_procurement_kpis(db: Session = Depends(get_db)):
             "crop_coverage": round(crop_coverage, 2),
         }
     except Exception as e:
-        print(f"Error fetching procurement KPIs: {e}")
-        return {
-            "total_districts": 0,
-            "total_centres": 0,
-            "total_target": 0,
-            "total_farmers": 0,
-            "total_procurement": 0,
-            "avg_procurement": 0,
-            "pvt_agencies_procurement": 0,
-            "crop_coverage": 0,
-        }
+        # Log error without leaking sensitive info
+        import logging
+        logging.error(f"Error fetching procurement KPIs", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error fetching procurement KPIs"
+        )

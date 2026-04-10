@@ -1,19 +1,35 @@
+# =====================
 # Environment variables
+# =====================
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env
 
-# Dependencies
-node_modules/
+# =====================
+# Python
+# =====================
 venv/
 .venv/
 __pycache__/
+*.pyc
+*.pyo
 
+# =====================
+# Node
+# =====================
+node_modules/
+
+# =====================
 # Build outputs
-/frontend/build/
-/frontend/dist/
+# =====================
+frontend/build/
+frontend/dist/
 
+# =====================
 # Logs
+# =====================
 *.log
 *.err
 uvicorn.err.log
@@ -21,22 +37,32 @@ uvicorn.out.log
 frontend.err.log
 frontend.out.log
 
+# =====================
 # Database
+# =====================
 *.db
 *.sqlite
 *.sqlite3
+backend/millet.db
+backend/test.db
 
+# =====================
 # IDE
+# =====================
 .vscode/
 .idea/
 *.swp
 *.swo
 
+# =====================
 # OS
+# =====================
 .DS_Store
 thumbs.db
 
-# Deployment files (keep locally for reference only)
+# =====================
+# Deployment (local only)
+# =====================
 Dockerfile
 docker-compose.yml
 .dockerignore
