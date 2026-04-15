@@ -1,3 +1,5 @@
+-- Agent Generated File --
+
 # Authentication System - Quick Start Guide
 
 ## ✅ Feature Summary

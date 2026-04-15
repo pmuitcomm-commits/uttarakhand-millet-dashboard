@@ -17,23 +17,33 @@ load_dotenv()
 
 app = FastAPI()
 
-# Initialize rate limiter with default key function
+# ✅ DB init moved here
+@app.on_event("startup")
+def startup():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Tables created")
+    except Exception as e:
+        print("❌ DB connection failed:", e)
+
+# Rate limiter
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
-# Add exception handler for rate limit exceeded
-app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
-    status_code=429,
-    content={"detail": "Rate limit exceeded. Too many requests."}
-))
+app.add_exception_handler(
+    RateLimitExceeded,
+    lambda request, exc: JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Too many requests."}
+    )
+)
 
-# Create DB tables
-Base.metadata.create_all(bind=engine)
+# CORS
+cors_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
 
-# CORS middleware configuration from environment variables
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
-
-# CORS middleware (must be before routes)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,

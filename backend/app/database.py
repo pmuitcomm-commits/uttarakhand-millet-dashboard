@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Load environment variables
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -25,20 +24,21 @@ if not DATABASE_URL:
             "Database configuration required. Set DATABASE_URL or DB credentials."
         )
 
-# Connection arguments
+# ✅ Connection arguments
 connect_args = {}
 
 if DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
 elif DATABASE_URL.startswith("postgresql"):
-    connect_args = {"sslmode": "require"}
+    connect_args = {"sslmode": "require"}  # REQUIRED for Render
 
-# Engine
+# ✅ Engine (FIXED)
 engine = create_engine(
     DATABASE_URL,
+    connect_args=connect_args,   # ⭐ THIS WAS MISSING
     pool_pre_ping=True,
-    connect_args=connect_args
+    pool_recycle=300
 )
 
 # Session
