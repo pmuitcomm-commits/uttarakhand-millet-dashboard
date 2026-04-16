@@ -14,6 +14,7 @@ import BlockDashboard from "./pages/BlockDashboard";
 import AdminLanding from "./pages/AdminLanding";
 import DistrictLanding from "./pages/DistrictLanding";
 import BlockLanding from "./pages/BlockLanding";
+import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
@@ -57,6 +58,7 @@ function AppRoutes() {
       {/* Public Routes - for farmers */}
       <Route path="/enrollment-status" element={<CheckEnrollment />} />
       <Route path="/check-status" element={<CheckEnrollmentStatus />} />
+      <Route path="/register-farmer" element={<RegisterFarmer />} />
       <Route path="/procurement" element={<Procurement />} />
       <Route path="/dashboard" element={<Dashboard page="dashboard" />} />
       <Route path="/production" element={<Dashboard page="production" />} />

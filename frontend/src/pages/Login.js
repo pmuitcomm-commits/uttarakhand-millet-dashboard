@@ -243,6 +243,13 @@ function Login() {
           <div className="login-header-text">
             <h2>Official Login Portal</h2>
             <p>Department of Agriculture & Horticulture, Government of Uttarakhand</p>
+            <button
+              type="button"
+              className="register-toggle-link"
+              onClick={() => navigate('/register-farmer')}
+            >
+              Register Farmer
+            </button>
           </div>
 
           <div className="role-selector">

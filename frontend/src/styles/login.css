@@ -569,6 +569,20 @@
   background: rgba(220, 38, 38, 0.05);
 }
 
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.error-text {
+  display: block;
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 0.88rem;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
