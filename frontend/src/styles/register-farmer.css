@@ -1,91 +1,173 @@
+/* ============================================================
+   Register Farmer Page — Redesigned CSS
+   Aesthetic: Refined organic / agri-tech. Clean card layout,
+   warm earthy greens, Lato + Playfair Display typography,
+   smooth transitions and subtle depth.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@400;700&display=swap');
+
+/* ── Page Shell ─────────────────────────────────────────────── */
 .register-farmer-page {
   min-height: 100vh;
   width: 100%;
-  padding: 20px;
+  padding: 32px 20px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background: #024b37;
-  overflow: hidden;
+  background: #f0ece4;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 10% 0%, rgba(2, 75, 55, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 92% 100%, rgba(134, 179, 116, 0.14) 0%, transparent 55%);
+  overflow-x: hidden;
+  font-family: 'Lato', sans-serif;
 }
 
+/* ── Outer Card ─────────────────────────────────────────────── */
 .register-farmer-card {
   width: 100%;
-  max-width: 1180px;
-  min-height: calc(100vh - 40px);
+  max-width: 1160px;
   background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  border-radius: 20px;
+  padding: 36px 40px 48px;
+  box-shadow:
+    0 2px 4px rgba(2, 50, 36, 0.04),
+    0 8px 24px rgba(2, 50, 36, 0.08),
+    0 24px 56px rgba(2, 50, 36, 0.07);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  gap: 0;
+  border: 1px solid rgba(2, 75, 55, 0.07);
 }
 
+/* ── Header ─────────────────────────────────────────────────── */
 .register-farmer-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1.5px solid #eae6de;
 }
 
 .register-farmer-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: #024b37;
+  margin: 0 0 6px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: #023628;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .register-farmer-header p {
-  margin: 6px 0 0;
-  color: #475569;
-  font-size: 0.95rem;
+  margin: 0;
+  color: #5c6b5e;
+  font-size: 0.93rem;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
+/* Optional: logo / badge area on the right */
+.register-farmer-header .header-badge {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #024b37 0%, #046a4e 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 100px;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ── Status Banner ──────────────────────────────────────────── */
 .status-banner {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 12px;
-  margin-bottom: 18px;
-  font-weight: 600;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .status-banner.success {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid #10b981;
-  color: #064e3b;
+  background: #edf7f2;
+  border: 1px solid #6dbf96;
+  color: #065235;
 }
 
+.status-banner.error {
+  background: #fef3f2;
+  border: 1px solid #f5a9a9;
+  color: #7a1c1c;
+}
+
+/* ── Main Form Grid ─────────────────────────────────────────── */
 .register-farmer-form {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
+/* ── Section Card ───────────────────────────────────────────── */
 .form-section {
-  grid-column: span 3;
-  background: #f8fafc;
-  border: 1px solid rgba(2, 75, 55, 0.08);
-  border-radius: 18px;
-  padding: 18px;
+  background: #faf9f6;
+  border: 1px solid #e8e3d8;
+  border-radius: 16px;
+  padding: 24px 26px 28px;
+  transition: border-color 0.2s;
+}
+
+.form-section:focus-within {
+  border-color: rgba(2, 75, 55, 0.28);
 }
 
 .form-section h2 {
-  margin: 0 0 18px;
-  font-size: 1.1rem;
+  margin: 0 0 20px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: #024b37;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+/* Accent bar before each section heading */
+.form-section h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  background: #024b37;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Inner Form Grid ────────────────────────────────────────── */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px 22px;
 }
 
+/* ── Field Group ────────────────────────────────────────────── */
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .field-group.full-width {
@@ -93,45 +175,112 @@
 }
 
 .field-group label {
-  color: #0f172a;
+  color: #2a3b2e;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
+/* ── Inputs & Selects ───────────────────────────────────────── */
 .field-group input,
 .field-group select {
-  padding: 12px 14px;
-  border: 1px solid rgba(2, 75, 55, 0.18);
+  padding: 11px 14px;
+  border: 1.5px solid #d8d2c6;
   border-radius: 10px;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
+  font-family: 'Lato', sans-serif;
   background: #ffffff;
-  color: #0f172a;
+  color: #1a2b1e;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
+.field-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23024b37' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+.field-group input::placeholder {
+  color: #a8a099;
+}
+
+.field-group input:hover,
+.field-group select:hover {
+  border-color: #a8c4b4;
+}
+
+.field-group input:focus,
+.field-group select:focus {
+  border-color: #024b37;
+  box-shadow: 0 0 0 3px rgba(2, 75, 55, 0.10);
+  background: #f7fbf9;
+}
+
+/* Error state */
 .field-group input.error,
 .field-group select.error {
-  border-color: #dc2626;
-  background: rgba(254, 202, 202, 0.2);
+  border-color: #d14343;
+  background: #fff8f8;
 }
 
+.field-group input.error:focus,
+.field-group select.error:focus {
+  box-shadow: 0 0 0 3px rgba(209, 67, 67, 0.11);
+}
+
+/* ── Error Text ─────────────────────────────────────────────── */
+.error-text {
+  color: #c0392b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Checkbox Grid ──────────────────────────────────────────── */
 .checkbox-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px 14px;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid rgba(2, 75, 55, 0.12);
-  border-radius: 12px;
-  font-weight: 600;
-  color: #0f172a;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1.5px solid #e0dbd0;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #2a3b2e;
   background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  user-select: none;
 }
 
+.checkbox-item:hover {
+  border-color: #024b37;
+  background: #f3f9f6;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #024b37;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ── Lease Section ──────────────────────────────────────────── */
 .lease-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -142,9 +291,10 @@
 
 .lease-options {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
   align-items: center;
+  margin-top: 4px;
 }
 
 .lease-options label {
@@ -152,72 +302,157 @@
   align-items: center;
   gap: 8px;
   font-weight: 700;
+  font-size: 0.91rem;
+  color: #2a3b2e;
+  cursor: pointer;
 }
 
+.lease-options input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #024b37;
+  cursor: pointer;
+}
+
+/* ── Declaration Row ────────────────────────────────────────── */
 .declaration-row {
   grid-column: span 3;
   display: flex;
   flex-direction: column;
-  padding: 14px 0;
+  gap: 6px;
+  padding: 18px 0 6px;
+  border-top: 1px solid #eae6de;
+  margin-top: 4px;
 }
 
 .declaration-checkbox {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
   font-weight: 700;
-  color: #0f172a;
-}
-
-.error-text {
-  color: #dc2626;
   font-size: 0.88rem;
+  color: #2a3b2e;
+  line-height: 1.5;
+  cursor: pointer;
 }
 
+.declaration-checkbox input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #024b37;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+/* ── Form Actions ───────────────────────────────────────────── */
 .form-actions {
-  grid-column: span 3;
   display: flex;
   justify-content: flex-end;
+  margin-top: 8px;
 }
 
+/* ── Submit Button ──────────────────────────────────────────── */
 .register-farmer-card .login-btn {
-  width: 260px;
-  padding: 14px 18px;
+  width: 240px;
+  padding: 14px 22px;
+  background: #024b37;
+  color: #ffffff;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.22);
 }
 
-@media (max-width: 1300px) {
-  .register-farmer-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .checkbox-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.register-farmer-card .login-btn:hover {
+  background: #035e47;
+  box-shadow: 0 4px 16px rgba(2, 75, 55, 0.30);
+  transform: translateY(-1px);
 }
 
-@media (max-width: 900px) {
+.register-farmer-card .login-btn:active {
+  background: #023628;
+  transform: translateY(0);
+  box-shadow: 0 1px 6px rgba(2, 75, 55, 0.20);
+}
+
+.register-farmer-card .login-btn:disabled {
+  background: #a8c4b4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Responsive: Tablet ─────────────────────────────────────── */
+@media (max-width: 1100px) {
   .register-farmer-card {
-    min-height: auto;
-    padding: 18px;
+    padding: 28px 28px 40px;
   }
 
-  .register-farmer-form,
-  .form-grid,
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .checkbox-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .field-group.full-width,
-  .form-section,
-  .form-actions {
-    width: 100%;
+  .declaration-row {
+    grid-column: span 2;
+  }
+}
+
+/* ── Responsive: Mobile ─────────────────────────────────────── */
+@media (max-width: 680px) {
+  .register-farmer-page {
+    padding: 16px 12px;
+    align-items: flex-start;
+  }
+
+  .register-farmer-card {
+    padding: 22px 18px 32px;
+    border-radius: 16px;
   }
 
   .register-farmer-header {
     flex-direction: column;
     align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
   }
+
+  .register-farmer-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .form-section {
+    padding: 18px 16px 22px;
+    border-radius: 12px;
+  }
+
+  .form-grid,
+  .checkbox-grid,
+  .lease-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group.full-width,
+  .declaration-row,
+  .lease-status-group {
+    grid-column: span 1;
+  }
+
   .form-actions {
     justify-content: center;
+  }
+
+  .register-farmer-card .login-btn {
+    width: 100%;
   }
 }
