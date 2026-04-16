@@ -1,18 +1,30 @@
-/* Enrollment Status Page Styles */
+/* ============================================================
+   Enrollment Status Page — Redesigned CSS
+   Aesthetic: Refined organic / agri-tech — matches RegisterFarmer
+   Lato + Playfair Display, warm earthy greens, clean cards.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@400;700&display=swap');
+
+/* ── Container ──────────────────────────────────────────────── */
 .enrollment-container {
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0ece4;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 10% 0%, rgba(2, 75, 55, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 92% 100%, rgba(134, 179, 116, 0.14) 0%, transparent 55%);
+  font-family: 'Lato', sans-serif;
   display: flex;
   flex-direction: column;
 }
 
+/* ── Header ─────────────────────────────────────────────────── */
 .enrollment-header {
-  background: linear-gradient(90deg, #ffffff 0%, #f5f5f5 100%);
-  padding: 20px 30px;
-  border-bottom: 2px solid #66b9ac;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 20px 36px;
+  border-bottom: 1.5px solid #eae6de;
+  box-shadow: 0 2px 12px rgba(2, 50, 36, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,83 +37,109 @@
 }
 
 .gov-logo-placeholder {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #024b37 0%, #003366 100%);
+  width: 72px;
+  height: 72px;
+  background: #024b37;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(2, 75, 55, 0.22);
+  flex-shrink: 0;
 }
 
 .gov-emblem {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
 }
 
 .title-section h1 {
-  margin: 0;
-  color: #003366;
-  font-size: 1.8rem;
-  font-weight: 700;
+  margin: 0 0 2px;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #023628;
+  font-size: 1.6rem;
+  font-weight: 600;
   text-align: center;
+  letter-spacing: -0.2px;
 }
 
 .title-section h2 {
-  margin: 5px 0;
-  color: #4a5568;
-  font-size: 1.2rem;
-  font-weight: 500;
+  margin: 3px 0;
+  font-family: 'Lato', sans-serif;
+  color: #5c6b5e;
+  font-size: 1rem;
+  font-weight: 400;
   text-align: center;
 }
 
 .title-section h3 {
-  margin: 5px 0;
+  margin: 3px 0 0;
+  font-family: 'Lato', sans-serif;
   color: #024b37;
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   text-align: center;
 }
 
+/* ── Content Area ───────────────────────────────────────────── */
 .enrollment-content {
   flex: 1;
-  padding: 40px 30px;
+  padding: 44px 20px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
-.enrollment-card, .loading-card, .results-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+/* ── Shared Card Base ───────────────────────────────────────── */
+.enrollment-card,
+.loading-card,
+.results-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(2, 75, 55, 0.07);
+  box-shadow:
+    0 2px 4px rgba(2, 50, 36, 0.04),
+    0 8px 24px rgba(2, 50, 36, 0.08),
+    0 24px 56px rgba(2, 50, 36, 0.07);
   max-width: 800px;
   width: 100%;
+  animation: slideIn 0.4s ease-out;
 }
 
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Enrollment Card ────────────────────────────────────────── */
 .enrollment-card {
-  padding: 40px;
+  padding: 44px 48px;
 }
 
+/* ── Card Header ────────────────────────────────────────────── */
 .card-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1.5px solid #eae6de;
 }
 
 .card-header h2 {
-  margin: 0 0 10px 0;
-  color: #003366;
-  font-size: 1.8rem;
-  font-weight: 700;
+  margin: 0 0 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #023628;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.2px;
 }
 
 .card-header p {
   margin: 0;
-  color: #4a5568;
-  font-size: 1rem;
-  line-height: 1.6;
+  color: #5c6b5e;
+  font-size: 0.91rem;
+  line-height: 1.55;
 }
 
+/* ── Form ───────────────────────────────────────────────────── */
 .enrollment-form {
   display: flex;
   flex-direction: column;
@@ -110,172 +148,245 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .form-group label {
-  font-weight: 600;
-  color: #024b37;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #2a3b2e;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .form-group input {
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 11px 14px;
+  border: 1.5px solid #d8d2c6;
+  border-radius: 10px;
+  font-size: 0.94rem;
+  font-family: 'Lato', sans-serif;
+  color: #1a2b1e;
+  background: #ffffff;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-group input::placeholder {
+  color: #a8a099;
+}
+
+.form-group input:hover {
+  border-color: #a8c4b4;
 }
 
 .form-group input:focus {
-  outline: none;
   border-color: #024b37;
-  box-shadow: 0 0 0 3px rgba(2, 75, 55, 0.1);
+  background: #f7fbf9;
+  box-shadow: 0 0 0 3px rgba(2, 75, 55, 0.10);
 }
 
+/* ── Error Message ──────────────────────────────────────────── */
 .error-message {
-  background: #fed7d7;
-  color: #c12f2f;
+  background: #fff3f3;
+  color: #8b1c1c;
   padding: 12px 16px;
-  border-radius: 8px;
-  border-left: 4px solid #c12f2f;
-  font-size: 0.9rem;
-  font-weight: 500;
+  border-radius: 10px;
+  border-left: 4px solid #d14343;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
+/* ── Form Actions ───────────────────────────────────────────── */
 .form-actions {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.back-btn, .check-btn {
-  padding: 12px 24px;
+/* ── Shared Button Base ─────────────────────────────────────── */
+.back-btn,
+.check-btn,
+.new-search-btn,
+.login-btn {
+  padding: 13px 24px;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  font-family: 'Lato', sans-serif;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.18s, transform 0.12s, box-shadow 0.18s, border-color 0.18s;
   flex: 1;
 }
 
-.back-btn {
-  background: #e2e8f0;
-  color: #4a5568;
+/* ── Back / Secondary Buttons ───────────────────────────────── */
+.back-btn,
+.new-search-btn {
+  background: #ffffff;
+  color: #024b37;
+  border: 1.5px solid #024b37;
 }
 
-.back-btn:hover {
-  background: #cbd5e0;
+.back-btn:hover,
+.new-search-btn:hover {
+  background: #f3f9f6;
+  border-color: #035e47;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.12);
   transform: translateY(-1px);
 }
 
-.check-btn {
-  background: linear-gradient(90deg, #024b37 0%, #003366 100%);
-  color: white;
+.back-btn:active,
+.new-search-btn:active {
+  background: #eaf3ee;
+  transform: translateY(0);
+  box-shadow: none;
 }
 
-.check-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(2, 75, 55, 0.3);
+/* ── Primary Buttons ────────────────────────────────────────── */
+.check-btn,
+.login-btn {
+  background: #024b37;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 75, 55, 0.22);
 }
 
-/* Loading State */
+.check-btn:hover,
+.login-btn:hover {
+  background: #035e47;
+  box-shadow: 0 4px 16px rgba(2, 75, 55, 0.30);
+  transform: translateY(-1px);
+}
+
+.check-btn:active,
+.login-btn:active {
+  background: #023628;
+  transform: translateY(0);
+  box-shadow: 0 1px 6px rgba(2, 75, 55, 0.20);
+}
+
+/* ── Loading Card ───────────────────────────────────────────── */
 .loading-card {
-  padding: 60px 40px;
+  padding: 64px 40px;
   text-align: center;
 }
 
 .loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #e2e8f0;
-  border-top: 4px solid #024b37;
+  width: 52px;
+  height: 52px;
+  border: 3px solid #eae6de;
+  border-top: 3px solid #024b37;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 22px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
+  0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 .loading-card h3 {
-  margin: 0 0 10px 0;
-  color: #003366;
-  font-size: 1.4rem;
+  margin: 0 0 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #023628;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
 .loading-card p {
   margin: 0;
-  color: #4a5568;
-  font-size: 1rem;
+  color: #5c6b5e;
+  font-size: 0.91rem;
 }
 
-/* Results State */
+/* ── Results Card ───────────────────────────────────────────── */
 .results-card {
-  padding: 40px;
+  padding: 44px 48px;
 }
 
 .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1.5px solid #eae6de;
 }
 
 .results-header h2 {
   margin: 0;
-  color: #003366;
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #023628;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.2px;
 }
 
+/* ── Status Badge ───────────────────────────────────────────── */
 .status-badge {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .status-badge.enrolled {
-  background: #c6f6d5;
+  background: #edf7f2;
   color: #024b37;
+  border: 1px solid #6dbf96;
 }
 
+.status-badge.not-enrolled {
+  background: #fff3f3;
+  color: #8b1c1c;
+  border: 1px solid #f5a9a9;
+}
+
+/* ── Farmer Details ─────────────────────────────────────────── */
 .farmer-details {
   display: grid;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: 28px;
+  margin-bottom: 32px;
 }
 
 .detail-section h3 {
-  margin: 0 0 20px 0;
-  color: #003366;
-  font-size: 1.3rem;
+  margin: 0 0 16px;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #024b37;
+  font-size: 1.05rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+.detail-section h3::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: #024b37;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 .detail-item {
@@ -283,79 +394,69 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  border-left: 3px solid #024b37;
+  background: #faf9f6;
+  border-radius: 10px;
+  border: 1px solid #e8e3d8;
+  border-left: 3.5px solid #024b37;
 }
 
 .detail-item .label {
-  font-weight: 600;
-  color: #4a5568;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #5c6b5e;
+  letter-spacing: 0.02em;
 }
 
 .detail-item .value {
-  color: #003366;
-  font-weight: 500;
+  color: #023628;
+  font-weight: 700;
+  font-size: 0.91rem;
 }
 
+/* ── Results Actions ────────────────────────────────────────── */
 .results-actions {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   justify-content: center;
+  padding-top: 8px;
+  border-top: 1.5px solid #eae6de;
+  margin-top: 4px;
 }
 
-.new-search-btn, .login-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.new-search-btn {
-  background: #e2e8f0;
-  color: #4a5568;
-}
-
-.new-search-btn:hover {
-  background: #cbd5e0;
-  transform: translateY(-1px);
-}
-
-.login-btn {
-  background: linear-gradient(90deg, #228B22 0%, #32CD32 100%);
-  color: white;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(34, 139, 34, 0.3);
-}
-
+/* ── Footer ─────────────────────────────────────────────────── */
 .enrollment-footer {
-  background: #2d3748;
-  color: white;
-  padding: 20px 30px;
+  background: #023628;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 18px 30px;
   text-align: center;
   margin-top: auto;
 }
 
 .enrollment-footer p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
+  font-family: 'Lato', sans-serif;
 }
 
-/* Responsive Design */
+/* ── Responsive: Tablet ─────────────────────────────────────── */
 @media (max-width: 768px) {
   .enrollment-content {
-    padding: 20px 15px;
+    padding: 28px 16px;
   }
 
-  .enrollment-card, .loading-card, .results-card {
-    padding: 30px 20px;
+  .enrollment-card,
+  .loading-card,
+  .results-card {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  .enrollment-header {
+    padding: 18px 20px;
+  }
+
+  .title-section h1 {
+    font-size: 1.3rem;
   }
 
   .form-row {
@@ -368,7 +469,7 @@
 
   .results-header {
     flex-direction: column;
-    gap: 15px;
+    gap: 14px;
     text-align: center;
   }
 
@@ -382,5 +483,37 @@
 
   .farmer-details {
     gap: 20px;
+  }
+}
+
+/* ── Responsive: Mobile ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .enrollment-card,
+  .loading-card,
+  .results-card {
+    padding: 24px 18px;
+    border-radius: 14px;
+  }
+
+  .card-header h2,
+  .results-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .gov-logo-placeholder {
+    width: 56px;
+    height: 56px;
+  }
+
+  .gov-emblem {
+    font-size: 1.8rem;
+  }
+
+  .back-btn,
+  .check-btn,
+  .new-search-btn,
+  .login-btn {
+    padding: 12px 18px;
+    font-size: 0.88rem;
   }
 }
