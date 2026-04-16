@@ -1,0 +1,223 @@
+.register-farmer-page {
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #024b37;
+  overflow: hidden;
+}
+
+.register-farmer-card {
+  width: 100%;
+  max-width: 1180px;
+  min-height: calc(100vh - 40px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.register-farmer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.register-farmer-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #024b37;
+}
+
+.register-farmer-header p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.status-banner {
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+.status-banner.success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid #10b981;
+  color: #064e3b;
+}
+
+.register-farmer-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  overflow: hidden;
+}
+
+.form-section {
+  grid-column: span 3;
+  background: #f8fafc;
+  border: 1px solid rgba(2, 75, 55, 0.08);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.form-section h2 {
+  margin: 0 0 18px;
+  font-size: 1.1rem;
+  color: #024b37;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-group.full-width {
+  grid-column: span 3;
+}
+
+.field-group label {
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.field-group input,
+.field-group select {
+  padding: 12px 14px;
+  border: 1px solid rgba(2, 75, 55, 0.18);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.field-group input.error,
+.field-group select.error {
+  border-color: #dc2626;
+  background: rgba(254, 202, 202, 0.2);
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(2, 75, 55, 0.12);
+  border-radius: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+}
+
+.lease-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lease-status-group {
+  grid-column: span 3;
+}
+
+.lease-options {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.lease-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.declaration-row {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 0;
+}
+
+.declaration-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.88rem;
+}
+
+.form-actions {
+  grid-column: span 3;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.register-farmer-card .login-btn {
+  width: 260px;
+  padding: 14px 18px;
+}
+
+@media (max-width: 1300px) {
+  .register-farmer-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .register-farmer-card {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .register-farmer-form,
+  .form-grid,
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group.full-width,
+  .form-section,
+  .form-actions {
+    width: 100%;
+  }
+
+  .register-farmer-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .form-actions {
+    justify-content: center;
+  }
+}
