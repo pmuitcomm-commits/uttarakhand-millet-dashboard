@@ -227,7 +227,7 @@ function CheckEnrollment() {
       </div>
 
       <div className="enrollment-footer">
-        <p>© 2024 Government of Uttarakhand | Department of Agriculture</p>
+        <p>© Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
       </div>
     </div>
   );
