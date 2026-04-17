@@ -34,7 +34,7 @@ html, body, #root {
 /* ── Top Header ─────────────────────────────────────────────── */
 .top-header {
   width: 100%;
-  padding: 10px 20px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,9 +55,7 @@ html, body, #root {
   object-fit: contain;
 }
 
-.logo3-login {
-  mix-blend-mode: darken;
-}
+.logo3-login { mix-blend-mode: darken; }
 
 .header-logo-separator {
   color: rgba(255,255,255,0.4);
@@ -66,9 +64,7 @@ html, body, #root {
   margin: 0 2px;
 }
 
-.logo-placeholder {
-  display: none;
-}
+.logo-placeholder { display: none; }
 
 .header-center {
   flex: 1;
@@ -77,9 +73,7 @@ html, body, #root {
   align-items: center;
 }
 
-.header-title {
-  text-align: center;
-}
+.header-title { text-align: center; }
 
 .header-title span {
   display: block;
@@ -132,7 +126,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  padding: 8px 24px;
   width: 100%;
   overflow: hidden;
 }
@@ -140,13 +134,14 @@ html, body, #root {
 /* ── Page Cards ─────────────────────────────────────────────── */
 .page-cards {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  max-width: 980px;
-  height: 100%;
-  max-height: 100%;
+  max-width: 1060px;
+  /* ~15% shorter than full available height */
+  height: 72vh;
+  max-height: 72vh;
 }
 
 /* ── Shared Card ────────────────────────────────────────────── */
@@ -154,84 +149,90 @@ html, body, #root {
 .login-card {
   border-radius: 20px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.18);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ── Info Card ──────────────────────────────────────────────── */
 .info-card {
   background: #ffffff;
   border: 1px solid rgba(2, 75, 55, 0.10);
-  padding: 22px;
+  padding: 20px;
   color: #024b37;
-  flex: 1.1;
+  flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(2,75,55,0.2) transparent;
 }
 
 .info-card h3 {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #024b37;
+  text-align: left;
 }
 
-.info-card p {
-  margin: 0 0 16px;
+.info-card > p {
+  margin: 0 0 14px;
   color: #3d5a4a;
-  line-height: 1.65;
-  font-size: 0.88rem;
+  line-height: 1.6;
+  font-size: 0.86rem;
+  text-align: left;
 }
 
+/* 5-column millet grid */
 .millet-images {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .millet-image-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
   background: #f0ece4;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 10px;
+  padding: 8px 6px;
   text-align: center;
 }
 
 .millet-image-card img {
   width: 100%;
-  height: 80px;
+  height: 68px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 7px;
   border: 1px solid rgba(2, 75, 55, 0.08);
 }
 
 .millet-image-card span {
   font-weight: 700;
   color: #024b37;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
 }
 
 .feature-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 7px;
+  margin-top: 12px;
 }
 
 .feature-item {
   position: relative;
-  padding-left: 16px;
-  font-size: 0.88rem;
+  padding-left: 15px;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #024b37;
   line-height: 1.4;
+  text-align: left;
 }
 
 .feature-item::before {
@@ -240,8 +241,8 @@ html, body, #root {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #024b37;
 }
@@ -250,43 +251,43 @@ html, body, #root {
 .login-card {
   background: #ffffff;
   color: #024b37;
-  padding: 24px 28px;
-  flex: 0 0 360px;
+  padding: 22px 26px;
+  flex: 0 0 340px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(2,75,55,0.2) transparent;
+  justify-content: center;
 }
 
 .login-header-text {
   text-align: center;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
   border-bottom: 1.5px solid #eae6de;
 }
 
 .login-header-text h2 {
-  margin: 0 0 6px;
+  margin: 0 0 5px;
   font-family: 'Playfair Display', Georgia, serif;
   color: #024b37;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
 .login-header-text p {
   margin: 0;
   color: #5c6b5e;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
+  text-align: center;
 }
 
-.demo-note {
-  display: none;
-}
+.demo-note { display: none; }
 
 /* ── User Type Selector ─────────────────────────────────────── */
 .user-type-selector {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 14px;
   justify-content: center;
   background: #f0ece4;
   border-radius: 999px;
@@ -295,11 +296,11 @@ html, body, #root {
 
 .user-type-btn {
   flex: 1;
-  padding: 8px 10px;
+  padding: 7px 8px;
   border: none;
   background: transparent;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   color: #024b37;
@@ -316,7 +317,7 @@ html, body, #root {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .form-group {
@@ -328,7 +329,7 @@ html, body, #root {
 .form-group label {
   font-weight: 700;
   color: #2a3b2e;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -336,10 +337,10 @@ html, body, #root {
 .form-group input,
 .form-group select,
 .role-select {
-  padding: 10px 13px;
+  padding: 9px 12px;
   border: 1.5px solid #d8d2c6;
   border-radius: 10px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-family: 'Lato', sans-serif;
   background: #ffffff;
   color: #1a2b1e;
@@ -350,9 +351,7 @@ html, body, #root {
   appearance: none;
 }
 
-.form-group input::placeholder {
-  color: #a8a099;
-}
+.form-group input::placeholder { color: #a8a099; }
 
 .form-group input:focus,
 .form-group select:focus,
@@ -370,23 +369,21 @@ html, body, #root {
 
 .captcha-display {
   background: #f0ece4;
-  padding: 10px 13px;
+  padding: 9px 12px;
   border-radius: 10px;
   color: #024b37;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   border: 1.5px solid #d8d2c6;
 }
 
 /* ── Role Selector ──────────────────────────────────────────── */
-.role-selector {
-  margin-bottom: 0;
-}
+.role-selector { margin-bottom: 0; }
 
 .role-selector label {
   display: block;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   margin-bottom: 5px;
   color: #2a3b2e;
   letter-spacing: 0.04em;
@@ -396,19 +393,19 @@ html, body, #root {
 .role-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23024b37' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 13px center;
-  padding-right: 36px;
+  background-position: right 12px center;
+  padding-right: 34px;
 }
 
 /* ── Buttons ────────────────────────────────────────────────── */
 .login-btn {
   width: 100%;
-  padding: 12px 20px;
+  padding: 11px 20px;
   background: #024b37;
   border-radius: 12px;
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-family: 'Lato', sans-serif;
   border: none;
   cursor: pointer;
@@ -422,10 +419,7 @@ html, body, #root {
   box-shadow: 0 4px 14px rgba(2, 75, 55, 0.28);
 }
 
-.login-btn:active {
-  background: #023628;
-  transform: translateY(0);
-}
+.login-btn:active { background: #023628; transform: translateY(0); }
 
 .login-btn:disabled {
   background: #a8c4b4;
@@ -434,14 +428,14 @@ html, body, #root {
   box-shadow: none;
 }
 
-/* ── Login Footer (Register + Create account + Register Farmer) */
+/* ── Login Footer ───────────────────────────────────────────── */
 .login-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   margin-top: 10px;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1.5px solid #eae6de;
 }
 
@@ -450,26 +444,23 @@ html, body, #root {
   background: transparent;
   color: #024b37;
   border: 1.5px solid #024b37;
-  padding: 10px;
+  padding: 9px;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-family: 'Lato', sans-serif;
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
   text-align: center;
 }
 
-.register-toggle-link:hover {
-  background: #024b37;
-  color: white;
-}
+.register-toggle-link:hover { background: #024b37; color: white; }
 
 .forgot-link,
 .enrollment-link {
   color: #024b37;
   font-weight: 700;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -480,20 +471,18 @@ html, body, #root {
 }
 
 .forgot-link:hover,
-.enrollment-link:hover {
-  color: #035e47;
-}
+.enrollment-link:hover { color: #035e47; }
 
-/* ── Error/Status Banners ────────────────────────────────────── */
+/* ── Error/Status Banners ───────────────────────────────────── */
 .error-banner {
-  padding: 10px 14px;
-  margin-bottom: 12px;
+  padding: 9px 13px;
+  margin-bottom: 10px;
   background: rgba(220, 38, 38, 0.10);
   border: 1px solid #d14343;
   border-radius: 10px;
   color: #8b1c1c;
   font-weight: 700;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   animation: slideIn 0.3s ease;
 }
 
@@ -501,7 +490,7 @@ html, body, #root {
   display: block;
   margin-top: 4px;
   color: #c0392b;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
 }
 
@@ -511,15 +500,13 @@ html, body, #root {
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 10px 0;
+  padding: 8px 0;
   color: rgba(255,255,255,0.75);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   flex-shrink: 0;
 }
 
-.login-footer-global p {
-  margin: 0;
-}
+.login-footer-global p { margin: 0; }
 
 /* ── Schemes Dropdown ───────────────────────────────────────── */
 .schemes-dropdown-container {
@@ -545,7 +532,7 @@ html, body, #root {
 }
 
 .scheme-item {
-  padding: 11px 14px;
+  padding: 10px 14px;
   border-bottom: 1px solid #eae6de;
   display: flex;
   justify-content: space-between;
@@ -555,12 +542,11 @@ html, body, #root {
 }
 
 .scheme-item:last-child { border-bottom: none; }
-
 .scheme-item:hover { background: #f3f9f6; }
 
 .scheme-item span {
   color: #1a2b1e;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 700;
   flex: 1;
   line-height: 1.3;
@@ -572,7 +558,7 @@ html, body, #root {
   border: none;
   border-radius: 6px;
   padding: 5px 10px;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -582,10 +568,8 @@ html, body, #root {
 
 .pdf-btn:hover { background: #035e47; }
 
-/* ── Info Section (hidden) ──────────────────────────────────── */
 .info-section { display: none; }
 
-/* ── Animations ─────────────────────────────────────────────── */
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -594,12 +578,8 @@ html, body, #root {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-
-/* Tablet portrait — stack cards */
 @media (max-width: 900px) {
-  html, body, #root {
-    overflow: auto;
-  }
+  html, body, #root { overflow: auto; }
 
   .login-container {
     height: auto;
@@ -621,24 +601,18 @@ html, body, #root {
     gap: 14px;
   }
 
-  .info-card {
-    flex: none;
-    width: 100%;
-    max-width: 560px;
-    overflow: visible;
-  }
-
+  .info-card,
   .login-card {
     flex: none;
     width: 100%;
     max-width: 560px;
+    height: auto;
     overflow: visible;
   }
 
-  .top-header {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+  .millet-images { grid-template-columns: repeat(3, 1fr); }
+
+  .top-header { flex-wrap: wrap; gap: 8px; }
 
   .header-center {
     order: 3;
@@ -646,34 +620,15 @@ html, body, #root {
     justify-content: center;
   }
 
-  .header-right {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
+  .header-right { flex-wrap: wrap; justify-content: flex-end; }
 }
 
-/* Mobile */
 @media (max-width: 520px) {
-  .top-header {
-    padding: 10px 14px;
-  }
-
-  .header-title h1 {
-    font-size: 1.1rem;
-  }
-
-  .header-title span {
-    font-size: 0.7rem;
-  }
-
-  .header-btn {
-    padding: 7px 11px;
-    font-size: 0.76rem;
-  }
-
-  .info-card {
-    display: none; /* hide info on very small screens to keep UX clean */
-  }
+  .top-header { padding: 10px 14px; }
+  .header-title h1 { font-size: 1.1rem; }
+  .header-title span { font-size: 0.7rem; }
+  .header-btn { padding: 7px 11px; font-size: 0.76rem; }
+  .info-card { display: none; }
 
   .login-card {
     border-radius: 16px;
