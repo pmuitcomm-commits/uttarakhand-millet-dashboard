@@ -5,9 +5,6 @@ import logging
 
 from ..database import get_db
 from ..models.production import Production
-from ..models.district import District
-from ..models.block import Block
-from ..models.millet import Millet
 
 router = APIRouter(prefix="/production", tags=["Production"])
 
@@ -15,28 +12,15 @@ router = APIRouter(prefix="/production", tags=["Production"])
 @router.get("/all")
 def get_all_production(db: Session = Depends(get_db)):
     try:
-        records = (
-            db.query(
-                Production.id,
-                District.name.label("district"),
-                Block.name.label("block"),
-                Millet.name.label("millet"),
-                Production.year,
-                Production.area_hectare,
-                Production.production_ton,
-            )
-            .outerjoin(District, Production.district_id == District.id)
-            .outerjoin(Block, Production.block_id == Block.id)
-            .outerjoin(Millet, Production.millet_id == Millet.id)
-            .all()
-        )
+        records = db.query(Production).all()
 
         return [
             {
                 "id": r.id,
-                "district": r.district,
-                "block": r.block,
-                "millet": r.millet,
+                "district_id": r.district_id,
+                "block_id": r.block_id,
+                "millet_id": r.millet_id,
+                "season_id": r.season_id,
                 "year": r.year,
                 "area_hectare": float(r.area_hectare) if r.area_hectare is not None else 0,
                 "production": float(r.production_ton) if r.production_ton is not None else 0,
@@ -56,17 +40,16 @@ def district_production(db: Session = Depends(get_db)):
     try:
         data = (
             db.query(
-                District.name.label("district"),
+                Production.district_id,
                 func.sum(Production.production_ton).label("production"),
             )
-            .outerjoin(District, Production.district_id == District.id)
-            .group_by(District.name)
+            .group_by(Production.district_id)
             .all()
         )
 
         return [
             {
-                "district": d,
+                "district_id": d,
                 "production": float(p) if p is not None else 0,
             }
             for d, p in data
@@ -84,17 +67,16 @@ def millet_production(db: Session = Depends(get_db)):
     try:
         data = (
             db.query(
-                Millet.name.label("millet"),
+                Production.millet_id,
                 func.sum(Production.production_ton).label("production"),
             )
-            .outerjoin(Millet, Production.millet_id == Millet.id)
-            .group_by(Millet.name)
+            .group_by(Production.millet_id)
             .all()
         )
 
         return [
             {
-                "millet": m,
+                "millet_id": m,
                 "production": float(p) if p is not None else 0,
             }
             for m, p in data
