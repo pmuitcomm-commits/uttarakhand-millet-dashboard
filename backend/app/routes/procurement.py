@@ -16,15 +16,15 @@ def get_all_procurement(db: Session = Depends(get_db)):
 
         return [
             {
-                "S.no": r.s_no,
+                "S.no": r.id,
                 "District": r.district,
                 "Crop": r.crop,
-                "Nos.of Centre": r.nos_of_centre,
-                "Target (in MT)": r.target_in_mt,
-                "No. of Farmer's /SHGs": r.no_of_farmers_shgs,
-                "Procurement quantity (in MT)": r.procurement_quantity_in_mt,
-                "Procurement (in %)": r.procurement_in_percent,
-                "Procurement by Pvt. agencies (in MT)": r.procurement_by_pvt_agencies_in_mt,
+                "Nos.of Centre": r.centres,
+                "Target (in MT)": r.target_mt,
+                "No. of Farmer's /SHGs": r.farmers_count,
+                "Procurement quantity (in MT)": r.procurement_mt,
+                "Procurement (in %)": r.procurement_percent,
+                "Procurement by Pvt. agencies (in MT)": r.private_procurement_mt,
             }
             for r in records
         ]
@@ -40,12 +40,12 @@ def get_all_procurement(db: Session = Depends(get_db)):
 def get_procurement_kpis(db: Session = Depends(get_db)):
     try:
         total_districts = db.query(Procurement.district).distinct().count()
-        total_centres = db.query(func.sum(Procurement.nos_of_centre)).scalar() or 0
-        total_target = db.query(func.sum(Procurement.target_in_mt)).scalar() or 0
-        total_farmers = db.query(func.sum(Procurement.no_of_farmers_shgs)).scalar() or 0
-        total_procurement = db.query(func.sum(Procurement.procurement_quantity_in_mt)).scalar() or 0
-        avg_procurement = db.query(func.avg(Procurement.procurement_in_percent)).scalar() or 0
-        pvt_agencies = db.query(func.sum(Procurement.procurement_by_pvt_agencies_in_mt)).scalar() or 0
+        total_centres = db.query(func.sum(Procurement.centres)).scalar() or 0
+        total_target = db.query(func.sum(Procurement.target_mt)).scalar() or 0
+        total_farmers = db.query(func.sum(Procurement.farmers_count)).scalar() or 0
+        total_procurement = db.query(func.sum(Procurement.procurement_mt)).scalar() or 0
+        avg_procurement = db.query(func.avg(Procurement.procurement_percent)).scalar() or 0
+        pvt_agencies = db.query(func.sum(Procurement.private_procurement_mt)).scalar() or 0
         crop_coverage = db.query(Procurement.crop).distinct().count()
 
         return {
@@ -64,3 +64,4 @@ def get_procurement_kpis(db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error fetching procurement KPIs"
         )
+    
