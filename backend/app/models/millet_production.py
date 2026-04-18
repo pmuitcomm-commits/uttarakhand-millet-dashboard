@@ -1,18 +1,18 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, Numeric, BigInteger, DateTime
 from ..database import Base
 
 
-class MilletProduction(Base):
+class Production(Base):
+    __tablename__ = "production"
 
-    __tablename__ = "millet_production"
+    id = Column(BigInteger, primary_key=True, index=True)
 
-    id = Column(Integer, primary_key=True, index=True)
+    district_id = Column(BigInteger, nullable=True)
+    block_id = Column(BigInteger, nullable=True)
+    millet_id = Column(BigInteger, nullable=True)
+    season_id = Column(BigInteger, nullable=True)
 
-    district = Column(String)
-    block = Column(String)
-    village = Column(String)
-    millet_type = Column(String)
-
-    production_quintal = Column(Float)
-    year = Column(Integer)
-    farmer_count = Column(Integer)
+    year = Column(Integer, nullable=True)
+    area_hectare = Column(Numeric, nullable=True)
+    production_ton = Column(Numeric, nullable=True)
+    created_at = Column(DateTime, nullable=True)
