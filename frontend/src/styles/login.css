@@ -16,7 +16,6 @@
 html, body, #root {
   height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 
 /* ── Container ──────────────────────────────────────────────── */
@@ -579,11 +578,13 @@ html, body, #root {
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
-  html, body, #root { overflow: auto; }
-
   .login-container {
     height: auto;
     min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  html, body, #root {
     overflow-y: auto;
   }
 
