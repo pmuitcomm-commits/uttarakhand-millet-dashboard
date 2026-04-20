@@ -256,6 +256,10 @@ function Login() {
             Enrollment Status
           </button>
 
+          <button className="header-btn" onClick={() => navigate('/about-programme')}>
+            About Programme
+          </button>
+
           <div className="schemes-dropdown-container">
             <button
               className="header-btn"
