@@ -1,6 +1,6 @@
 /* ============================================================
    Login Page — Redesigned CSS
-   Right-side login card, left area reserved for notifications
+   Left notification section + right login card
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@400;700&display=swap');
@@ -65,10 +65,6 @@ html, body, #root {
   margin: 0 2px;
 }
 
-.logo-placeholder {
-  display: none;
-}
-
 .header-center {
   flex: 1;
   display: flex;
@@ -102,6 +98,8 @@ html, body, #root {
   gap: 8px;
   align-items: center;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .header-btn {
@@ -131,131 +129,116 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 24px;
+  padding: 18px 24px;
   width: 100%;
   overflow: hidden;
 }
 
-/* ── Page Cards ─────────────────────────────────────────────── */
+/* ── Main Layout ────────────────────────────────────────────── */
 .page-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
   align-items: center;
-  justify-content: flex-end;
+  gap: 34px;
   width: 100%;
-  max-width: 1200px;
-  height: 72vh;
-  max-height: 72vh;
-  gap: 0;
+  max-width: 1320px;
+  height: 100%;
 }
 
-/* Left area reserved for future notification section */
-.page-cards::before {
-  content: "";
-  flex: 1;
+/* ── Left Notification Panel ────────────────────────────────── */
+.left-panel {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   min-width: 0;
 }
 
-/* ── Shared Card ────────────────────────────────────────────── */
-.info-card,
-.login-card {
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-/* ── Info Card ──────────────────────────────────────────────── */
-.info-card {
-  display: none;
-  background: #ffffff;
-  border: 1px solid rgba(2, 75, 55, 0.10);
-  padding: 20px;
-  color: #024b37;
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(2,75,55,0.2) transparent;
-}
-
-.info-card h3 {
-  margin: 0 0 10px;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #024b37;
-  text-align: left;
-}
-
-.info-card > p {
-  margin: 0 0 14px;
-  color: #3d5a4a;
-  line-height: 1.6;
-  font-size: 0.86rem;
-  text-align: left;
-}
-
-.millet-images {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.millet-image-card {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: center;
-  background: #f0ece4;
-  border-radius: 10px;
-  padding: 8px 6px;
-  text-align: center;
-}
-
-.millet-image-card img {
+.notification-box {
   width: 100%;
-  height: 68px;
-  object-fit: cover;
-  border-radius: 7px;
-  border: 1px solid rgba(2, 75, 55, 0.08);
+  max-width: 760px;
+  min-height: 320px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 24px 26px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+  backdrop-filter: blur(5px);
 }
 
-.millet-image-card span {
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.notification-header h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(216, 128, 13, 0.18);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #ffffff;
+  font-size: 0.76rem;
   font-weight: 700;
-  color: #024b37;
-  font-size: 0.72rem;
-  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.feature-list {
+.notification-marquee {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 14px 0;
+}
+
+.notification-track {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  margin-top: 12px;
+  gap: 14px;
+  animation: verticalScroll 18s linear infinite;
 }
 
-.feature-item {
-  position: relative;
-  padding-left: 15px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #024b37;
-  line-height: 1.4;
-  text-align: left;
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0 18px;
+  color: rgba(255,255,255,0.95);
+  font-size: 0.96rem;
+  line-height: 1.5;
 }
 
-.feature-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
+.notification-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #024b37;
+  background: #d8800d;
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+@keyframes verticalScroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
 }
 
 /* ── Login Card ─────────────────────────────────────────────── */
@@ -263,12 +246,13 @@ html, body, #root {
   background: #ffffff;
   color: #024b37;
   padding: 22px 26px;
-  flex: 0 0 360px;
-  margin-left: auto;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(2,75,55,0.2) transparent;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
   justify-content: center;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .login-header-text {
@@ -291,40 +275,6 @@ html, body, #root {
   color: #5c6b5e;
   font-size: 0.84rem;
   text-align: center;
-}
-
-.demo-note {
-  display: none;
-}
-
-/* ── User Type Selector ─────────────────────────────────────── */
-.user-type-selector {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 14px;
-  justify-content: center;
-  background: #f0ece4;
-  border-radius: 999px;
-  padding: 4px;
-}
-
-.user-type-btn {
-  flex: 1;
-  padding: 7px 8px;
-  border: none;
-  background: transparent;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  color: #024b37;
-  font-family: 'Lato', sans-serif;
-  transition: background 0.18s, color 0.18s;
-}
-
-.user-type-btn.active {
-  background: #024b37;
-  color: white;
 }
 
 /* ── Login Form ─────────────────────────────────────────────── */
@@ -383,19 +333,9 @@ html, body, #root {
   background: #fff8f8;
 }
 
-.captcha-display {
-  background: #f0ece4;
-  padding: 9px 12px;
-  border-radius: 10px;
-  color: #024b37;
-  font-weight: 700;
-  font-size: 0.88rem;
-  border: 1.5px solid #d8d2c6;
-}
-
 /* ── Role Selector ──────────────────────────────────────────── */
 .role-selector {
-  margin-bottom: 0;
+  margin-bottom: 20px;
 }
 
 .role-selector label {
@@ -450,27 +390,6 @@ html, body, #root {
   box-shadow: none;
 }
 
-.register-farmer-btn {
-  width: 100%;
-  background: transparent;
-  color: #024b37;
-  border: 1.5px solid #024b37;
-  padding: 9px;
-  margin-top: 6px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.86rem;
-  font-family: 'Lato', sans-serif;
-  cursor: pointer;
-  transition: background 0.18s, color 0.18s;
-  text-align: center;
-}
-
-.register-farmer-btn:hover {
-  background: #024b37;
-  color: white;
-}
-
 /* ── Login Footer ───────────────────────────────────────────── */
 .login-footer {
   display: flex;
@@ -502,8 +421,7 @@ html, body, #root {
   color: white;
 }
 
-.forgot-link,
-.enrollment-link {
+.forgot-link {
   color: #024b37;
   font-weight: 700;
   font-size: 0.82rem;
@@ -516,8 +434,7 @@ html, body, #root {
   text-underline-offset: 2px;
 }
 
-.forgot-link:hover,
-.enrollment-link:hover {
+.forgot-link:hover {
   color: #035e47;
 }
 
@@ -625,17 +542,6 @@ html, body, #root {
   background: #035e47;
 }
 
-.info-section {
-  display: none;
-}
-
-.single-card-layout {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-}
-
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -650,7 +556,7 @@ html, body, #root {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .login-container {
     height: auto;
     min-height: 100vh;
@@ -662,39 +568,35 @@ html, body, #root {
   }
 
   .hero-content {
-    padding: 14px 16px;
+    padding: 16px;
     align-items: flex-start;
     overflow: visible;
   }
 
   .page-cards {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    grid-template-columns: 1fr;
     height: auto;
-    max-height: none;
-    gap: 14px;
+    gap: 18px;
   }
 
-  .page-cards::before {
-    display: none;
+  .left-panel {
+    height: auto;
   }
 
-  .info-card,
+  .notification-box {
+    max-width: 100%;
+    min-height: auto;
+  }
+
+  .notification-marquee {
+    height: 150px;
+  }
+
   .login-card {
-    flex: none;
     width: 100%;
     max-width: 560px;
-    height: auto;
-    overflow: visible;
-  }
-
-  .login-card {
-    margin-left: 0;
-  }
-
-  .millet-images {
-    grid-template-columns: repeat(3, 1fr);
+    justify-self: center;
+    max-height: none;
   }
 
   .top-header {
@@ -709,12 +611,11 @@ html, body, #root {
   }
 
   .header-right {
-    flex-wrap: wrap;
     justify-content: flex-end;
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
   .top-header {
     padding: 10px 14px;
   }
@@ -732,14 +633,19 @@ html, body, #root {
     font-size: 0.76rem;
   }
 
-  .info-card {
-    display: none;
-  }
-
   .login-card {
     border-radius: 16px;
     padding: 20px 18px;
     max-width: 100%;
+  }
+
+  .notification-box {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .notification-header h3 {
+    font-size: 1.15rem;
   }
 
   .schemes-dropdown-menu {

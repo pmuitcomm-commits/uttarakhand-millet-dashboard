@@ -113,6 +113,12 @@ function Login() {
     }
   ];
 
+  const notifications = [
+    'Department notifications and scheme alerts will appear here.',
+    'Live updates section is reserved for scrolling announcements.',
+    'You can later connect this panel to API-based notices or MIS alerts.'
+  ];
+
   const handleSchemeOpen = (pdfUrl) => {
     window.open(pdfUrl, '_blank');
     setShowSchemeDropdown(false);
@@ -165,11 +171,6 @@ function Login() {
       }
     }
 
-    // Captcha validation commented out for later enablement
-    // if (!formData.captcha.trim()) {
-    //   newErrors.captcha = 'Please enter the captcha';
-    // }
-
     return newErrors;
   };
 
@@ -189,7 +190,6 @@ function Login() {
       const { loginUser, registerUser } = await import('../services/api');
 
       if (isRegistering) {
-        // Register new user (only for officers)
         const roleMap = { admin: 1, district_officer: 2, block_officer: 3 };
         const userData = {
           username: formData.username,
@@ -201,13 +201,11 @@ function Login() {
         };
         response = await registerUser(userData);
       } else {
-        // Login
         response = await loginUser(formData.username, formData.password);
       }
 
       const { access_token, user } = response.data;
 
-      // Store token and user info (normalize role to lowercase)
       const normalizedUser = {
         ...user,
         role: user.role.toLowerCase()
@@ -217,7 +215,6 @@ function Login() {
       localStorage.setItem('userInfo', JSON.stringify(normalizedUser));
       localStorage.setItem('userRole', normalizedUser.role);
 
-      // Reload the page to let AuthContext reinitialize with new auth
       window.location.href = '/';
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Authentication failed. Please try again.';
@@ -250,6 +247,15 @@ function Login() {
           <button className="header-btn" onClick={() => navigate('/procurement')}>
             Dashboard
           </button>
+
+          <button className="header-btn" onClick={() => navigate('/register-farmer')}>
+            Register Farmer
+          </button>
+
+          <button className="header-btn" onClick={() => navigate('/enrollment-status')}>
+            Enrollment Status
+          </button>
+
           <div className="schemes-dropdown-container">
             <button
               className="header-btn"
@@ -278,7 +284,27 @@ function Login() {
       </header>
 
       <div className="hero-content">
-        <div className="page-cards single-card-layout">
+        <div className="page-cards">
+          <div className="left-panel" data-aos="fade-right" data-aos-delay="100">
+            <div className="notification-box">
+              <div className="notification-header">
+                <h3>Notifications</h3>
+                <span className="live-badge">Live</span>
+              </div>
+
+              <div className="notification-marquee">
+                <div className="notification-track">
+                  {[...notifications, ...notifications].map((item, index) => (
+                    <div key={index} className="notification-item">
+                      <span className="notification-dot" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="login-card" data-aos="fade-up" data-aos-delay="150">
             <div className="login-header-text">
               <h2>Official Login Portal</h2>
@@ -405,37 +431,8 @@ function Login() {
                 {errors.password && <span className="error-text">{errors.password}</span>}
               </div>
 
-              {/* Captcha section commented out for later enablement
-              {!isRegistering && (
-                <div className="form-group">
-                  <label htmlFor="captcha">Captcha</label>
-                  <div className="captcha-section">
-                    <div className="captcha-display">{captchaText}</div>
-                    <input
-                      type="text"
-                      id="captcha"
-                      name="captcha"
-                      value={formData.captcha}
-                      onChange={handleInputChange}
-                      placeholder="Enter captcha"
-                      className={errors.captcha ? 'error' : ''}
-                    />
-                  </div>
-                  {errors.captcha && <span className="error-text">{errors.captcha}</span>}
-                </div>
-              )}
-              */}
-
               <button type="submit" className="login-btn" disabled={loading}>
                 {loading ? 'Please wait...' : (isRegistering ? 'Register' : 'Login')}
-              </button>
-
-              <button
-                type="button"
-                className="register-farmer-btn"
-                onClick={() => navigate('/register-farmer')}
-              >
-                Register Farmer
               </button>
             </form>
 
@@ -453,22 +450,13 @@ function Login() {
               </button>
 
               {!isRegistering && (
-                <>
-                  <button
-                    className="forgot-link"
-                    onClick={() => setShowForgotPassword(true)}
-                    type="button"
-                  >
-                    Forgot Password?
-                  </button>
-                  <button
-                    className="enrollment-link"
-                    onClick={() => navigate('/enrollment-status')}
-                    type="button"
-                  >
-                    Check Enrollment Status
-                  </button>
-                </>
+                <button
+                  className="forgot-link"
+                  onClick={() => setShowForgotPassword(true)}
+                  type="button"
+                >
+                  Forgot Password?
+                </button>
               )}
             </div>
           </div>
