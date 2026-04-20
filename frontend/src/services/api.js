@@ -48,3 +48,9 @@ export const getProcurementKPIs = () => API.get("/procurement/kpis");
 export const getAllProcurement = () => API.get("/procurement/all");
 
 export default API;
+
+export const registerFarmer = (data) =>
+  API.post("/farmers/register", data);
+
+export const checkEnrollmentStatus = (mobile) =>
+  API.get(`/farmers/status/${mobile}`);

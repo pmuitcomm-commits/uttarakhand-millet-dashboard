@@ -61,3 +61,7 @@ app.include_router(auth_router)
 @app.get("/")
 def root():
     return {"message": "Millet Dashboard API Running"}
+
+from app.routes import farmer
+
+app.include_router(farmer.router, prefix="/farmers", tags=["Farmers"])
