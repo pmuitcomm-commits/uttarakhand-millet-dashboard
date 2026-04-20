@@ -7,6 +7,7 @@ const API = axios.create({
   baseURL: API_BASE_URL,
 });
 
+// Attach token if available
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token) {
@@ -15,7 +16,9 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// =========================
 // Auth APIs
+// =========================
 export const loginUser = (username, password) =>
   API.post("/auth/login", { username, password });
 
@@ -30,11 +33,18 @@ export const logoutUser = () => {
   window.location.href = "/";
 };
 
-// Farmer registration API
+// =========================
+// Farmer APIs
+// =========================
 export const registerFarmer = (farmerData) =>
   API.post("/farmers/register", farmerData);
 
+export const checkEnrollmentStatus = (mobile) =>
+  API.get(`/farmers/status/${mobile}`);
+
+// =========================
 // Dashboard APIs
+// =========================
 export const getKPIs = () => API.get("/dashboard/kpis");
 
 export const getDistrictProduction = () => API.get("/production/district");
@@ -48,9 +58,3 @@ export const getProcurementKPIs = () => API.get("/procurement/kpis");
 export const getAllProcurement = () => API.get("/procurement/all");
 
 export default API;
-
-export const registerFarmer = (data) =>
-  API.post("/farmers/register", data);
-
-export const checkEnrollmentStatus = (mobile) =>
-  API.get(`/farmers/status/${mobile}`);
