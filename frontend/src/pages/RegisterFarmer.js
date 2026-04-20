@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerFarmer } from "../services/api";
-import "../styles/login.css";
 import "../styles/register-farmer.css";
 
 const districts = [
@@ -12,10 +11,11 @@ const districts = [
   "Dehradun",
   "Haridwar",
   "Nainital",
-  "Pauri",
+  "Pauri Garhwal",
   "Pithoragarh",
   "Rudraprayag",
-  "Tehri",
+  "Tehri Garhwal",
+  "Udham Singh Nagar",
   "Uttarkashi",
 ];
 
@@ -26,15 +26,24 @@ const blocksByDistrict = {
   Haridwar: ["Haridwar", "Khanpur", "Lakhanpur", "Bahadarabad"],
   Chamoli: ["Gopeshwar", "Joshimath", "Chamoli", "Tharali"],
   Champawat: ["Champawat", "Lohaghat", "Pati", "Pancheshwar"],
-  Pauri: ["Pauri", "Kotdwara", "Lansdowne", "Srinagar"],
+  Pauri Garhwal: ["Pauri", "Kotdwara", "Lansdowne", "Srinagar"],
   Pithoragarh: ["Pithoragarh", "Dharchula", "Kausani", "Munsiari"],
   Rudraprayag: ["Rudraprayag", "Gopeshwar", "Karnaprayag", "Agastyamuni"],
-  Tehri: ["Tehri", "New Tehri", "Chamba", "Dhanaulti"],
+  Tehri Garhwal: ["Tehri", "New Tehri", "Chamba", "Dhanaulti"],
   Uttarkashi: ["Uttarkashi", "Harshil", "Dunda", "Gangnani"],
   Bageshwar: ["Bageshwar", "Kanda", "Kapkot", "Tharali"],
+  Udham Singh Nagar: [
+    "Rudrapur",
+    "Kashipur",
+    "Jaspur",
+    "Sitarganj",
+    "Khatima",
+    "Gadarpur",
+    "Bazpur",
+  ],
 };
 
-const cropOptions = ["Mandua", "Jhangora", "Sawa", "Ramdana", "Kauni", "Cheena"];
+const cropOptions = ["Mandua", "Jhangora", "Ramdana", "Kauni", "Cheena"];
 
 const ifscPattern = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,6 +84,7 @@ function RegisterFarmer() {
 
   const [errors, setErrors] = useState({});
   const [statusMessage, setStatusMessage] = useState("");
+  const [statusType, setStatusType] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const currentBlocks = formData.district
@@ -307,10 +317,12 @@ function RegisterFarmer() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatusMessage("");
+    setStatusType("");
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -318,6 +330,7 @@ function RegisterFarmer() {
 
     try {
       await registerFarmer(formatPayload());
+      setStatusType("success");
       setStatusMessage(
         "Farmer registration submitted successfully. Redirecting to login..."
       );
@@ -325,8 +338,11 @@ function RegisterFarmer() {
     } catch (error) {
       const backendMessage =
         error.response?.data?.detail ||
+        error.message ||
         "Farmer registration failed. Please try again.";
+      setStatusType("error");
       setStatusMessage(backendMessage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setSubmitting(false);
     }
@@ -336,7 +352,7 @@ function RegisterFarmer() {
     <div className="register-farmer-page">
       <div className="register-farmer-card">
         <div className="register-farmer-header">
-          <div>
+          <div className="header-content">
             <h1>Farmer Registration</h1>
             <p>Complete the application form in one screen.</p>
           </div>
@@ -344,19 +360,14 @@ function RegisterFarmer() {
             type="button"
             className="header-btn"
             onClick={() => navigate("/")}
+            aria-label="Back to Login"
           >
             Back to Login
           </button>
         </div>
 
         {statusMessage && (
-          <div
-            className={`status-banner ${
-              statusMessage.includes("successfully")
-                ? "success"
-                : "error-banner"
-            }`}
-          >
+          <div className={`status-banner ${statusType}`} role="alert">
             {statusMessage}
           </div>
         )}
@@ -372,9 +383,11 @@ function RegisterFarmer() {
                 <input
                   id="full_name"
                   name="full_name"
+                  type="text"
                   value={formData.full_name}
                   onChange={handleInputChange}
                   className={errors.full_name ? "error" : ""}
+                  placeholder="Enter full name"
                 />
                 {errors.full_name && (
                   <span className="error-text">{errors.full_name}</span>
@@ -386,9 +399,11 @@ function RegisterFarmer() {
                 <input
                   id="father_name"
                   name="father_name"
+                  type="text"
                   value={formData.father_name}
                   onChange={handleInputChange}
                   className={errors.father_name ? "error" : ""}
+                  placeholder="Enter name"
                 />
                 {errors.father_name && (
                   <span className="error-text">{errors.father_name}</span>
@@ -400,9 +415,12 @@ function RegisterFarmer() {
                 <input
                   id="mobile"
                   name="mobile"
+                  type="tel"
                   value={formData.mobile}
                   onChange={handleInputChange}
                   className={errors.mobile ? "error" : ""}
+                  placeholder="10-digit number"
+                  maxLength="10"
                 />
                 {errors.mobile && (
                   <span className="error-text">{errors.mobile}</span>
@@ -418,6 +436,7 @@ function RegisterFarmer() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className={errors.email ? "error" : ""}
+                  placeholder="your.email@example.com"
                 />
                 {errors.email && (
                   <span className="error-text">{errors.email}</span>
@@ -429,9 +448,11 @@ function RegisterFarmer() {
                 <input
                   id="address"
                   name="address"
+                  type="text"
                   value={formData.address}
                   onChange={handleInputChange}
                   className={errors.address ? "error" : ""}
+                  placeholder="Enter full address"
                 />
                 {errors.address && (
                   <span className="error-text">{errors.address}</span>
@@ -488,8 +509,10 @@ function RegisterFarmer() {
                 <input
                   id="group_president_name"
                   name="group_president_name"
+                  type="text"
                   value={formData.group_president_name}
                   onChange={handleInputChange}
+                  placeholder="Enter name (optional)"
                 />
               </div>
             </div>
@@ -507,7 +530,7 @@ function RegisterFarmer() {
                     checked={formData.crops.includes(crop)}
                     onChange={handleInputChange}
                   />
-                  {crop}
+                  <span>{crop}</span>
                 </label>
               ))}
             </div>
@@ -519,9 +542,11 @@ function RegisterFarmer() {
                 <input
                   id="cultivator_name"
                   name="cultivator_name"
+                  type="text"
                   value={formData.cultivator_name}
                   onChange={handleInputChange}
                   className={errors.cultivator_name ? "error" : ""}
+                  placeholder="Enter cultivator name"
                 />
                 {errors.cultivator_name && (
                   <span className="error-text">{errors.cultivator_name}</span>
@@ -535,9 +560,11 @@ function RegisterFarmer() {
                   name="cultivation_area"
                   type="number"
                   min="0"
+                  step="0.01"
                   value={formData.cultivation_area}
                   onChange={handleInputChange}
                   className={errors.cultivation_area ? "error" : ""}
+                  placeholder="0.00"
                 />
                 {errors.cultivation_area && (
                   <span className="error-text">{errors.cultivation_area}</span>
@@ -551,9 +578,11 @@ function RegisterFarmer() {
                 <input
                   id="cultivation_khatauni"
                   name="cultivation_khatauni"
+                  type="text"
                   value={formData.cultivation_khatauni}
                   onChange={handleInputChange}
                   className={errors.cultivation_khatauni ? "error" : ""}
+                  placeholder="Enter khatauni number"
                 />
                 {errors.cultivation_khatauni && (
                   <span className="error-text">
@@ -567,9 +596,11 @@ function RegisterFarmer() {
                 <input
                   id="cultivation_khasra"
                   name="cultivation_khasra"
+                  type="text"
                   value={formData.cultivation_khasra}
                   onChange={handleInputChange}
                   className={errors.cultivation_khasra ? "error" : ""}
+                  placeholder="Enter khasra number"
                 />
                 {errors.cultivation_khasra && (
                   <span className="error-text">{errors.cultivation_khasra}</span>
@@ -584,7 +615,7 @@ function RegisterFarmer() {
               <div className="field-group lease-status-group">
                 <label>Lease status</label>
                 <div className="lease-options">
-                  <label>
+                  <label className="radio-item">
                     <input
                       type="radio"
                       name="lease_status"
@@ -592,9 +623,9 @@ function RegisterFarmer() {
                       checked={formData.lease_status === "yes"}
                       onChange={handleInputChange}
                     />
-                    Yes
+                    <span>Yes</span>
                   </label>
-                  <label>
+                  <label className="radio-item">
                     <input
                       type="radio"
                       name="lease_status"
@@ -602,7 +633,7 @@ function RegisterFarmer() {
                       checked={formData.lease_status === "no"}
                       onChange={handleInputChange}
                     />
-                    No
+                    <span>No</span>
                   </label>
                 </div>
               </div>
@@ -616,9 +647,11 @@ function RegisterFarmer() {
                     <input
                       id="lease_cultivator_name"
                       name="lease_cultivator_name"
+                      type="text"
                       value={formData.lease_cultivator_name}
                       onChange={handleInputChange}
                       className={errors.lease_cultivator_name ? "error" : ""}
+                      placeholder="Enter cultivator name"
                     />
                     {errors.lease_cultivator_name && (
                       <span className="error-text">
@@ -632,9 +665,11 @@ function RegisterFarmer() {
                     <input
                       id="lease_period"
                       name="lease_period"
+                      type="text"
                       value={formData.lease_period}
                       onChange={handleInputChange}
                       className={errors.lease_period ? "error" : ""}
+                      placeholder="e.g., 2 years"
                     />
                     {errors.lease_period && (
                       <span className="error-text">{errors.lease_period}</span>
@@ -648,9 +683,11 @@ function RegisterFarmer() {
                     <input
                       id="lease_khatauni"
                       name="lease_khatauni"
+                      type="text"
                       value={formData.lease_khatauni}
                       onChange={handleInputChange}
                       className={errors.lease_khatauni ? "error" : ""}
+                      placeholder="Enter khatauni number"
                     />
                     {errors.lease_khatauni && (
                       <span className="error-text">{errors.lease_khatauni}</span>
@@ -662,9 +699,11 @@ function RegisterFarmer() {
                     <input
                       id="lease_khasra"
                       name="lease_khasra"
+                      type="text"
                       value={formData.lease_khasra}
                       onChange={handleInputChange}
                       className={errors.lease_khasra ? "error" : ""}
+                      placeholder="Enter khasra number"
                     />
                     {errors.lease_khasra && (
                       <span className="error-text">{errors.lease_khasra}</span>
@@ -678,9 +717,11 @@ function RegisterFarmer() {
                       name="lease_area"
                       type="number"
                       min="0"
+                      step="0.01"
                       value={formData.lease_area}
                       onChange={handleInputChange}
                       className={errors.lease_area ? "error" : ""}
+                      placeholder="0.00"
                     />
                     {errors.lease_area && (
                       <span className="error-text">{errors.lease_area}</span>
@@ -718,9 +759,11 @@ function RegisterFarmer() {
                 <input
                   id="estimated_yield"
                   name="estimated_yield"
+                  type="text"
                   value={formData.estimated_yield}
                   onChange={handleInputChange}
                   className={errors.estimated_yield ? "error" : ""}
+                  placeholder="Enter estimated yield"
                 />
                 {errors.estimated_yield && (
                   <span className="error-text">{errors.estimated_yield}</span>
@@ -737,9 +780,11 @@ function RegisterFarmer() {
                 <input
                   id="bank_name"
                   name="bank_name"
+                  type="text"
                   value={formData.bank_name}
                   onChange={handleInputChange}
                   className={errors.bank_name ? "error" : ""}
+                  placeholder="Enter bank name"
                 />
                 {errors.bank_name && (
                   <span className="error-text">{errors.bank_name}</span>
@@ -753,9 +798,11 @@ function RegisterFarmer() {
                 <input
                   id="account_number"
                   name="account_number"
+                  type="text"
                   value={formData.account_number}
                   onChange={handleInputChange}
                   className={errors.account_number ? "error" : ""}
+                  placeholder="Enter account number"
                 />
                 {errors.account_number && (
                   <span className="error-text">{errors.account_number}</span>
@@ -767,9 +814,12 @@ function RegisterFarmer() {
                 <input
                   id="ifsc"
                   name="ifsc"
+                  type="text"
                   value={formData.ifsc}
                   onChange={handleInputChange}
                   className={errors.ifsc ? "error" : ""}
+                  placeholder="e.g., SBIN0001234"
+                  style={{ textTransform: "uppercase" }}
                 />
                 {errors.ifsc && (
                   <span className="error-text">{errors.ifsc}</span>
@@ -781,9 +831,11 @@ function RegisterFarmer() {
                 <input
                   id="bank_address"
                   name="bank_address"
+                  type="text"
                   value={formData.bank_address}
                   onChange={handleInputChange}
                   className={errors.bank_address ? "error" : ""}
+                  placeholder="Enter bank address"
                 />
                 {errors.bank_address && (
                   <span className="error-text">{errors.bank_address}</span>
@@ -795,9 +847,11 @@ function RegisterFarmer() {
                 <input
                   id="account_holder_name"
                   name="account_holder_name"
+                  type="text"
                   value={formData.account_holder_name}
                   onChange={handleInputChange}
                   className={errors.account_holder_name ? "error" : ""}
+                  placeholder="Enter account holder name"
                 />
                 {errors.account_holder_name && (
                   <span className="error-text">
@@ -808,7 +862,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
-          <div className="form-section declaration-row">
+          <div className="form-section declaration-section">
             <label className="checkbox-item declaration-checkbox">
               <input
                 id="declaration"
@@ -817,8 +871,10 @@ function RegisterFarmer() {
                 checked={formData.declaration}
                 onChange={handleInputChange}
               />
-              I declare that the information provided above is correct and
-              complete.
+              <span>
+                I declare that the information provided above is correct and
+                complete.
+              </span>
             </label>
             {errors.declaration && (
               <span className="error-text">{errors.declaration}</span>
@@ -826,7 +882,7 @@ function RegisterFarmer() {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="login-btn" disabled={submitting}>
+            <button type="submit" className="submit-btn" disabled={submitting}>
               {submitting ? "Registering Farmer..." : "Submit Registration"}
             </button>
           </div>
