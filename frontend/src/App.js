@@ -17,6 +17,7 @@ import BlockLanding from "./pages/BlockLanding";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import aboutpage from "./pages/aboutpage";
 
 function ProtectedOfficerRoute({ children, requiredRole = null }) {
   const { isAuthenticated, user, loading } = useAuth();

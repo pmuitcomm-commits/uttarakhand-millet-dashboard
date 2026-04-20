@@ -20,6 +20,10 @@ function TopBar() {
     navigate('/');
   };
 
+  const handleAboutClick = () => {
+    navigate('/about-programme');
+  };
+
   const handleIncreaseFontSize = () => {
     if (fontSize < 24) {
       const newSize = fontSize + 2;
@@ -76,6 +80,11 @@ function TopBar() {
         <button onClick={handleHomeClick} className="topbar-btn dashboard-btn" title="Go to Home">
           Home
         </button>
+
+        <button onClick={handleAboutClick} className="topbar-btn dashboard-btn" title="About Programme">
+          About
+        </button>
+
         <button onClick={handleIncreaseFontSize} className="topbar-btn" title="Increase Font Size">
           A+
         </button>
