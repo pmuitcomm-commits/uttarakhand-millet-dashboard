@@ -1,225 +1,231 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/enrollment.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { checkEnrollmentStatus } from "../services/api";
+import "../styles/enrollment.css";
+
+const mobilePattern = /^\d{10}$/;
+
+const farmerFields = [
+  ["Farmer ID", "farmer_id"],
+  ["Name", "name"],
+  ["Father / Husband Name", "father_husband_name"],
+  ["Mobile", "mobile"],
+  ["Email", "email"],
+  ["Address", "address"],
+  ["District", "district_name"],
+  ["Block", "block_name"],
+  ["Group President Name", "group_president_name"],
+  ["Account Holder Name", "account_holder_name"],
+  ["Bank Account Number", "bank_account_number"],
+  ["Bank IFSC", "bank_ifsc"],
+  ["Bank Name and Address", "bank_name_address"],
+  ["Crops", "crops"],
+  ["Estimated Seed Date", "estimated_seed_date"],
+  ["Estimated Yield", "estimated_yield"],
+  ["Created At", "created_at"],
+];
+
+const landParcelFields = [
+  ["Land ID", "land_id"],
+  ["Khatauni Number", "khatauni_number"],
+  ["Khasra Number", "khasra_number"],
+  ["Area Value", "area_value"],
+  ["Area Unit", "area_unit"],
+  ["Ownership Type", "ownership_type"],
+  ["Cultivator Name", "cultivator_name"],
+  ["Lease Period", "lease_period"],
+  ["Created At", "created_at"],
+];
+
+function formatValue(value) {
+  if (Array.isArray(value)) {
+    return value.length ? value.join(", ") : "-";
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  return String(value);
+}
 
 function CheckEnrollment() {
-  const [formData, setFormData] = useState({
-    farmerId: '',
-    aadhaar: '',
-    mobile: ''
-  });
-  const [step, setStep] = useState(1); // 1: form, 2: loading, 3: results
-  const [enrollmentData, setEnrollmentData] = useState(null);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [mobile, setMobile] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [noData, setNoData] = useState(false);
+  const [enrollmentData, setEnrollmentData] = useState(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (error) setError('');
+  const handleInputChange = (event) => {
+    const numericValue = event.target.value.replace(/\D/g, "").slice(0, 10);
+    setMobile(numericValue);
+    setError("");
+    setNoData(false);
   };
 
-  const validateForm = () => {
-    if (!formData.farmerId.trim() && !formData.aadhaar.trim() && !formData.mobile.trim()) {
-      setError('Please enter at least one search criteria (Farmer ID, Aadhaar, or Mobile)');
-      return false;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!mobilePattern.test(mobile.trim())) {
+      setEnrollmentData(null);
+      setNoData(false);
+      setError("Mobile number must be exactly 10 digits.");
+      return;
     }
 
-    if (formData.aadhaar && formData.aadhaar.length !== 12) {
-      setError('Aadhaar number must be 12 digits');
-      return false;
+    setLoading(true);
+    setError("");
+    setNoData(false);
+    setEnrollmentData(null);
+
+    try {
+      const response = await checkEnrollmentStatus(mobile.trim());
+      setEnrollmentData(response.data);
+    } catch (apiError) {
+      const statusCode = apiError.response?.status;
+      const detail = apiError.response?.data?.detail;
+
+      if (statusCode === 404) {
+        setNoData(true);
+      } else {
+        setError(detail || "Unable to fetch enrollment status. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    if (formData.mobile && formData.mobile.length !== 10) {
-      setError('Mobile number must be 10 digits');
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setStep(2); // Loading
-
-    // Mock API call - in real app, this would fetch from backend
-    setTimeout(() => {
-      // Mock enrollment data
-      const mockData = {
-        farmerId: formData.farmerId || 'UK2024001234',
-        name: 'Rajesh Kumar',
-        district: 'Udham Singh Nagar',
-        status: 'Enrolled',
-        enrollmentDate: '2024-01-15',
-        milletTypes: ['Finger Millet', 'Foxtail Millet'],
-        totalArea: '5.5 hectares',
-        contact: formData.mobile || '9876543210'
-      };
-
-      setEnrollmentData(mockData);
-      setStep(3);
-    }, 2000);
-  };
-
-  const handleBackToLogin = () => {
-    navigate('/');
   };
 
   const handleNewSearch = () => {
-    setFormData({ farmerId: '', aadhaar: '', mobile: '' });
-    setStep(1);
+    setMobile("");
+    setLoading(false);
+    setError("");
+    setNoData(false);
     setEnrollmentData(null);
-    setError('');
   };
 
   return (
     <div className="enrollment-container">
       <div className="enrollment-header">
         <div className="logo-section">
-          <div className="gov-logo-placeholder">
-            <span className="gov-emblem">🏛️</span>
-          </div>
           <div className="title-section">
-            <h1>उत्तराखंड सरकार</h1>
-            <h2>Government of Uttarakhand</h2>
-            <h3> Farmer Enrollment Status</h3>
+            <h1>Government of Uttarakhand</h1>
+            <h2>Farmer Enrollment Status</h2>
+            <h3>Check registration details using mobile number</h3>
           </div>
         </div>
       </div>
 
       <div className="enrollment-content">
-        {step === 1 && (
-          <div className="enrollment-card" data-aos="fade-up">
-            <div className="card-header">
-              <h2> Check Enrollment Status</h2>
-              <p>Enter any of the following details to check your farmer enrollment status</p>
+        <div className="enrollment-card">
+          <div className="card-header">
+            <h2>Check Enrollment Status</h2>
+            <p>Enter the registered mobile number to fetch farmer details.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="enrollment-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="mobile">Mobile Number</label>
+                <input
+                  type="text"
+                  id="mobile"
+                  name="mobile"
+                  value={mobile}
+                  onChange={handleInputChange}
+                  placeholder="10-digit mobile number"
+                  maxLength="10"
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="enrollment-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="farmerId">Farmer ID (Optional)</label>
-                  <input
-                    type="text"
-                    id="farmerId"
-                    name="farmerId"
-                    value={formData.farmerId}
-                    onChange={handleInputChange}
-                    placeholder="e.g., UK2024001234"
-                  />
-                </div>
+            {error && <div className="error-message">{error}</div>}
 
-                <div className="form-group">
-                  <label htmlFor="aadhaar">Aadhaar Number (Optional)</label>
-                  <input
-                    type="text"
-                    id="aadhaar"
-                    name="aadhaar"
-                    value={formData.aadhaar}
-                    onChange={handleInputChange}
-                    placeholder="12-digit Aadhaar number"
-                    maxLength="12"
-                  />
-                </div>
+            <div className="form-actions">
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="back-btn"
+              >
+                Back to Login
+              </button>
+              <button type="submit" className="check-btn" disabled={loading}>
+                {loading ? "Checking..." : "Check Status"}
+              </button>
+            </div>
+          </form>
+        </div>
 
-                <div className="form-group">
-                  <label htmlFor="mobile">Mobile Number (Optional)</label>
-                  <input
-                    type="text"
-                    id="mobile"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleInputChange}
-                    placeholder="10-digit mobile number"
-                    maxLength="10"
-                  />
-                </div>
-              </div>
-
-              {error && <div className="error-message">{error}</div>}
-
-              <div className="form-actions">
-                <button type="button" onClick={handleBackToLogin} className="back-btn">
-                  ← Back to Login
-                </button>
-                <button type="submit" className="check-btn">
-                   Check Status
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="loading-card" data-aos="fade-up">
+        {loading && (
+          <div className="loading-card">
             <div className="loading-spinner"></div>
             <h3>Checking Enrollment Status...</h3>
-            <p>Please wait while we verify your details</p>
+            <p>Please wait while we fetch the farmer record.</p>
           </div>
         )}
 
-        {step === 3 && enrollmentData && (
-          <div className="results-card" data-aos="fade-up">
+        {noData && !loading && (
+          <div className="results-card">
             <div className="results-header">
-              <h2> Enrollment Found</h2>
-              <div className="status-badge enrolled">
-                {enrollmentData.status}
-              </div>
+              <h2>No Enrollment Found</h2>
+            </div>
+            <p>No farmer record was found for this mobile number.</p>
+            <div className="results-actions">
+              <button onClick={handleNewSearch} className="new-search-btn">
+                New Search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {enrollmentData && !loading && (
+          <div className="results-card">
+            <div className="results-header">
+              <h2>Enrollment Details</h2>
+              <div className="status-badge enrolled">Found</div>
             </div>
 
             <div className="farmer-details">
               <div className="detail-section">
-                <h3> Farmer Information</h3>
+                <h3>Farmer Details</h3>
                 <div className="detail-grid">
-                  <div className="detail-item">
-                    <span className="label">Farmer ID:</span>
-                    <span className="value">{enrollmentData.farmerId}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Name:</span>
-                    <span className="value">{enrollmentData.name}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">District:</span>
-                    <span className="value">{enrollmentData.district}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Contact:</span>
-                    <span className="value">{enrollmentData.contact}</span>
-                  </div>
+                  {farmerFields.map(([label, key]) => (
+                    <div className="detail-item" key={key}>
+                      <span className="label">{label}:</span>
+                      <span className="value">
+                        {formatValue(enrollmentData.farmer?.[key])}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div className="detail-section">
-                <h3> Agriculture Details</h3>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <span className="label">Enrollment Date:</span>
-                    <span className="value">{enrollmentData.enrollmentDate}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Total Area:</span>
-                    <span className="value">{enrollmentData.totalArea}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Millet Types:</span>
-                    <span className="value">{enrollmentData.milletTypes.join(', ')}</span>
-                  </div>
-                </div>
+                <h3>Land Parcels</h3>
+                {enrollmentData.land_parcels?.length ? (
+                  enrollmentData.land_parcels.map((parcel) => (
+                    <div className="detail-grid" key={parcel.land_id}>
+                      {landParcelFields.map(([label, key]) => (
+                        <div className="detail-item" key={`${parcel.land_id}-${key}`}>
+                          <span className="label">{label}:</span>
+                          <span className="value">{formatValue(parcel[key])}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                ) : (
+                  <p>No land parcels found for this farmer.</p>
+                )}
               </div>
             </div>
 
             <div className="results-actions">
               <button onClick={handleNewSearch} className="new-search-btn">
-                 New Search
+                New Search
               </button>
-              <button onClick={handleBackToLogin} className="login-btn">
-                 Go to Login
+              <button onClick={() => navigate("/")} className="login-btn">
+                Go to Login
               </button>
             </div>
           </div>
@@ -227,7 +233,7 @@ function CheckEnrollment() {
       </div>
 
       <div className="enrollment-footer">
-        <p>© Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
+        <p>Government of Uttarakhand | Millet Development Programme</p>
       </div>
     </div>
   );

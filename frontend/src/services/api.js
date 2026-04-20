@@ -1,7 +1,11 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+  (
+    process.env.REACT_APP_API_URL ||
+    process.env.REACT_APP_API_BASE_URL ||
+    "http://127.0.0.1:8000"
+  ).replace(/\/+$/, "");
 
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -40,7 +44,7 @@ export const registerFarmer = (farmerData) =>
   API.post("/farmers/register", farmerData);
 
 export const checkEnrollmentStatus = (mobile) =>
-  API.get(`/farmers/status/${mobile}`);
+  API.get(`/farmers/status/${encodeURIComponent(mobile)}`);
 
 // =========================
 // Dashboard APIs
