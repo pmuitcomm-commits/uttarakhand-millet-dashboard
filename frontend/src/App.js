@@ -17,7 +17,7 @@ import BlockLanding from "./pages/BlockLanding";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
-import aboutpage from "./pages/aboutpage";
+import AboutPage from "./pages/aboutpage";
 
 function ProtectedOfficerRoute({ children, requiredRole = null }) {
   const { isAuthenticated, user, loading } = useAuth();
@@ -65,6 +65,7 @@ function AppRoutes() {
       <Route path="/production" element={<Dashboard page="production" />} />
       <Route path="/district" element={<Dashboard page="district" />} />
       <Route path="/millet" element={<Dashboard page="millet" />} />
+      <Route path="/about-programme" element={<AboutPage />} />
 
       {/* Protected Routes - for officers */}
       <Route path="/admin-dashboard" element={
