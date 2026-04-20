@@ -1,6 +1,6 @@
 /* ============================================================
    Login Page — Redesigned CSS
-   Full green viewport, no scroll, fully responsive
+   Right-side login card, left area reserved for notifications
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@400;700&display=swap');
@@ -54,7 +54,9 @@ html, body, #root {
   object-fit: contain;
 }
 
-.logo3-login { mix-blend-mode: darken; }
+.logo3-login {
+  mix-blend-mode: darken;
+}
 
 .header-logo-separator {
   color: rgba(255,255,255,0.4);
@@ -63,7 +65,9 @@ html, body, #root {
   margin: 0 2px;
 }
 
-.logo-placeholder { display: none; }
+.logo-placeholder {
+  display: none;
+}
 
 .header-center {
   flex: 1;
@@ -72,7 +76,9 @@ html, body, #root {
   align-items: center;
 }
 
-.header-title { text-align: center; }
+.header-title {
+  text-align: center;
+}
 
 .header-title span {
   display: block;
@@ -134,13 +140,19 @@ html, body, #root {
 .page-cards {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
+  justify-content: flex-end;
   width: 100%;
-  max-width: 1060px;
-  /* ~15% shorter than full available height */
+  max-width: 1200px;
   height: 72vh;
   max-height: 72vh;
+  gap: 0;
+}
+
+/* Left area reserved for future notification section */
+.page-cards::before {
+  content: "";
+  flex: 1;
+  min-width: 0;
 }
 
 /* ── Shared Card ────────────────────────────────────────────── */
@@ -156,6 +168,7 @@ html, body, #root {
 
 /* ── Info Card ──────────────────────────────────────────────── */
 .info-card {
+  display: none;
   background: #ffffff;
   border: 1px solid rgba(2, 75, 55, 0.10);
   padding: 20px;
@@ -183,7 +196,6 @@ html, body, #root {
   text-align: left;
 }
 
-/* 5-column millet grid */
 .millet-images {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -251,7 +263,8 @@ html, body, #root {
   background: #ffffff;
   color: #024b37;
   padding: 22px 26px;
-  flex: 0 0 340px;
+  flex: 0 0 360px;
+  margin-left: auto;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(2,75,55,0.2) transparent;
@@ -280,7 +293,9 @@ html, body, #root {
   text-align: center;
 }
 
-.demo-note { display: none; }
+.demo-note {
+  display: none;
+}
 
 /* ── User Type Selector ─────────────────────────────────────── */
 .user-type-selector {
@@ -350,7 +365,9 @@ html, body, #root {
   appearance: none;
 }
 
-.form-group input::placeholder { color: #a8a099; }
+.form-group input::placeholder {
+  color: #a8a099;
+}
 
 .form-group input:focus,
 .form-group select:focus,
@@ -377,7 +394,9 @@ html, body, #root {
 }
 
 /* ── Role Selector ──────────────────────────────────────────── */
-.role-selector { margin-bottom: 0; }
+.role-selector {
+  margin-bottom: 0;
+}
 
 .role-selector label {
   display: block;
@@ -400,6 +419,7 @@ html, body, #root {
 .login-btn {
   width: 100%;
   padding: 11px 20px;
+  margin-top: 6px;
   background: #024b37;
   border-radius: 12px;
   color: #ffffff;
@@ -418,13 +438,37 @@ html, body, #root {
   box-shadow: 0 4px 14px rgba(2, 75, 55, 0.28);
 }
 
-.login-btn:active { background: #023628; transform: translateY(0); }
+.login-btn:active {
+  background: #023628;
+  transform: translateY(0);
+}
 
 .login-btn:disabled {
   background: #a8c4b4;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+.register-farmer-btn {
+  width: 100%;
+  background: transparent;
+  color: #024b37;
+  border: 1.5px solid #024b37;
+  padding: 9px;
+  margin-top: 6px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  font-family: 'Lato', sans-serif;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  text-align: center;
+}
+
+.register-farmer-btn:hover {
+  background: #024b37;
+  color: white;
 }
 
 /* ── Login Footer ───────────────────────────────────────────── */
@@ -453,7 +497,10 @@ html, body, #root {
   text-align: center;
 }
 
-.register-toggle-link:hover { background: #024b37; color: white; }
+.register-toggle-link:hover {
+  background: #024b37;
+  color: white;
+}
 
 .forgot-link,
 .enrollment-link {
@@ -470,7 +517,9 @@ html, body, #root {
 }
 
 .forgot-link:hover,
-.enrollment-link:hover { color: #035e47; }
+.enrollment-link:hover {
+  color: #035e47;
+}
 
 /* ── Error/Status Banners ───────────────────────────────────── */
 .error-banner {
@@ -505,7 +554,9 @@ html, body, #root {
   flex-shrink: 0;
 }
 
-.login-footer-global p { margin: 0; }
+.login-footer-global p {
+  margin: 0;
+}
 
 /* ── Schemes Dropdown ───────────────────────────────────────── */
 .schemes-dropdown-container {
@@ -540,8 +591,13 @@ html, body, #root {
   transition: background 0.15s;
 }
 
-.scheme-item:last-child { border-bottom: none; }
-.scheme-item:hover { background: #f3f9f6; }
+.scheme-item:last-child {
+  border-bottom: none;
+}
+
+.scheme-item:hover {
+  background: #f3f9f6;
+}
 
 .scheme-item span {
   color: #1a2b1e;
@@ -565,13 +621,30 @@ html, body, #root {
   font-family: 'Lato', sans-serif;
 }
 
-.pdf-btn:hover { background: #035e47; }
+.pdf-btn:hover {
+  background: #035e47;
+}
 
-.info-section { display: none; }
+.info-section {
+  display: none;
+}
+
+.single-card-layout {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================================
@@ -597,9 +670,14 @@ html, body, #root {
   .page-cards {
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     height: auto;
     max-height: none;
     gap: 14px;
+  }
+
+  .page-cards::before {
+    display: none;
   }
 
   .info-card,
@@ -611,9 +689,18 @@ html, body, #root {
     overflow: visible;
   }
 
-  .millet-images { grid-template-columns: repeat(3, 1fr); }
+  .login-card {
+    margin-left: 0;
+  }
 
-  .top-header { flex-wrap: wrap; gap: 8px; }
+  .millet-images {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .top-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
   .header-center {
     order: 3;
@@ -621,15 +708,33 @@ html, body, #root {
     justify-content: center;
   }
 
-  .header-right { flex-wrap: wrap; justify-content: flex-end; }
+  .header-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 520px) {
-  .top-header { padding: 10px 14px; }
-  .header-title h1 { font-size: 1.1rem; }
-  .header-title span { font-size: 0.7rem; }
-  .header-btn { padding: 7px 11px; font-size: 0.76rem; }
-  .info-card { display: none; }
+  .top-header {
+    padding: 10px 14px;
+  }
+
+  .header-title h1 {
+    font-size: 1.1rem;
+  }
+
+  .header-title span {
+    font-size: 0.7rem;
+  }
+
+  .header-btn {
+    padding: 7px 11px;
+    font-size: 0.76rem;
+  }
+
+  .info-card {
+    display: none;
+  }
 
   .login-card {
     border-radius: 16px;
