@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import geoData from "../data/district.geojson";
+import "../styles/aboutpage.css";
 import {
   MapPin,
   Users,
@@ -10,8 +11,6 @@ import {
   Info,
 } from "lucide-react";
 
-/* ---------- SAMPLE DATA ---------- */
-/* Replace later with FastAPI data */
 const SAMPLE_DISTRICTS = [
   { id: "almora", name: "Almora", blocks: 11, farmers: 1880, areaHa: 465 },
   { id: "bageshwar", name: "Bageshwar", blocks: 3, farmers: 720, areaHa: 210 },
@@ -28,7 +27,6 @@ const SAMPLE_DISTRICTS = [
   { id: "uttarkashi", name: "Uttarkashi", blocks: 6, farmers: 860, areaHa: 240 },
 ];
 
-/* ---------- HELPERS ---------- */
 function normalizeName(name) {
   return String(name || "")
     .toLowerCase()
@@ -40,7 +38,6 @@ function normalizeName(name) {
 const DISTRICT_NAME_ALIASES = {
   "u.s. nagar": "udham singh nagar",
   "us nagar": "udham singh nagar",
-  "udham सिंह nagar": "udham singh nagar",
 };
 
 function getCanonicalDistrictName(name) {
@@ -87,10 +84,12 @@ function buildPathFromRing(ring, project) {
   if (!ring || ring.length === 0) return "";
   const first = project(ring[0]);
   let path = `M ${first[0]} ${first[1]}`;
+
   for (let i = 1; i < ring.length; i += 1) {
     const [x, y] = project(ring[i]);
     path += ` L ${x} ${y}`;
   }
+
   path += " Z";
   return path;
 }
@@ -112,23 +111,12 @@ function buildFeaturePath(feature, project) {
   return "";
 }
 
-/* ---------- UI ---------- */
 function StatCard({ title, value, icon: Icon }) {
   return (
-    <div
-      style={{
-        padding: "15px",
-        borderRadius: "10px",
-        background: "#fff",
-        border: "1px solid #e5e7eb",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
+    <div className="stat-card">
       <div>
-        <p style={{ fontSize: "12px", color: "#555", margin: 0 }}>{title}</p>
-        <h3 style={{ margin: "6px 0 0 0" }}>{value}</h3>
+        <p className="stat-card-title">{title}</p>
+        <h3 className="stat-card-value">{value}</h3>
       </div>
       <Icon size={20} color="#166534" />
     </div>
@@ -152,6 +140,15 @@ function MapSection({ data }) {
 
   const features = geoData.features || [];
   const allCoords = getAllCoordinates(features);
+
+  if (!allCoords.length) {
+    return (
+      <div className="map-container">
+        <h3 className="section-title">District Coverage Map</h3>
+        <p>No district geometry found.</p>
+      </div>
+    );
+  }
 
   const xs = allCoords.map((c) => c[0]);
   const ys = allCoords.map((c) => c[1]);
@@ -181,44 +178,27 @@ function MapSection({ data }) {
   };
 
   return (
-    <div
-      style={{
-        position: "relative",
-        background: "#fff",
-        padding: "20px",
-        borderRadius: "10px",
-        border: "1px solid #e5e7eb",
-      }}
-    >
-      <div
-        style={{
-          marginBottom: "12px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "12px",
-          flexWrap: "wrap",
-        }}
-      >
+    <div className="map-container">
+      <div className="map-header">
         <div>
-          <h3 style={{ margin: 0 }}>District Coverage Map</h3>
-          <p style={{ margin: "6px 0 0 0", color: "#666", fontSize: "14px" }}>
+          <h3 className="section-title">District Coverage Map</h3>
+          <p className="section-subtitle">
             Hover over a district to view blocks, farmers, and area under millets.
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#666" }}>
+        <div className="map-legend">
           <span>Low</span>
-          <div style={{ display: "flex", overflow: "hidden", borderRadius: "999px", border: "1px solid #ddd" }}>
+          <div className="legend-scale">
             {["#dcfce7", "#bbf7d0", "#86efac", "#4ade80", "#16a34a"].map((c) => (
-              <div key={c} style={{ width: "26px", height: "10px", background: c }} />
+              <div key={c} className="legend-color" style={{ background: c }} />
             ))}
           </div>
           <span>High</span>
         </div>
       </div>
 
-      <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: "block" }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" className="district-map-svg">
         {features.map((feature, index) => {
           const districtName =
             feature.properties?.NAME_2 ||
@@ -239,8 +219,10 @@ function MapSection({ data }) {
               fill={fill}
               stroke="#ffffff"
               strokeWidth="1.2"
-              style={{ cursor: "pointer", transition: "opacity 0.2s ease" }}
-              onMouseEnter={() => setHover(info || { name: districtName, blocks: "-", farmers: "-", areaHa: "-" })}
+              className="district-path"
+              onMouseEnter={() =>
+                setHover(info || { name: districtName, blocks: "-", farmers: "-", areaHa: "-" })
+              }
               onMouseLeave={() => setHover(null)}
             />
           );
@@ -248,24 +230,19 @@ function MapSection({ data }) {
       </svg>
 
       {hover && (
-        <div
-          style={{
-            position: "absolute",
-            right: "20px",
-            top: "20px",
-            background: "#fff",
-            padding: "12px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            minWidth: "220px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-          }}
-        >
-          <div style={{ fontWeight: 700, marginBottom: "8px" }}>{hover.name}</div>
-          <div style={{ fontSize: "14px", lineHeight: 1.7 }}>
+        <div className="map-tooltip">
+          <div className="tooltip-title">{hover.name}</div>
+          <div className="tooltip-body">
             <div>Blocks: {hover.blocks}</div>
-            <div>Farmers: {hover.farmers && hover.farmers.toLocaleString ? hover.farmers.toLocaleString() : hover.farmers}</div>
-            <div>Area under Millets: {hover.areaHa !== undefined ? `${hover.areaHa} ha` : "-"}</div>
+            <div>
+              Farmers:{" "}
+              {hover.farmers && hover.farmers.toLocaleString
+                ? hover.farmers.toLocaleString()
+                : hover.farmers}
+            </div>
+            <div>
+              Area under Millets: {hover.areaHa !== undefined ? `${hover.areaHa} ha` : "-"}
+            </div>
           </div>
         </div>
       )}
@@ -273,7 +250,6 @@ function MapSection({ data }) {
   );
 }
 
-/* ---------- MAIN PAGE ---------- */
 export default function AboutPage() {
   const totals = useMemo(() => {
     return {
@@ -287,29 +263,15 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div style={{ padding: "20px", background: "#f9fafb", minHeight: "100vh" }}>
-      <div
-        style={{
-          background: "#166534",
-          color: "#fff",
-          padding: "30px",
-          borderRadius: "10px",
-        }}
-      >
-        <h1 style={{ margin: 0 }}>Uttarakhand Millet Programme</h1>
-        <p style={{ margin: "10px 0 0 0" }}>
+    <div className="about-container">
+      <div className="about-header">
+        <h1 className="about-header-title">Uttarakhand Millet Programme</h1>
+        <p className="about-header-text">
           Promoting millets for nutrition, sustainability, climate resilience, and farmer income.
         </p>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "10px",
-          marginTop: "20px",
-        }}
-      >
+      <div className="about-grid">
         <StatCard title="Districts" value={totals.districts} icon={MapPin} />
         <StatCard title="Blocks" value={totals.blocks} icon={Building2} />
         <StatCard title="Farmers" value={totals.farmers.toLocaleString()} icon={Users} />
@@ -318,42 +280,24 @@ export default function AboutPage() {
         <StatCard title="SHGs / Groups" value={totals.shgs} icon={TrendingUp} />
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <MapSection data={SAMPLE_DISTRICTS} />
-      </div>
+      <MapSection data={SAMPLE_DISTRICTS} />
 
-      <div
-        style={{
-          marginTop: "20px",
-          background: "#fff",
-          padding: "20px",
-          borderRadius: "10px",
-          border: "1px solid #e5e7eb",
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>About Programme</h2>
-        <p style={{ lineHeight: 1.7 }}>
+      <div className="section-card">
+        <h2 className="section-title">About Programme</h2>
+        <p className="section-text">
           The Uttarakhand Millet Programme promotes traditional crops, strengthens farmer livelihoods,
           improves nutrition security, and supports climate-resilient agriculture across the state.
         </p>
-        <p style={{ lineHeight: 1.7 }}>
+        <p className="section-text">
           Millets are well suited to Uttarakhand’s hill and rainfed farming systems. The programme
           encourages production, processing, value addition, and market linkage through coordinated
           support at the state, district, block, and community levels.
         </p>
       </div>
 
-      <div
-        style={{
-          marginTop: "20px",
-          background: "#fff",
-          padding: "20px",
-          borderRadius: "10px",
-          border: "1px solid #e5e7eb",
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>Objectives</h2>
-        <ul style={{ lineHeight: 1.9, paddingLeft: "18px" }}>
+      <div className="section-card">
+        <h2 className="section-title">Objectives</h2>
+        <ul className="objectives-list">
           <li>Increase millet cultivation and productivity.</li>
           <li>Support farmer registration and district-level monitoring.</li>
           <li>Promote nutrition, traditional crops, and resilient agriculture.</li>
@@ -362,18 +306,7 @@ export default function AboutPage() {
         </ul>
       </div>
 
-      <div
-        style={{
-          marginTop: "20px",
-          background: "#fefce8",
-          padding: "20px",
-          borderRadius: "10px",
-          border: "1px solid #f3e8a6",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}
-      >
+      <div className="info-box">
         <Info size={20} />
         <span>Millets are key to sustainable mountain agriculture in Uttarakhand.</span>
       </div>
