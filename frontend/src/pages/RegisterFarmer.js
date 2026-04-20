@@ -26,13 +26,13 @@ const blocksByDistrict = {
   Haridwar: ["Haridwar", "Khanpur", "Lakhanpur", "Bahadarabad"],
   Chamoli: ["Gopeshwar", "Joshimath", "Chamoli", "Tharali"],
   Champawat: ["Champawat", "Lohaghat", "Pati", "Pancheshwar"],
-  Pauri Garhwal: ["Pauri", "Kotdwara", "Lansdowne", "Srinagar"],
+  "Pauri Garhwal": ["Pauri", "Kotdwara", "Lansdowne", "Srinagar"],
   Pithoragarh: ["Pithoragarh", "Dharchula", "Kausani", "Munsiari"],
   Rudraprayag: ["Rudraprayag", "Gopeshwar", "Karnaprayag", "Agastyamuni"],
-  Tehri Garhwal: ["Tehri", "New Tehri", "Chamba", "Dhanaulti"],
+  "Tehri Garhwal": ["Tehri", "New Tehri", "Chamba", "Dhanaulti"],
   Uttarkashi: ["Uttarkashi", "Harshil", "Dunda", "Gangnani"],
   Bageshwar: ["Bageshwar", "Kanda", "Kapkot", "Tharali"],
-  Udham Singh Nagar: [
+  "Udham Singh Nagar": [
     "Rudrapur",
     "Kashipur",
     "Jaspur",
