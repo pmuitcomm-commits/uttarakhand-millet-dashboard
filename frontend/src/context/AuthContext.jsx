@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser } from '../services/api';
+import { clearAuthSession, getAuthToken, getCurrentUser } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -19,17 +19,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
-      const token = localStorage.getItem('authToken');
-      const storedUser = localStorage.getItem('userInfo');
+      const token = getAuthToken();
 
-      if (token && storedUser) {
+      if (token) {
         try {
-          // Parse stored user and normalize role to lowercase
-          let parsedUser = JSON.parse(storedUser);
-          if (parsedUser.role) {
-            parsedUser.role = parsedUser.role.toLowerCase();
-          }
-          
           // Verify token is still valid
           const response = await getCurrentUser();
           // Normalize the response user role to lowercase
@@ -40,9 +33,7 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
         } catch (error) {
           // Token is invalid, clear storage
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('userInfo');
-          localStorage.removeItem('userRole');
+          clearAuthSession();
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -54,9 +45,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('userRole');
+    clearAuthSession();
     setUser(null);
     setIsAuthenticated(false);
   };

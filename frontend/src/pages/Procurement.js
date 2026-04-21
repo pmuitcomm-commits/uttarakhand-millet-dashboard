@@ -66,8 +66,7 @@ function Procurement() {
       }));
       
       setProcurementData(normalizedData);
-    } catch (error) {
-      console.error("Procurement API Error:", error);
+    } catch {
       setError("Failed to fetch procurement data");
       setProcurementData([]);
     } finally {
@@ -91,8 +90,7 @@ function Procurement() {
         pvtAgenciesProcurement: kpiData.pvt_agencies_procurement || 0,
         cropCoverage: kpiData.crop_coverage || 0,
       });
-    } catch (error) {
-      console.error("KPI Fetch Error:", error);
+    } catch {
       // Fallback to showing zeros if KPI fetch fails
       setProcurementKPIs({
         totalDistricts: 0,

@@ -4,6 +4,7 @@ Run: python setup_auth.py
 """
 
 import os
+import secrets
 import sys
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -17,6 +18,14 @@ try:
     from app.security import hash_password
     
     db = SessionLocal()
+
+    def seed_password(env_name: str) -> str:
+        return os.getenv(env_name) or secrets.token_urlsafe(18)
+
+    admin_password = seed_password("SEED_ADMIN_PASSWORD")
+    district_password = seed_password("SEED_DISTRICT_PASSWORD")
+    block_password = seed_password("SEED_BLOCK_PASSWORD")
+    farmer_password = seed_password("SEED_FARMER_PASSWORD")
     
     print("Creating users table with SQL...")
     
@@ -43,7 +52,7 @@ try:
         print("\nCreating test users...")
         
         # Create admin
-        admin_pw = hash_password("Admin@123")
+        admin_pw = hash_password(admin_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, is_active)
             VALUES (:username, :email, :hashed_password, :full_name, :role, :is_active)
@@ -55,10 +64,10 @@ try:
             "role": "admin",
             "is_active": 1
         })
-        print("✓ Created Admin: admin_uttarakhand / Admin@123")
+        print("✓ Created Admin user admin_uttarakhand")
         
         # District officer - Nainital
-        dist_pw = hash_password("District@123")
+        dist_pw = hash_password(district_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, district, is_active)
             VALUES (:username, :email, :hashed_password, :full_name, :role, :district, :is_active)
@@ -71,7 +80,7 @@ try:
             "district": "Nainital",
             "is_active": 1
         })
-        print("✓ Created District Officer: district_nainital / District@123")
+        print("✓ Created District Officer user district_nainital")
         
         # District officer - Almora
         db.execute(text("""
@@ -86,10 +95,10 @@ try:
             "district": "Almora",
             "is_active": 1
         })
-        print("✓ Created District Officer: district_almora / District@123")
+        print("✓ Created District Officer user district_almora")
         
         # Block officer
-        block_pw = hash_password("Block@123")
+        block_pw = hash_password(block_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, district, block, is_active)
             VALUES (:username, :email, :hashed_password, :full_name, :role, :district, :block, :is_active)
@@ -103,10 +112,10 @@ try:
             "block": "Nainital",
             "is_active": 1
         })
-        print("✓ Created Block Officer: block_nainital_city / Block@123")
+        print("✓ Created Block Officer user block_nainital_city")
         
         # Farmer
-        farmer_pw = hash_password("Farmer@123")
+        farmer_pw = hash_password(farmer_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, is_active)
             VALUES (:username, :email, :hashed_password, :full_name, :role, :is_active)
@@ -118,10 +127,11 @@ try:
             "role": "farmer",
             "is_active": 1
         })
-        print("✓ Created Farmer: farmer_uttarakhand / Farmer@123")
+        print("✓ Created Farmer user farmer_uttarakhand")
         
         db.commit()
         print("\n✓✓✓ All test users created successfully!")
+        print("Passwords were read from SEED_*_PASSWORD env vars or generated for this run.")
     else:
         print("Users already exist!")
     

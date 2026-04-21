@@ -72,10 +72,8 @@ function Dashboard({ page = "dashboard" }) {
 
       const tableRes = await getAllProduction();
       setTableData(tableRes.data);
-
-      console.log("All Data Loaded");
-    } catch (error) {
-      console.log("API Error:", error);
+    } catch {
+      setTableData([]);
     }
   };
 

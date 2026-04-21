@@ -4,15 +4,12 @@ import ForgotPassword from '../components/ForgotPassword';
 import { authClasses, authInputBase, authInputError } from '../components/authStyles';
 
 function Login() {
-  const [officialRole, setOfficialRole] = useState('admin');
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     // captcha: '', // Commented out for later enablement
     email: '',
-    fullName: '',
-    district: '',
-    block: ''
+    fullName: ''
   });
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -21,74 +18,6 @@ function Login() {
   const [authError, setAuthError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const districts = [
-    'Almora',
-    'Bageshwar',
-    'Chamoli',
-    'Champawat',
-    'Dehradun',
-    'Haridwar',
-    'Nainital',
-    'Pauri Garhwal',
-    'Pithoragarh',
-    'Rudraprayag',
-    'Tehri Garhwal',
-    'Udham Singh Nagar',
-    'Uttarkashi'
-  ];
-
-  const blocks = {
-    'Almora': [
-      'Bhaisiya Chhana', 'Chaukhutia', 'Dhauladevi', 'Hawalbagh',
-      'Lamgara', 'Salt', 'Sult', 'Takula', 'Tarikhet'
-    ],
-    'Bageshwar': [
-      'Bageshwar', 'Garur', 'Kapkot'
-    ],
-    'Chamoli': [
-      'Dasholi', 'Dewal', 'Gairsain', 'Ghat',
-      'Joshimath', 'Karnaprayag', 'Narayanbagar', 'Pokhari', 'Tharali'
-    ],
-    'Champawat': [
-      'Barakot', 'Champawat', 'Lohaghat', 'Pati'
-    ],
-    'Dehradun': [
-      'Chakrata', 'Doiwala', 'Kalsi', 'Raipur', 'Sahaspur', 'Vikasnagar'
-    ],
-    'Haridwar': [
-      'Bahadrabad', 'Bhagwanpur', 'Khanpur', 'Laksar', 'Narsan', 'Roorkee'
-    ],
-    'Nainital': [
-      'Betalghat', 'Bhimtal', 'Dhari', 'Haldwani',
-      'Kotabagh', 'Okhalkanda', 'Ramnagar'
-    ],
-    'Pauri Garhwal': [
-      'Bironkhal', 'Dwarikhal', 'Ekeshwar', 'Jaiharikhal',
-      'Kaljikhal', 'Khirsu', 'Kot', 'Nainidanda',
-      'Pabo', 'Pauri', 'Pokhra', 'Rikhnikhal',
-      'Thalisain', 'Yamkeshwar'
-    ],
-    'Pithoragarh': [
-      'Berinag', 'Dharchula', 'Didihat', 'Gangolihat',
-      'Kanalichina', 'Munsiyari', 'Pithoragarh'
-    ],
-    'Rudraprayag': [
-      'Augustmuni', 'Jakholi', 'Ukhimath'
-    ],
-    'Tehri Garhwal': [
-      'Bhilangna', 'Chamba', 'Devprayag', 'Jakhnidhar',
-      'Jaunpur', 'Kirtinagar', 'Narendranagar', 'Pratapnagar', 'Thauldhar'
-    ],
-    'Udham Singh Nagar': [
-      'Bajpur', 'Gadarpur', 'Jaspur', 'Kashipur',
-      'Khatima', 'Rudrapur', 'Sitarganj'
-    ],
-    'Uttarkashi': [
-      'Bhatwari', 'Chinyalisaur', 'Dunda',
-      'Mori', 'Naugaon', 'Purola'
-    ]
-  };
 
   const schemes = [
     {
@@ -120,7 +49,7 @@ function Login() {
   ];
 
   const handleSchemeOpen = (pdfUrl) => {
-    window.open(pdfUrl, '_blank');
+    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
     setShowSchemeDropdown(false);
   };
 
@@ -129,21 +58,13 @@ function Login() {
 
     setFormData(prev => ({
       ...prev,
-      [name]: value,
-      ...(name === 'district' ? { block: '' } : {})
+      [name]: value
     }));
 
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
-      }));
-    }
-
-    if (name === 'district' && errors.block) {
-      setErrors(prev => ({
-        ...prev,
-        block: ''
       }));
     }
   };
@@ -157,18 +78,6 @@ function Login() {
 
     if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
-    }
-
-    if (isRegistering && (officialRole === 'district_officer' || officialRole === 'block_officer')) {
-      if (!formData.district.trim()) {
-        newErrors.district = 'District is required';
-      }
-    }
-
-    if (isRegistering && officialRole === 'block_officer') {
-      if (!formData.block.trim()) {
-        newErrors.block = 'Block is required';
-      }
     }
 
     return newErrors;
@@ -187,17 +96,15 @@ function Login() {
 
     try {
       let response;
-      const { loginUser, registerUser } = await import('../services/api');
+      const { loginUser, registerUser, setAuthSession } = await import('../services/api');
 
       if (isRegistering) {
-        const roleMap = { admin: 1, district_officer: 2, block_officer: 3 };
         const userData = {
           username: formData.username,
           password: formData.password,
           email: formData.email,
-          role_id: roleMap[officialRole],
-          district: formData.district || null,
-          block: officialRole === 'block_officer' ? formData.block || null : null
+          full_name: formData.fullName.trim() || null,
+          role_id: 4
         };
         response = await registerUser(userData);
       } else {
@@ -211,15 +118,12 @@ function Login() {
         role: user.role.toLowerCase()
       };
 
-      localStorage.setItem('authToken', access_token);
-      localStorage.setItem('userInfo', JSON.stringify(normalizedUser));
-      localStorage.setItem('userRole', normalizedUser.role);
+      setAuthSession(access_token, normalizedUser);
 
       window.location.href = '/';
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Authentication failed. Please try again.';
       setAuthError(errorMsg);
-      console.error('Auth error:', error);
     } finally {
       setLoading(false);
     }
@@ -315,21 +219,10 @@ function Login() {
 
           <div className={authClasses.loginCard} data-aos="fade-up" data-aos-delay="150">
             <div className={authClasses.loginHeaderText}>
-              <h2 className={authClasses.loginHeading}>Official Login Portal</h2>
+              <h2 className={authClasses.loginHeading}>
+                {isRegistering ? 'Farmer Account Registration' : 'Official Login Portal'}
+              </h2>
               <p className={authClasses.loginDescription}>Department of Agriculture & Horticulture, Government of Uttarakhand</p>
-            </div>
-
-            <div className={authClasses.roleSelector}>
-              <label className={authClasses.roleLabel}>Select Role:</label>
-              <select
-                value={officialRole}
-                onChange={(e) => setOfficialRole(e.target.value)}
-                className={authInputBase}
-              >
-                <option value="admin">Admin</option>
-                <option value="district_officer">District Officer</option>
-                <option value="block_officer">Block Officer</option>
-              </select>
             </div>
 
             {authError && (
@@ -368,47 +261,6 @@ function Login() {
                     />
                   </div>
 
-                  {(officialRole === 'district_officer' || officialRole === 'block_officer') && (
-                    <div className={authClasses.formGroup}>
-                      <label className={authClasses.formLabel} htmlFor="district">District</label>
-                      <select
-                        id="district"
-                        name="district"
-                        value={formData.district}
-                        onChange={handleInputChange}
-                        className={`${authInputBase} ${errors.district ? authInputError : ''}`}
-                      >
-                        <option value="">Select District</option>
-                        {districts.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.district && <span className={authClasses.errorText}>{errors.district}</span>}
-                    </div>
-                  )}
-
-                  {officialRole === 'block_officer' && formData.district && (
-                    <div className={authClasses.formGroup}>
-                      <label className={authClasses.formLabel} htmlFor="block">Block</label>
-                      <select
-                        id="block"
-                        name="block"
-                        value={formData.block}
-                        onChange={handleInputChange}
-                        className={`${authInputBase} ${errors.block ? authInputError : ''}`}
-                      >
-                        <option value="">Select Block</option>
-                        {(blocks[formData.district] || []).map((b) => (
-                          <option key={b} value={b}>
-                            {b}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.block && <span className={authClasses.errorText}>{errors.block}</span>}
-                    </div>
-                  )}
                 </>
               )}
 
@@ -441,7 +293,7 @@ function Login() {
               </div>
 
               <button type="submit" className={authClasses.loginButton} disabled={loading}>
-                {loading ? 'Please wait...' : (isRegistering ? 'Register' : 'Login')}
+                {loading ? 'Please wait...' : (isRegistering ? 'Create Farmer Account' : 'Login')}
               </button>
             </form>
 
@@ -455,7 +307,7 @@ function Login() {
                 }}
                 type="button"
               >
-                {isRegistering ? 'Already have an account? Login' : 'Create new account'}
+                {isRegistering ? 'Already have an account? Login' : 'Create farmer account'}
               </button>
 
               {!isRegistering && (

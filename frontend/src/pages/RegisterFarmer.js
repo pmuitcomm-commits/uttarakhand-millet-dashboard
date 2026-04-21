@@ -130,6 +130,7 @@ function RegisterFarmer() {
     ifsc: "",
     bank_address: "",
     account_holder_name: "",
+    privacy_consent: false,
     declaration: false,
   });
 
@@ -145,10 +146,10 @@ function RegisterFarmer() {
   const handleInputChange = (event) => {
     const { name, value, checked } = event.target;
 
-    if (name === "declaration") {
-      setFormData((prev) => ({ ...prev, declaration: checked }));
-      if (errors.declaration) {
-        setErrors((prev) => ({ ...prev, declaration: "" }));
+    if (name === "declaration" || name === "privacy_consent") {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
       }
       return;
     }
@@ -298,6 +299,9 @@ function RegisterFarmer() {
     } else if (!/^\d+$/.test(formData.account_number.trim())) {
       validationErrors.account_number =
         "Account number must contain only numbers";
+    } else if (!/^\d{9,18}$/.test(formData.account_number.trim())) {
+      validationErrors.account_number =
+        "Account number must be between 9 and 18 digits";
     }
 
     if (!formData.ifsc.trim()) {
@@ -312,6 +316,11 @@ function RegisterFarmer() {
 
     if (!formData.account_holder_name.trim()) {
       validationErrors.account_holder_name = "Account holder name is required";
+    }
+
+    if (!formData.privacy_consent) {
+      validationErrors.privacy_consent =
+        "You must consent to personal data processing for registration";
     }
 
     if (!formData.declaration) {
@@ -363,6 +372,8 @@ function RegisterFarmer() {
           ]
         : []),
     ],
+    consent_accepted: formData.privacy_consent,
+    consent_text_version: "farmer-registration-v1",
   });
 
   const handleSubmit = async (event) => {
@@ -913,6 +924,25 @@ function RegisterFarmer() {
           </div>
 
           <div className={declarationSectionClass}>
+            <label className={declarationCheckboxClass}>
+              <input
+                id="privacy_consent"
+                name="privacy_consent"
+                type="checkbox"
+                checked={formData.privacy_consent}
+                onChange={handleInputChange}
+              />
+              <span>
+                I consent to the Department processing the personal, bank, and
+                land details submitted here for farmer registration, scheme
+                administration, and enrollment verification by authorized
+                officials.
+              </span>
+            </label>
+            {errors.privacy_consent && (
+              <span className={errorTextClass}>{errors.privacy_consent}</span>
+            )}
+
             <label className={declarationCheckboxClass}>
               <input
                 id="declaration"

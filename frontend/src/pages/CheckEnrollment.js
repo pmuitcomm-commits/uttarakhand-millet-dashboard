@@ -6,34 +6,9 @@ import { checkEnrollmentStatus } from "../services/api";
 const mobilePattern = /^\d{10}$/;
 
 const farmerFields = [
-  ["Farmer ID", "farmer_id"],
-  ["Name", "name"],
-  ["Father / Husband Name", "father_husband_name"],
-  ["Mobile", "mobile"],
-  ["Email", "email"],
-  ["Address", "address"],
+  ["Mobile", "masked_mobile"],
   ["District", "district_name"],
   ["Block", "block_name"],
-  ["Group President Name", "group_president_name"],
-  ["Account Holder Name", "account_holder_name"],
-  ["Bank Account Number", "bank_account_number"],
-  ["Bank IFSC", "bank_ifsc"],
-  ["Bank Name and Address", "bank_name_address"],
-  ["Crops", "crops"],
-  ["Estimated Seed Date", "estimated_seed_date"],
-  ["Estimated Yield", "estimated_yield"],
-  ["Created At", "created_at"],
-];
-
-const landParcelFields = [
-  ["Land ID", "land_id"],
-  ["Khatauni Number", "khatauni_number"],
-  ["Khasra Number", "khasra_number"],
-  ["Area Value", "area_value"],
-  ["Area Unit", "area_unit"],
-  ["Ownership Type", "ownership_type"],
-  ["Cultivator Name", "cultivator_name"],
-  ["Lease Period", "lease_period"],
   ["Created At", "created_at"],
 ];
 
@@ -163,7 +138,7 @@ function CheckEnrollment() {
           <div>
             <h1 className={titleClass}>Government of Uttarakhand</h1>
             <h2 className={subTitleClass}>Farmer Enrollment Status</h2>
-            <h3 className={titleThirdClass}>Check registration details using mobile number</h3>
+            <h3 className={titleThirdClass}>Check masked enrollment status using mobile number</h3>
           </div>
         </div>
       </div>
@@ -172,7 +147,7 @@ function CheckEnrollment() {
         <div className={paddedCardClass}>
           <div className={cardHeaderClass}>
             <h2 className={cardHeadingClass}>Check Enrollment Status</h2>
-            <p className={cardDescriptionClass}>Enter the registered mobile number to fetch farmer details.</p>
+            <p className={cardDescriptionClass}>Enter the registered mobile number to view a limited enrollment status.</p>
           </div>
 
           <form onSubmit={handleSubmit} className={formClass}>
@@ -212,7 +187,7 @@ function CheckEnrollment() {
           <div className={loadingCardClass}>
             <div className={spinnerClass}></div>
             <h3 className="mb-2 mt-0 font-playfair text-[1.3rem] font-semibold text-[#023628]">Checking Enrollment Status...</h3>
-            <p className="m-0 text-[0.91rem] text-[#5c6b5e]">Please wait while we fetch the farmer record.</p>
+            <p className="m-0 text-[0.91rem] text-[#5c6b5e]">Please wait while we fetch the masked enrollment status.</p>
           </div>
         )}
 
@@ -233,13 +208,13 @@ function CheckEnrollment() {
         {enrollmentData && !loading && (
           <div className={paddedCardClass}>
             <div className={resultsHeaderClass}>
-              <h2 className={cardHeadingClass}>Enrollment Details</h2>
+              <h2 className={cardHeadingClass}>Enrollment Status</h2>
               <div className={statusBadgeClass}>Found</div>
             </div>
 
             <div className={farmerDetailsClass}>
               <div className={detailSectionClass}>
-                <h3>Farmer Details</h3>
+                <h3>Status Details</h3>
                 <div className={detailGridClass}>
                   {farmerFields.map(([label, key]) => (
                     <div className={detailItemClass} key={key}>
@@ -252,23 +227,9 @@ function CheckEnrollment() {
                 </div>
               </div>
 
-              <div className={detailSectionClass}>
-                <h3>Land Parcels</h3>
-                {enrollmentData.land_parcels?.length ? (
-                  enrollmentData.land_parcels.map((parcel) => (
-                    <div className={detailGridClass} key={parcel.land_id}>
-                      {landParcelFields.map(([label, key]) => (
-                        <div className={detailItemClass} key={`${parcel.land_id}-${key}`}>
-                          <span className={detailLabelClass}>{label}:</span>
-                          <span className={detailValueClass}>{formatValue(parcel[key])}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                ) : (
-                  <p>No land parcels found for this farmer.</p>
-                )}
-              </div>
+              <p className="m-0 text-[0.88rem] leading-relaxed text-[#5c6b5e]">
+                Sensitive farmer, bank, address, and land details are available only to authorized officers.
+              </p>
             </div>
 
             <div className={resultsActionsClass}>

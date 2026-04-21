@@ -4,6 +4,7 @@ Run: python add_users.py
 """
 
 import os
+import secrets
 from datetime import datetime
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -11,7 +12,7 @@ from sqlalchemy import text
 load_dotenv()
 
 db_host = os.getenv("DB_HOST")
-db_port = os. getenv("DB_PORT")
+db_port = os.getenv("DB_PORT")
 db_name = os.getenv("DB_NAME")
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
@@ -23,6 +24,14 @@ DATABASE_URL = f"postgresql://{db_user}{password_part}@{db_host}{port_part}/{db_
 try:
     from sqlalchemy import create_engine
     from app.security import hash_password
+
+    def seed_password(env_name: str) -> str:
+        return os.getenv(env_name) or secrets.token_urlsafe(18)
+
+    admin_password = seed_password("SEED_ADMIN_PASSWORD")
+    district_password = seed_password("SEED_DISTRICT_PASSWORD")
+    block_password = seed_password("SEED_BLOCK_PASSWORD")
+    farmer_password = seed_password("SEED_FARMER_PASSWORD")
     
     engine = create_engine(DATABASE_URL)
     
@@ -35,7 +44,7 @@ try:
             print("✓ Users already exist!")
         else:
             # Insert admin user
-            admin_pw = hash_password("Admin@123")
+            admin_pw = hash_password(admin_password)
             conn.execute(text("""
                 INSERT INTO users (name, email, password, role_id, district, created_at)
                 VALUES (:name, :email, :password, :role_id, :district, :created_at)
@@ -47,10 +56,10 @@ try:
                 "district": None,
                 "created_at": datetime.now()
             })
-            print("✓ Created Admin: admin_uttarakhand / Admin@123")
+            print("✓ Created Admin user admin_uttarakhand")
             
             # Insert district officer
-            dist_pw = hash_password("District@123")
+            dist_pw = hash_password(district_password)
             conn.execute(text("""
                 INSERT INTO users (name, email, password, role_id, district, created_at)
                 VALUES (:name, :email, :password, :role_id, :district, :created_at)
@@ -62,10 +71,10 @@ try:
                 "district": "Nainital",
                 "created_at": datetime.now()
             })
-            print("✓ Created District Officer: district_nainital / District@123")
+            print("✓ Created District Officer user district_nainital")
             
             # Insert block officer
-            block_pw = hash_password("Block@123")
+            block_pw = hash_password(block_password)
             conn.execute(text("""
                 INSERT INTO users (name, email, password, role_id, district, created_at)
                 VALUES (:name, :email, :password, :role_id, :district, :created_at)
@@ -77,10 +86,10 @@ try:
                 "district": "Nainital",
                 "created_at": datetime.now()
             })
-            print("✓ Created Block Officer: block_nainital / Block@123")
+            print("✓ Created Block Officer user block_nainital")
             
             # Insert farmer
-            farmer_pw = hash_password("Farmer@123")
+            farmer_pw = hash_password(farmer_password)
             conn.execute(text("""
                 INSERT INTO users (name, email, password, role_id, created_at)
                 VALUES (:name, :email, :password, :role_id, :created_at)
@@ -91,10 +100,11 @@ try:
                 "role_id": 4,
                 "created_at": datetime.now()
             })
-            print("✓ Created Farmer: farmer_john / Farmer@123")
+            print("✓ Created Farmer user farmer_john")
             
             conn.commit()
             print("\n✓✓✓ Users created successfully!")
+            print("Passwords were read from SEED_*_PASSWORD env vars or generated for this run.")
         
         # List all users
         print("\n--- All Users ---")

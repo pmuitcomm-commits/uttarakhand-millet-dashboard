@@ -74,9 +74,8 @@ function CheckEnrollmentStatus() {
 
   const handleCheckStatus = () => {
     if (inputValue.trim()) {
-      console.log(`Checking ${checkType}: ${inputValue}`);
       // Mock API call - in real app this would fetch from backend
-      alert(`Checking ${getInputLabel()}: ${inputValue}`);
+      alert("Status lookup request received.");
     }
   };
 

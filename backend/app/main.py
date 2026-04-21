@@ -2,12 +2,11 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from dotenv import load_dotenv
 
 from .database import engine, Base
+from .rate_limit import limiter
 from .routes.production import router as production_router
 from .routes.dashboard import router as dashboard_router
 from .routes.procurement import router as procurement_router
@@ -28,8 +27,6 @@ def startup():
         print("❌ DB connection failed:", e)
 
 
-# Rate limiter
-limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
 app.add_exception_handler(
