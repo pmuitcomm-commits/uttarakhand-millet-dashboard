@@ -113,7 +113,7 @@ function TopBar() {
   return (
     <header
       ref={headerRef}
-      className="relative z-50 shrink-0 border-b border-white/10 bg-[#0b5d3b] text-white shadow-lg"
+      className="relative z-50 shrink-0 border-b border-white/10 bg-[#024b37] text-white shadow-lg"
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 lg:flex-nowrap lg:px-8">
         <div className="flex min-w-0 items-center gap-4">
