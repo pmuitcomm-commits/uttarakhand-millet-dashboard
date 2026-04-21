@@ -145,7 +145,7 @@ function TopBar() {
             onClick={() => navigateAndClose("/dashboard")}
           >
             <LayoutDashboard className="h-4 w-4" />
-            Program
+            Dashboard
           </button>
 
           <div className="relative">
