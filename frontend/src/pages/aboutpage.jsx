@@ -295,8 +295,8 @@ export default function AboutPage() {
   return (
     <div className="about-container">
       <div className="about-header">
-        <h1 className="about-header-title">उत्तराखंड मिलेट कार्यक्रम</h1>
-        <p className="about-header-text">Uttarakhand Millet Programme</p>
+        <h1 className="about-header-title">Uttarakhand State Millet Mission Policy</h1>
+        <p className="about-header-text">About the Programme</p>
         <p className="about-header-text">
           Promoting millets for nutrition, sustainability, climate resilience, and farmer income.
         </p>
@@ -320,9 +320,11 @@ export default function AboutPage() {
           improves nutrition security, and supports climate-resilient agriculture across the state.
         </p>
         <p className="section-text">
-          Millets are well suited to Uttarakhand's hill and rainfed farming systems. The programme
-          encourages production, processing, value addition, and market linkage through coordinated
-          support at the state, district, block, and community levels.
+         The Uttarakhand Millet Mission (Shree Anna Uttarakhand) is a flagship initiative of the Department of Agriculture, Government of Uttarakhand. The programme aims to revive traditional millet cultivation—especially mandua (finger millet), jhangora (barnyard millet), kangni, and other local crops—while strengthening farmer livelihoods and improving nutritional security.
+
+The mission adopts an integrated approach covering production, processing, value addition, and market linkage, ensuring end-to-end support for farmers, Self Help Groups (SHGs), and rural enterprises.
+
+It also promotes climate-resilient agriculture, particularly suited to the hill ecosystems of Uttarakhand.
         </p>
       </div>
 
