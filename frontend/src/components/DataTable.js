@@ -1,6 +1,15 @@
 import { useState } from "react";
 
-function DataTable({ data, title = "📋 Detailed Data" }) {
+const tableButtonBase =
+  "rounded-md border border-[#024b37] bg-[#024b37] px-3 py-2 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#035344] hover:shadow-[0_2px_8px_rgba(2,75,55,0.2)] disabled:cursor-not-allowed disabled:border-[#d0d0d0] disabled:bg-[#d0d0d0] disabled:text-[#999999] disabled:shadow-none disabled:transform-none dark:border-[#024b37] dark:bg-[#024b37] dark:text-white dark:hover:bg-[#035344] dark:hover:shadow-[0_2px_8px_rgba(2,75,55,0.4)] dark:disabled:border-[#444444] dark:disabled:bg-[#444444] dark:disabled:text-[#999999]";
+
+function pageButtonClassName(active) {
+  return active
+    ? `${tableButtonBase} !border-[#0a7c59] !bg-[#0a7c59] !font-bold`
+    : tableButtonBase;
+}
+
+function DataTable({ data, title = "Detailed Data" }) {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 100;
   
@@ -18,30 +27,46 @@ function DataTable({ data, title = "📋 Detailed Data" }) {
   };
 
   return (
-    <div className="table-container" data-aos="fade-up">
-      <div className="table-header">
-        <h2>{title}</h2>
+    <div
+      className="!block !transform-none !overflow-x-auto !visible w-full rounded-lg !opacity-100"
+      data-aos="fade-up"
+    >
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="m-0 text-[1.2rem] font-bold text-[#024b37] dark:text-white">{title}</h2>
         {totalPages > 1 && (
-          <div className="pagination-info">
+          <div className="text-sm font-medium text-[#666666] dark:text-[#cccccc]">
             Showing {startIndex + 1} - {Math.min(endIndex, data.length)} of {data.length}
           </div>
         )}
       </div>
       {data?.length > 0 ? (
         <>
-          <table>
+          <table className="w-full border-collapse bg-white dark:bg-[#2a2a2a]">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th
+                    key={column}
+                    className="border border-[#e2e8f0] bg-[#f5f5f5] px-4 py-3 text-left text-[0.85rem] font-bold uppercase text-[#003366] dark:border-[#444444] dark:bg-[#1a1a1a] dark:text-white"
+                  >
+                    {column}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {currentData.map((row, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  className="even:bg-[#f5f8fa] hover:bg-[#f9fbff] dark:even:bg-[#252525] dark:hover:bg-[#333333]"
+                >
                   {columns.map((column) => (
-                    <td key={`${index}-${column}`}>{row[column] ?? "-"}</td>
+                    <td
+                      className="border border-[#e2e8f0] px-4 py-3 text-left text-[0.95rem] text-[#024b37] dark:border-[#444444] dark:text-white"
+                      key={`${index}-${column}`}
+                    >
+                      {row[column] ?? "-"}
+                    </td>
                   ))}
                 </tr>
               ))}
@@ -49,21 +74,23 @@ function DataTable({ data, title = "📋 Detailed Data" }) {
           </table>
           
           {totalPages > 1 && (
-            <div className="pagination-controls">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 p-4">
               <button 
+                className={tableButtonBase}
                 onClick={() => handlePageChange(1)} 
                 disabled={currentPage === 1}
               >
                 First
               </button>
               <button 
+                className={tableButtonBase}
                 onClick={() => handlePageChange(currentPage - 1)} 
                 disabled={currentPage === 1}
               >
                 Previous
               </button>
               
-              <div className="page-numbers">
+              <div className="mx-2 flex gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
                   if (totalPages <= 5) {
@@ -79,7 +106,7 @@ function DataTable({ data, title = "📋 Detailed Data" }) {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={currentPage === pageNum ? "active" : ""}
+                      className={`${pageButtonClassName(currentPage === pageNum)} min-w-9 px-2.5 py-1.5 text-[0.85rem]`}
                     >
                       {pageNum}
                     </button>
@@ -88,12 +115,14 @@ function DataTable({ data, title = "📋 Detailed Data" }) {
               </div>
               
               <button 
+                className={tableButtonBase}
                 onClick={() => handlePageChange(currentPage + 1)} 
                 disabled={currentPage === totalPages}
               >
                 Next
               </button>
               <button 
+                className={tableButtonBase}
                 onClick={() => handlePageChange(totalPages)} 
                 disabled={currentPage === totalPages}
               >

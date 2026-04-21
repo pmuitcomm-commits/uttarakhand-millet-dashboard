@@ -18,6 +18,7 @@ import Sidebar from "../components/Sidebar";
 import DistrictChart from "../components/DistrictChart";
 import MilletChart from "../components/MilletChart";
 import DataTable from "../components/DataTable";
+import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
 import { useLanguage } from "../context/LanguageContext";
 
 import {
@@ -26,8 +27,6 @@ import {
   getMilletProduction,
   getAllProduction,
 } from "../services/api";
-
-import "../styles/dashboard.css";
 
 ChartJS.register(
   CategoryScale,
@@ -332,7 +331,7 @@ function Dashboard({ page = "dashboard" }) {
 
   if (!isMilletPage) {
     chartCards.push(
-      <div className="dashboard-chart-card" data-aos="fade-up" key="district-chart">
+      <div className={dashboardClasses.chartCard} data-aos="fade-up" key="district-chart">
         <DistrictChart data={page === "district" ? filteredDistrictData : districtData} />
       </div>
     );
@@ -340,20 +339,20 @@ function Dashboard({ page = "dashboard" }) {
 
   // Always show millet chart on all pages
   chartCards.push(
-    <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="100" key="millet-chart">
+    <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="millet-chart">
       <MilletChart data={page === "millet" ? filteredMilletData : (page === "district" ? filteredDistrictData : milletData)} />
     </div>
   );
 
   if (isMilletPage) {
     chartCards.push(
-      <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="200" key="millet-line-chart">
+      <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="200" key="millet-line-chart">
         <Line data={milletTrendData} options={milletTrendOptions} />
       </div>
     );
   } else {
     chartCards.push(
-      <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="200" key="procurement-line-chart">
+      <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="200" key="procurement-line-chart">
         <Line data={procurementTrendData} options={procurementTrendOptions} />
       </div>
     );
@@ -380,20 +379,20 @@ function Dashboard({ page = "dashboard" }) {
   };
 
   return (
-    <div className="page-wrapper">
+    <div className={dashboardClasses.pageWrapper}>
       <TopBar />
-      <div className="dashboard-container">
+      <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
-        <div className="main-content">
+        <div className={dashboardClasses.mainContent}>
           <Header />
-          <div className="page-heading-row" data-aos="fade-up">
-            <h2>{pageTitle}</h2>
+          <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
+            <h2 className={dashboardClasses.pageHeadingTitle}>{pageTitle}</h2>
             {page === "district" && (
-              <div className="district-selector-wrapper">
+              <div className={dashboardClasses.selectorWrapper}>
                 <select 
                   value={selectedDistrict} 
                   onChange={(e) => setSelectedDistrict(e.target.value)}
-                  className="district-selector"
+                  className={dashboardClasses.selector}
                 >
                   <option value="all">All Districts</option>
                   {getUniqueDistricts().map((district) => (
@@ -405,11 +404,11 @@ function Dashboard({ page = "dashboard" }) {
               </div>
             )}
             {page === "millet" && (
-              <div className="millet-selector-wrapper">
+              <div className={dashboardClasses.selectorWrapper}>
                 <select 
                   value={selectedMillet} 
                   onChange={(e) => setSelectedMillet(e.target.value)}
-                  className="millet-selector"
+                  className={dashboardClasses.selector}
                 >
                   <option value="all">All Millets</option>
                   {milletVarieties.map((millet) => (
@@ -422,18 +421,18 @@ function Dashboard({ page = "dashboard" }) {
             )}
           </div>
 
-          <div className="dashboard-metrics-row">
-            {(pageMetricsMap[page] || pageMetricsMap.dashboard).map((metric) => (
-              <div key={metric.label} className="dashboard-metric-card">
-                <div className="metric-value">{metric.value}</div>
-                <div className="metric-label">{metric.label}</div>
+          <div className={dashboardClasses.metricsRow}>
+            {(pageMetricsMap[page] || pageMetricsMap.dashboard).map((metric, index) => (
+              <div key={metric.label} className={metricCardClassName(index)}>
+                <div className={dashboardClasses.metricValue}>{metric.value}</div>
+                <div className={dashboardClasses.metricLabel}>{metric.label}</div>
               </div>
             ))}
           </div>
 
-          <div className="dashboard-chart-row">{chartCards}</div>
+          <div className={dashboardClasses.chartRow}>{chartCards}</div>
 
-          <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
+          <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
             <DataTable
               data={getTableData()}
               title={getTableTitle()}

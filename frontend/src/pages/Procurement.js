@@ -16,9 +16,9 @@ import TopBar from "../components/TopBar";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import DataTable from "../components/DataTable";
+import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
 import { getAllProcurement, getProcurementKPIs } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
-import "../styles/dashboard.css";
 
 ChartJS.register(
   CategoryScale,
@@ -328,55 +328,49 @@ function Procurement() {
   };
 
   return (
-    <div className="page-wrapper">
+    <div className={dashboardClasses.pageWrapper}>
       <TopBar />
-      <div className="dashboard-container">
+      <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
-        <div className="main-content">
+        <div className={dashboardClasses.mainContent}>
           <Header />
 
-          <div className="page-heading-row" data-aos="fade-up">
-            <h2>{t('procurementSummary')}</h2>
+          <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
+            <h2 className={dashboardClasses.pageHeadingTitle}>{t('procurementSummary')}</h2>
           </div>
 
           {error && (
-            <div style={{ 
-              padding: '15px', 
-              marginBottom: '20px', 
-              backgroundColor: '#fee', 
-              color: '#c33', 
-              borderRadius: '4px' 
-            }}>
+            <div className={dashboardClasses.dashboardNotice}>
               ⚠️ {error}
             </div>
           )}
 
-          <div className="dashboard-metrics-row">
-            {dashboardMetrics.map((metric) => (
-              <div key={metric.label} className="dashboard-metric-card">
-                <div className="metric-value">{metric.value}</div>
-                <div className="metric-label">{metric.label}</div>
+          <div className={dashboardClasses.metricsRow}>
+            {dashboardMetrics.map((metric, index) => (
+              <div key={metric.label} className={metricCardClassName(index)}>
+                <div className={dashboardClasses.metricValue}>{metric.value}</div>
+                <div className={dashboardClasses.metricLabel}>{metric.label}</div>
               </div>
             ))}
           </div>
 
-          <div className="dashboard-chart-row">
-            <div className="dashboard-chart-card" data-aos="fade-up" key="procurement-by-district">
+          <div className={dashboardClasses.chartRow}>
+            <div className={dashboardClasses.chartCard} data-aos="fade-up" key="procurement-by-district">
               <Bar data={procurementByDistrictData} options={procurementByDistrictOptions} />
             </div>
-            <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="100" key="target-vs-actual">
+            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="target-vs-actual">
               <Line data={targetVsActualData} options={targetVsActualOptions} />
             </div>
-            <div className="dashboard-chart-card" data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
+            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
               <Bar data={achievementPercentageData} options={achievementPercentageOptions} />
             </div>
           </div>
 
-          <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
+          <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
             {loading ? (
-              <p style={{ padding: '20px', textAlign: 'center' }}>Loading data...</p>
+              <p className={dashboardClasses.dashboardMessage}>Loading data...</p>
             ) : procurementData.length === 0 ? (
-              <p style={{ padding: '20px', textAlign: 'center' }}>No procurement data available</p>
+              <p className={dashboardClasses.dashboardMessage}>No procurement data available</p>
             ) : (
               <DataTable data={procurementData} title="Detailed Procurement Data" />
             )}

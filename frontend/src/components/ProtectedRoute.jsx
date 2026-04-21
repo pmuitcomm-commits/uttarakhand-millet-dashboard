@@ -6,7 +6,7 @@ export const ProtectedRoute = ({ children, requiredRoles = null }) => {
   const { isAuthenticated, loading, hasRole } = useAuth();
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>;
+    return <div className="p-5 text-center">Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -15,12 +15,7 @@ export const ProtectedRoute = ({ children, requiredRoles = null }) => {
 
   if (requiredRoles && !hasRole(requiredRoles)) {
     return (
-      <div style={{ 
-        padding: '40px 20px', 
-        textAlign: 'center',
-        backgroundColor: '#fee',
-        minHeight: '100vh'
-      }}>
+      <div className="min-h-screen bg-red-50 px-5 py-10 text-center">
         <h2>Access Denied</h2>
         <p>You don't have permission to access this page.</p>
         <p>Required roles: {Array.isArray(requiredRoles) ? requiredRoles.join(', ') : requiredRoles}</p>

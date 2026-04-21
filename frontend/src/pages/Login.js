@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ForgotPassword from '../components/ForgotPassword';
-import '../styles/login.css';
+import { authClasses, authInputBase, authInputError } from '../components/authStyles';
 
 function Login() {
   const [officialRole, setOfficialRole] = useState('admin');
@@ -226,54 +226,58 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <header className="top-header" data-aos="fade-down">
-        <div className="header-left">
-          <img src="/logo3.png" alt="Logo 3" className="header-logo logo3-login" />
-          <div className="header-logo-separator">|</div>
-          <img src="/logo2.png" alt="Logo 2" className="header-logo" />
-          <div className="header-logo-separator">|</div>
-          <img src="/logo1.png" alt="Logo 1" className="header-logo" />
+    <div className={authClasses.container}>
+      <header className={authClasses.topHeader} data-aos="fade-down">
+        <div className={authClasses.headerLeft}>
+          <img
+            src="/logo3.png"
+            alt="Logo 3"
+            className={`${authClasses.headerLogo} ${authClasses.headerLogoBlend}`}
+          />
+          <div className={authClasses.headerSeparator}>|</div>
+          <img src="/logo2.png" alt="Logo 2" className={authClasses.headerLogo} />
+          <div className={authClasses.headerSeparator}>|</div>
+          <img src="/logo1.png" alt="Logo 1" className={authClasses.headerLogo} />
         </div>
 
-        <div className="header-center">
-          <div className="header-title">
-            <span>Department of Agriculture & Horticulture, Uttarakhand</span>
-            <h1>State Millet Monitoring & Management System</h1>
+        <div className={authClasses.headerCenter}>
+          <div className={authClasses.headerTitle}>
+            <span className={authClasses.headerEyebrow}>Department of Agriculture & Horticulture, Uttarakhand</span>
+            <h1 className={authClasses.headerH1}>State Millet Monitoring & Management System</h1>
           </div>
         </div>
 
-        <div className="header-right">
-          <button className="header-btn" onClick={() => navigate('/procurement')}>
+        <div className={authClasses.headerRight}>
+          <button className={authClasses.headerButton} onClick={() => navigate('/procurement')}>
             Dashboard
           </button>
 
-          <button className="header-btn" onClick={() => navigate('/register-farmer')}>
+          <button className={authClasses.headerButton} onClick={() => navigate('/register-farmer')}>
             Register Farmer
           </button>
 
-          <button className="header-btn" onClick={() => navigate('/enrollment-status')}>
+          <button className={authClasses.headerButton} onClick={() => navigate('/enrollment-status')}>
             Enrollment Status
           </button>
 
-          <button className="header-btn" onClick={() => navigate('/about-programme')}>
+          <button className={authClasses.headerButton} onClick={() => navigate('/about-programme')}>
             About Programme
           </button>
 
-          <div className="schemes-dropdown-container">
+          <div className={authClasses.dropdownContainer}>
             <button
-              className="header-btn"
+              className={authClasses.headerButton}
               onClick={() => setShowSchemeDropdown(!showSchemeDropdown)}
             >
               Schemes
             </button>
             {showSchemeDropdown && (
-              <div className="schemes-dropdown-menu">
+              <div className={authClasses.dropdownMenu}>
                 {schemes.map((scheme, index) => (
-                  <div key={index} className="scheme-item">
-                    <span>{scheme.name}</span>
+                  <div key={index} className={authClasses.schemeItem}>
+                    <span className={authClasses.schemeName}>{scheme.name}</span>
                     <button
-                      className="pdf-btn"
+                      className={authClasses.pdfButton}
                       onClick={() => handleSchemeOpen(scheme.pdfUrl)}
                       title="Open PDF"
                     >
@@ -287,20 +291,20 @@ function Login() {
         </div>
       </header>
 
-      <div className="hero-content">
-        <div className="page-cards">
-          <div className="left-panel" data-aos="fade-right" data-aos-delay="100">
-            <div className="notification-box">
-              <div className="notification-header">
-                <h3>Notifications</h3>
-                <span className="live-badge">Live</span>
+      <div className={authClasses.heroContent}>
+        <div className={authClasses.pageCards}>
+          <div className={authClasses.leftPanel} data-aos="fade-right" data-aos-delay="100">
+            <div className={authClasses.notificationBox}>
+              <div className={authClasses.notificationHeader}>
+                <h3 className={authClasses.notificationTitle}>Notifications</h3>
+                <span className={authClasses.liveBadge}>Live</span>
               </div>
 
-              <div className="notification-marquee">
-                <div className="notification-track">
+              <div className={authClasses.notificationMarquee}>
+                <div className={authClasses.notificationTrack}>
                   {[...notifications, ...notifications].map((item, index) => (
-                    <div key={index} className="notification-item">
-                      <span className="notification-dot" />
+                    <div key={index} className={authClasses.notificationItem}>
+                      <span className={authClasses.notificationDot} />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -309,18 +313,18 @@ function Login() {
             </div>
           </div>
 
-          <div className="login-card" data-aos="fade-up" data-aos-delay="150">
-            <div className="login-header-text">
-              <h2>Official Login Portal</h2>
-              <p>Department of Agriculture & Horticulture, Government of Uttarakhand</p>
+          <div className={authClasses.loginCard} data-aos="fade-up" data-aos-delay="150">
+            <div className={authClasses.loginHeaderText}>
+              <h2 className={authClasses.loginHeading}>Official Login Portal</h2>
+              <p className={authClasses.loginDescription}>Department of Agriculture & Horticulture, Government of Uttarakhand</p>
             </div>
 
-            <div className="role-selector">
-              <label>Select Role:</label>
+            <div className={authClasses.roleSelector}>
+              <label className={authClasses.roleLabel}>Select Role:</label>
               <select
                 value={officialRole}
                 onChange={(e) => setOfficialRole(e.target.value)}
-                className="role-select"
+                className={authInputBase}
               >
                 <option value="admin">Admin</option>
                 <option value="district_officer">District Officer</option>
@@ -329,16 +333,16 @@ function Login() {
             </div>
 
             {authError && (
-              <div className="error-banner">
+              <div className={authClasses.errorBanner}>
                 ⚠️ {authError}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="login-form">
+            <form onSubmit={handleSubmit} className={authClasses.loginForm}>
               {isRegistering && (
                 <>
-                  <div className="form-group">
-                    <label htmlFor="fullName">Full Name</label>
+                  <div className={authClasses.formGroup}>
+                    <label className={authClasses.formLabel} htmlFor="fullName">Full Name</label>
                     <input
                       type="text"
                       id="fullName"
@@ -346,13 +350,13 @@ function Login() {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       placeholder="Enter your full name"
-                      className={errors.fullName ? 'error' : ''}
+                      className={`${authInputBase} ${errors.fullName ? authInputError : ''}`}
                     />
-                    {errors.fullName && <span className="error-text">{errors.fullName}</span>}
+                    {errors.fullName && <span className={authClasses.errorText}>{errors.fullName}</span>}
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="email">Email (Optional)</label>
+                  <div className={authClasses.formGroup}>
+                    <label className={authClasses.formLabel} htmlFor="email">Email (Optional)</label>
                     <input
                       type="email"
                       id="email"
@@ -360,18 +364,19 @@ function Login() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email (optional)"
+                      className={authInputBase}
                     />
                   </div>
 
                   {(officialRole === 'district_officer' || officialRole === 'block_officer') && (
-                    <div className="form-group">
-                      <label htmlFor="district">District</label>
+                    <div className={authClasses.formGroup}>
+                      <label className={authClasses.formLabel} htmlFor="district">District</label>
                       <select
                         id="district"
                         name="district"
                         value={formData.district}
                         onChange={handleInputChange}
-                        className={errors.district ? 'error' : ''}
+                        className={`${authInputBase} ${errors.district ? authInputError : ''}`}
                       >
                         <option value="">Select District</option>
                         {districts.map((d) => (
@@ -380,19 +385,19 @@ function Login() {
                           </option>
                         ))}
                       </select>
-                      {errors.district && <span className="error-text">{errors.district}</span>}
+                      {errors.district && <span className={authClasses.errorText}>{errors.district}</span>}
                     </div>
                   )}
 
                   {officialRole === 'block_officer' && formData.district && (
-                    <div className="form-group">
-                      <label htmlFor="block">Block</label>
+                    <div className={authClasses.formGroup}>
+                      <label className={authClasses.formLabel} htmlFor="block">Block</label>
                       <select
                         id="block"
                         name="block"
                         value={formData.block}
                         onChange={handleInputChange}
-                        className={errors.block ? 'error' : ''}
+                        className={`${authInputBase} ${errors.block ? authInputError : ''}`}
                       >
                         <option value="">Select Block</option>
                         {(blocks[formData.district] || []).map((b) => (
@@ -401,14 +406,14 @@ function Login() {
                           </option>
                         ))}
                       </select>
-                      {errors.block && <span className="error-text">{errors.block}</span>}
+                      {errors.block && <span className={authClasses.errorText}>{errors.block}</span>}
                     </div>
                   )}
                 </>
               )}
 
-              <div className="form-group">
-                <label htmlFor="username">Username</label>
+              <div className={authClasses.formGroup}>
+                <label className={authClasses.formLabel} htmlFor="username">Username</label>
                 <input
                   type="text"
                   id="username"
@@ -416,13 +421,13 @@ function Login() {
                   value={formData.username}
                   onChange={handleInputChange}
                   placeholder="Enter your username"
-                  className={errors.username ? 'error' : ''}
+                  className={`${authInputBase} ${errors.username ? authInputError : ''}`}
                 />
-                {errors.username && <span className="error-text">{errors.username}</span>}
+                {errors.username && <span className={authClasses.errorText}>{errors.username}</span>}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
+              <div className={authClasses.formGroup}>
+                <label className={authClasses.formLabel} htmlFor="password">Password</label>
                 <input
                   type="password"
                   id="password"
@@ -430,19 +435,19 @@ function Login() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter your password"
-                  className={errors.password ? 'error' : ''}
+                  className={`${authInputBase} ${errors.password ? authInputError : ''}`}
                 />
-                {errors.password && <span className="error-text">{errors.password}</span>}
+                {errors.password && <span className={authClasses.errorText}>{errors.password}</span>}
               </div>
 
-              <button type="submit" className="login-btn" disabled={loading}>
+              <button type="submit" className={authClasses.loginButton} disabled={loading}>
                 {loading ? 'Please wait...' : (isRegistering ? 'Register' : 'Login')}
               </button>
             </form>
 
-            <div className="login-footer">
+            <div className={authClasses.loginFooter}>
               <button
-                className="register-toggle-link"
+                className={authClasses.registerToggle}
                 onClick={() => {
                   setIsRegistering(!isRegistering);
                   setErrors({});
@@ -455,7 +460,7 @@ function Login() {
 
               {!isRegistering && (
                 <button
-                  className="forgot-link"
+                  className={authClasses.forgotLink}
                   onClick={() => setShowForgotPassword(true)}
                   type="button"
                 >
@@ -467,7 +472,7 @@ function Login() {
         </div>
       </div>
 
-      <div className="login-footer-global">
+      <div className={authClasses.globalFooter}>
         <p>© Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
       </div>
 

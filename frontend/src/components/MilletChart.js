@@ -1,4 +1,5 @@
 import { Pie } from "react-chartjs-2";
+import { chartClasses } from "./dashboardStyles";
 
 function MilletChart({ data }) {
   const chartData = {
@@ -36,8 +37,8 @@ function MilletChart({ data }) {
   };
 
   return (
-    <div className="chart" data-aos="fade-left">
-      <h2>Millet Production</h2>
+    <div className={chartClasses.wrapper} data-aos="fade-left">
+      <h2 className={chartClasses.title}>Millet Production</h2>
       <Pie data={chartData} options={options} />
     </div>
   );

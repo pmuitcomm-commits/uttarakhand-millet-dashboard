@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/landing.css';
+import { landingClasses, landingVariants } from './landingStyles';
 
 function AdminLanding() {
   const navigate = useNavigate();
@@ -23,32 +23,32 @@ function AdminLanding() {
   const roleDisplay = user?.role === 'admin' ? 'Admin' : user?.role?.replace('_', ' ').toUpperCase() || 'ADMIN';
 
   return (
-    <div className="landing-container admin-landing">
-      <div className="landing-header">
-        <div className="header-logo-section">
-          <img src="/logo1.png" alt="Logo" className="landing-logo" />
+    <div className={`${landingClasses.container} ${landingVariants.admin.container}`}>
+      <div className={landingClasses.header}>
+        <div className={landingClasses.logoSection}>
+          <img src="/logo1.png" alt="Logo" className={landingClasses.logo} />
         </div>
       </div>
 
-      <div className="landing-content">
-        <div className="welcome-card admin-card">
-          <h1 className="greeting">Hi, {roleDisplay}</h1>
-          <p className="welcome-message">Welcome to dashboard managing panel</p>
+      <div className={landingClasses.content}>
+        <div className={landingClasses.card}>
+          <h1 className={landingClasses.greeting}>Hi, {roleDisplay}</h1>
+          <p className={landingClasses.welcomeMessage}>Welcome to dashboard managing panel</p>
           
-          <div className="role-info admin-info">
-            <p className="role-description">You have access to all administrative functions and system-wide data.</p>
+          <div className={`${landingClasses.roleInfo} ${landingVariants.admin.roleInfo}`}>
+            <p className={landingClasses.roleDescription}>You have access to all administrative functions and system-wide data.</p>
           </div>
 
-          <button className="continue-btn admin-btn" onClick={handleContinue}>
+          <button className={`${landingClasses.continueButton} ${landingVariants.admin.button}`} onClick={handleContinue}>
             Enter Dashboard
           </button>
 
-          <p className="auto-redirect-text">Redirecting in 3 seconds...</p>
+          <p className={landingClasses.autoRedirect}>Redirecting in 3 seconds...</p>
         </div>
       </div>
 
-      <div className="landing-footer">
-        <p className="footer-text">Millet Dashboard Management System</p>
+      <div className={landingClasses.footer}>
+        <p className={landingClasses.footerText}>Millet Dashboard Management System</p>
       </div>
     </div>
   );

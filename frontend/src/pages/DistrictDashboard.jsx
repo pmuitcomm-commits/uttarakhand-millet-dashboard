@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
-import '../styles/dashboard.css';
+import { dashboardClasses } from '../components/dashboardStyles';
 
 function DistrictDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -18,25 +18,25 @@ function DistrictDashboard() {
   }, [isAuthenticated, user, navigate]);
 
   return (
-    <div className="page-wrapper">
+    <div className={dashboardClasses.pageWrapper}>
       <TopBar />
-      <div className="dashboard-container">
+      <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
-        <div className="main-content">
+        <div className={dashboardClasses.mainContent}>
           <Header />
 
-          <div className="page-heading-row" data-aos="fade-up">
-            <h2>District Officer Dashboard</h2>
+          <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
+            <h2 className={dashboardClasses.pageHeadingTitle}>District Officer Dashboard</h2>
           </div>
 
-          <div className="dashboard-table-card" data-aos="fade-up" data-aos-delay="300">
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-              <h3>Welcome, {user?.username}</h3>
-              <p>District: {user?.district || 'Not assigned'}</p>
+          <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
+            <div className="p-10 text-center">
+              <h3 className="text-xl font-semibold text-[#024b37] dark:text-white">Welcome, {user?.username}</h3>
+              <p className="mt-2 text-[#4a5568] dark:text-slate-200">District: {user?.district || 'Not assigned'}</p>
               
-              <div style={{ marginTop: '30px', textAlign: 'left', maxWidth: '600px', margin: '30px auto' }}>
-                <h4>District Officer Features:</h4>
-                <ul style={{ lineHeight: '1.8' }}>
+              <div className="mx-auto mt-[30px] max-w-[600px] text-left">
+                <h4 className="font-semibold text-[#024b37] dark:text-white">District Officer Features:</h4>
+                <ul className="leading-[1.8] text-[#024b37] dark:text-slate-100">
                   <li>✓ Manage block officers in {user?.district || 'your district'}</li>
                   <li>✓ View district-wise procurement data</li>
                   <li>✓ View district-wise production data</li>

@@ -23,7 +23,7 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>;
+    return <div className="p-5 text-center">Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -100,7 +100,7 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div style={{ width: '100%', minHeight: '100vh', margin: 0, padding: 0, backgroundColor: '#024b37', overflow: 'auto' }}>
+        <div className="m-0 min-h-screen w-full overflow-auto bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
           <AppRoutes />
         </div>
       </AuthProvider>

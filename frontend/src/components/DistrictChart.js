@@ -9,6 +9,7 @@ import {
 } from "chart.js";
 
 import { Bar } from "react-chartjs-2";
+import { chartClasses } from "./dashboardStyles";
 
 ChartJS.register(
   CategoryScale,
@@ -57,8 +58,8 @@ function DistrictChart({ data }) {
   };
 
   return (
-    <div className="chart" data-aos="fade-right">
-      <h2>District Production</h2>
+    <div className={chartClasses.wrapper} data-aos="fade-right">
+      <h2 className={chartClasses.title}>District Production</h2>
       <Bar data={chartData} options={options} />
     </div>
   );

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerFarmer } from "../services/api";
-import "../styles/register-farmer.css";
 
 const districts = [
   "Almora",
@@ -44,6 +43,58 @@ const blocksByDistrict = {
 };
 
 const cropOptions = ["Mandua", "Jhangora", "Ramdana", "Kauni", "Cheena"];
+
+const pageClass =
+  "flex min-h-screen w-full items-start justify-center overflow-x-hidden bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] px-5 py-8 font-lato max-[768px]:px-3 max-[768px]:py-5 max-[480px]:px-2 max-[480px]:py-4";
+const cardClass =
+  "flex w-full max-w-[1160px] flex-col rounded-[20px] border border-[#024b37]/[0.07] bg-white px-10 pb-12 pt-9 shadow-form-card max-[1100px]:px-7 max-[1100px]:pb-10 max-[1100px]:pt-7 max-[768px]:rounded-2xl max-[768px]:px-5 max-[768px]:pb-8 max-[768px]:pt-6 max-[480px]:rounded-xl max-[480px]:px-3.5 max-[480px]:pb-6 max-[480px]:pt-4 max-[480px]:shadow-[0_1px_3px_rgba(2,50,36,0.08)] max-[320px]:px-2.5 max-[320px]:pb-[18px] max-[320px]:pt-3";
+const headerClass =
+  "mb-8 flex items-start justify-between gap-5 border-b-[1.5px] border-[#eae6de] pb-7 max-[768px]:mb-6 max-[768px]:flex-col max-[768px]:gap-4 max-[768px]:pb-5 max-[480px]:mb-4 max-[480px]:items-stretch max-[480px]:gap-3 max-[480px]:pb-4";
+const headerContentClass = "min-w-0 flex-1";
+const headerTitleClass =
+  "mb-1.5 mt-0 font-playfair text-[2.1rem] font-semibold leading-tight tracking-[-0.3px] text-[#023628] max-[768px]:mb-1 max-[768px]:text-[1.8rem] max-[480px]:text-2xl max-[320px]:text-[1.3rem]";
+const headerTextClass =
+  "m-0 text-[0.93rem] leading-normal text-[#5c6b5e] max-[768px]:text-[0.88rem] max-[480px]:text-[0.8rem] max-[480px]:text-[#6b7b70]";
+const backButtonClass =
+  "shrink-0 cursor-pointer whitespace-nowrap rounded-[10px] border-[1.5px] border-[#e0dbd0] bg-[#f5f3f0] px-4 py-2.5 text-[0.85rem] font-bold tracking-[0.02em] text-[#024b37] transition duration-200 hover:border-[#024b37] hover:bg-[#024b37] hover:text-white active:scale-[0.98] max-[768px]:w-full max-[768px]:px-3.5 max-[480px]:px-3 max-[480px]:py-[9px] max-[480px]:text-[0.8rem]";
+const formClass = "flex flex-col gap-5";
+const sectionClass =
+  "rounded-2xl border border-[#e8e3d8] bg-[#faf9f6] px-[26px] pb-7 pt-6 transition duration-200 focus-within:border-[#024b37]/30 focus-within:bg-[#fdfcfb] max-[768px]:rounded-xl max-[768px]:px-4 max-[768px]:pb-[22px] max-[768px]:pt-[18px] max-[480px]:mb-2 max-[480px]:rounded-[10px] max-[480px]:px-3 max-[480px]:pb-4 max-[480px]:pt-3.5 max-[320px]:px-2.5 max-[320px]:pb-3.5 max-[320px]:pt-3 [&>h2]:mb-5 [&>h2]:mt-0 [&>h2]:flex [&>h2]:items-center [&>h2]:gap-2.5 [&>h2]:font-playfair [&>h2]:text-[1.05rem] [&>h2]:font-semibold [&>h2]:text-[#024b37] [&>h2]:before:inline-block [&>h2]:before:h-[18px] [&>h2]:before:w-1 [&>h2]:before:shrink-0 [&>h2]:before:rounded-[3px] [&>h2]:before:bg-[#024b37] [&>h2]:before:content-[''] max-[768px]:[&>h2]:mb-4 max-[768px]:[&>h2]:text-[0.98rem] max-[480px]:[&>h2]:mb-3 max-[480px]:[&>h2]:text-[0.92rem] max-[480px]:[&>h2]:before:h-4 max-[480px]:[&>h2]:before:w-[3px] max-[320px]:[&>h2]:text-[0.88rem]";
+const gridClass =
+  "grid grid-cols-3 gap-x-[22px] gap-y-[18px] max-[1100px]:grid-cols-2 max-[768px]:grid-cols-2 max-[768px]:gap-x-4 max-[768px]:gap-y-3.5 max-[480px]:grid-cols-1 max-[480px]:gap-2.5";
+const fullWidthClass = "col-span-3 max-[1100px]:col-span-2 max-[480px]:col-span-1";
+const fieldGroupClass =
+  "flex flex-col gap-[7px] [&>label]:text-[0.82rem] [&>label]:font-bold [&>label]:uppercase [&>label]:tracking-[0.04em] [&>label]:text-[#2a3b2e] max-[768px]:[&>label]:text-[0.78rem] max-[480px]:[&>label]:text-[0.75rem] max-[480px]:[&>label]:tracking-[0.03em] [&>input]:appearance-none [&>input]:rounded-[10px] [&>input]:border-[1.5px] [&>input]:border-[#d8d2c6] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-[11px] [&>input]:font-lato [&>input]:text-[0.94rem] [&>input]:text-[#1a2b1e] [&>input]:outline-none [&>input]:transition [&>input]:duration-200 [&>input]:placeholder:text-[#a8a099] [&>input:hover]:border-[#a8c4b4] [&>input:focus]:border-[#024b37] [&>input:focus]:bg-[#f7fbf9] [&>input:focus]:shadow-[0_0_0_3px_rgba(2,75,55,0.10)] [&>select]:appearance-none [&>select]:rounded-[10px] [&>select]:border-[1.5px] [&>select]:border-[#d8d2c6] [&>select]:bg-white [&>select]:px-3.5 [&>select]:py-[11px] [&>select]:font-lato [&>select]:text-[0.94rem] [&>select]:text-[#1a2b1e] [&>select]:outline-none [&>select]:transition [&>select]:duration-200 [&>select:hover]:border-[#a8c4b4] [&>select:focus]:border-[#024b37] [&>select:focus]:bg-[#f7fbf9] [&>select:focus]:shadow-[0_0_0_3px_rgba(2,75,55,0.10)] [&>select:disabled]:cursor-not-allowed [&>select:disabled]:bg-[#f5f3f0] [&>select:disabled]:opacity-60 max-[768px]:[&>input]:px-3 max-[768px]:[&>input]:py-2.5 max-[768px]:[&>input]:text-[0.92rem] max-[768px]:[&>select]:px-3 max-[768px]:[&>select]:py-2.5 max-[768px]:[&>select]:text-[0.92rem] max-[480px]:[&>input]:rounded-lg max-[480px]:[&>input]:px-[11px] max-[480px]:[&>input]:py-[9px] max-[480px]:[&>input]:text-[0.9rem] max-[480px]:[&>select]:rounded-lg max-[480px]:[&>select]:px-[11px] max-[480px]:[&>select]:py-[9px] max-[480px]:[&>select]:text-[0.9rem] max-[320px]:[&>input]:px-2.5 max-[320px]:[&>input]:py-2 max-[320px]:[&>input]:text-[0.88rem] max-[320px]:[&>select]:px-2.5 max-[320px]:[&>select]:py-2 max-[320px]:[&>select]:text-[0.88rem]";
+const errorControlClass =
+  "!border-[#d14343] !bg-[#fff8f8] focus:!shadow-[0_0_0_3px_rgba(209,67,67,0.11)]";
+const errorTextClass =
+  "flex items-center gap-[5px] text-[0.8rem] font-bold tracking-[0.01em] text-[#c0392b] max-[480px]:text-[0.75rem]";
+const checkboxGridClass =
+  "mb-2 grid grid-cols-3 gap-x-3.5 gap-y-2.5 max-[1100px]:grid-cols-2 max-[768px]:grid-cols-2 max-[768px]:gap-x-3 max-[768px]:gap-y-2 max-[480px]:grid-cols-1 max-[480px]:gap-2";
+const checkboxItemClass =
+  "flex cursor-pointer select-none items-center gap-2.5 rounded-[10px] border-[1.5px] border-[#e0dbd0] bg-white px-3.5 py-[11px] text-[0.88rem] font-bold text-[#2a3b2e] transition duration-150 hover:border-[#024b37] hover:bg-[#f3f9f6] max-[768px]:px-3 max-[768px]:py-2.5 max-[768px]:text-[0.86rem] max-[480px]:gap-2 max-[480px]:px-[11px] max-[480px]:py-[9px] max-[480px]:text-[0.8rem] [&_input]:m-0 [&_input]:h-4 [&_input]:w-4 [&_input]:shrink-0 [&_input]:cursor-pointer [&_input]:accent-[#024b37] max-[480px]:[&_input]:h-3.5 max-[480px]:[&_input]:w-3.5";
+const leaseStatusClass = "col-span-3 max-[1100px]:col-span-2 max-[480px]:col-span-1";
+const leaseOptionsClass =
+  "mt-1 flex flex-wrap items-center gap-5 max-[480px]:mt-0.5 max-[480px]:gap-3";
+const radioItemClass =
+  "flex cursor-pointer select-none items-center gap-2 text-[0.91rem] font-bold text-[#2a3b2e] max-[480px]:gap-1.5 max-[480px]:text-[0.85rem] [&_input]:m-0 [&_input]:h-4 [&_input]:w-4 [&_input]:cursor-pointer [&_input]:accent-[#024b37]";
+const declarationSectionClass =
+  "mt-1 flex flex-col gap-1.5 border-0 bg-transparent px-0 pb-1.5 pt-[18px] max-[480px]:mt-0.5 max-[480px]:pb-1 max-[480px]:pt-3";
+const declarationCheckboxClass =
+  "flex cursor-pointer items-start gap-3 border-0 bg-transparent p-0 text-[0.88rem] font-bold leading-normal text-[#2a3b2e] max-[480px]:gap-2.5 max-[480px]:text-[0.8rem] [&_input]:mt-px [&_input]:h-[18px] [&_input]:w-[18px] [&_input]:shrink-0 [&_input]:cursor-pointer [&_input]:accent-[#024b37] max-[480px]:[&_input]:h-4 max-[480px]:[&_input]:w-4 [&_span]:flex-1";
+const formActionsClass =
+  "mt-3 flex justify-end gap-3 pt-3 max-[768px]:justify-stretch max-[480px]:mt-2 max-[480px]:flex-col max-[480px]:gap-2";
+const submitButtonClass =
+  "min-w-[200px] cursor-pointer rounded-xl border-0 bg-[#024b37] px-8 py-3.5 text-center font-lato text-[0.96rem] font-bold tracking-[0.03em] text-white shadow-[0_2px_8px_rgba(2,75,55,0.22)] transition duration-200 hover:-translate-y-px hover:bg-[#035e47] hover:shadow-[0_4px_16px_rgba(2,75,55,0.30)] active:translate-y-0 active:bg-[#023628] active:shadow-[0_1px_6px_rgba(2,75,55,0.20)] disabled:cursor-not-allowed disabled:bg-[#a8c4b4] disabled:opacity-80 disabled:shadow-none disabled:transform-none max-[768px]:w-full max-[768px]:min-w-0 max-[768px]:px-5 max-[768px]:py-3 max-[768px]:text-[0.92rem] max-[480px]:rounded-[10px] max-[480px]:px-4 max-[480px]:py-[11px] max-[480px]:text-[0.9rem] max-[320px]:px-3 max-[320px]:py-2.5 max-[320px]:text-[0.85rem]";
+const statusBannerBase =
+  "mb-6 flex animate-slide-down items-center gap-2.5 break-words rounded-xl px-[18px] py-3.5 text-[0.9rem] font-bold max-[480px]:mb-4 max-[480px]:rounded-[10px] max-[480px]:px-3.5 max-[480px]:py-3 max-[480px]:text-[0.85rem]";
+const statusBannerClass = (type) =>
+  `${statusBannerBase} ${
+    type === "success"
+      ? "border border-[#6dbf96] bg-[#edf7f2] text-[#065235]"
+      : "border border-[#f5a9a9] bg-[#fef3f2] text-[#7a1c1c]"
+  }`;
+const controlErrorClass = (error) => (error ? errorControlClass : "");
 
 const ifscPattern = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -349,16 +400,16 @@ function RegisterFarmer() {
   };
 
   return (
-    <div className="register-farmer-page">
-      <div className="register-farmer-card">
-        <div className="register-farmer-header">
-          <div className="header-content">
-            <h1>Farmer Registration</h1>
-            <p>Complete the application form in one screen.</p>
+    <div className={pageClass}>
+      <div className={cardClass}>
+        <div className={headerClass}>
+          <div className={headerContentClass}>
+            <h1 className={headerTitleClass}>Farmer Registration</h1>
+            <p className={headerTextClass}>Complete the application form in one screen.</p>
           </div>
           <button
             type="button"
-            className="header-btn"
+            className={backButtonClass}
             onClick={() => navigate("/")}
             aria-label="Back to Login"
           >
@@ -367,16 +418,16 @@ function RegisterFarmer() {
         </div>
 
         {statusMessage && (
-          <div className={`status-banner ${statusType}`} role="alert">
+          <div className={statusBannerClass(statusType)} role="alert">
             {statusMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="register-farmer-form">
-          <div className="form-section">
+        <form onSubmit={handleSubmit} className={formClass}>
+          <div className={sectionClass}>
             <h2>Farmer / Group Details</h2>
-            <div className="form-grid">
-              <div className="field-group full-width">
+            <div className={gridClass}>
+              <div className={`${fieldGroupClass} ${fullWidthClass}`}>
                 <label htmlFor="full_name">
                   Name of Farmer / Group / FPO / SHG / NRLM Group
                 </label>
@@ -386,15 +437,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  className={errors.full_name ? "error" : ""}
+                  className={controlErrorClass(errors.full_name)}
                   placeholder="Enter full name"
                 />
                 {errors.full_name && (
-                  <span className="error-text">{errors.full_name}</span>
+                  <span className={errorTextClass}>{errors.full_name}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="father_name">Father / Husband&apos;s Name</label>
                 <input
                   id="father_name"
@@ -402,15 +453,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.father_name}
                   onChange={handleInputChange}
-                  className={errors.father_name ? "error" : ""}
+                  className={controlErrorClass(errors.father_name)}
                   placeholder="Enter name"
                 />
                 {errors.father_name && (
-                  <span className="error-text">{errors.father_name}</span>
+                  <span className={errorTextClass}>{errors.father_name}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="mobile">Mobile Number</label>
                 <input
                   id="mobile"
@@ -418,16 +469,16 @@ function RegisterFarmer() {
                   type="tel"
                   value={formData.mobile}
                   onChange={handleInputChange}
-                  className={errors.mobile ? "error" : ""}
+                  className={controlErrorClass(errors.mobile)}
                   placeholder="10-digit number"
                   maxLength="10"
                 />
                 {errors.mobile && (
-                  <span className="error-text">{errors.mobile}</span>
+                  <span className={errorTextClass}>{errors.mobile}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="email">E-mail</label>
                 <input
                   id="email"
@@ -435,15 +486,15 @@ function RegisterFarmer() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={errors.email ? "error" : ""}
+                  className={controlErrorClass(errors.email)}
                   placeholder="your.email@example.com"
                 />
                 {errors.email && (
-                  <span className="error-text">{errors.email}</span>
+                  <span className={errorTextClass}>{errors.email}</span>
                 )}
               </div>
 
-              <div className="field-group full-width">
+              <div className={`${fieldGroupClass} ${fullWidthClass}`}>
                 <label htmlFor="address">Address</label>
                 <input
                   id="address"
@@ -451,22 +502,22 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className={errors.address ? "error" : ""}
+                  className={controlErrorClass(errors.address)}
                   placeholder="Enter full address"
                 />
                 {errors.address && (
-                  <span className="error-text">{errors.address}</span>
+                  <span className={errorTextClass}>{errors.address}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="district">District</label>
                 <select
                   id="district"
                   name="district"
                   value={formData.district}
                   onChange={handleInputChange}
-                  className={errors.district ? "error" : ""}
+                  className={controlErrorClass(errors.district)}
                 >
                   <option value="">Select district</option>
                   {districts.map((district) => (
@@ -476,18 +527,18 @@ function RegisterFarmer() {
                   ))}
                 </select>
                 {errors.district && (
-                  <span className="error-text">{errors.district}</span>
+                  <span className={errorTextClass}>{errors.district}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="block">Block</label>
                 <select
                   id="block"
                   name="block"
                   value={formData.block}
                   onChange={handleInputChange}
-                  className={errors.block ? "error" : ""}
+                  className={controlErrorClass(errors.block)}
                   disabled={!currentBlocks.length}
                 >
                   <option value="">Select block</option>
@@ -498,11 +549,11 @@ function RegisterFarmer() {
                   ))}
                 </select>
                 {errors.block && (
-                  <span className="error-text">{errors.block}</span>
+                  <span className={errorTextClass}>{errors.block}</span>
                 )}
               </div>
 
-              <div className="field-group full-width">
+              <div className={`${fieldGroupClass} ${fullWidthClass}`}>
                 <label htmlFor="group_president_name">
                   Name of Group President (if applicable)
                 </label>
@@ -518,11 +569,11 @@ function RegisterFarmer() {
             </div>
           </div>
 
-          <div className="form-section">
+          <div className={sectionClass}>
             <h2>Land under Millet Cultivation</h2>
-            <div className="checkbox-grid">
+            <div className={checkboxGridClass}>
               {cropOptions.map((crop) => (
-                <label key={crop} className="checkbox-item">
+                <label key={crop} className={checkboxItemClass}>
                   <input
                     type="checkbox"
                     name="crops"
@@ -534,10 +585,10 @@ function RegisterFarmer() {
                 </label>
               ))}
             </div>
-            {errors.crops && <span className="error-text">{errors.crops}</span>}
+            {errors.crops && <span className={errorTextClass}>{errors.crops}</span>}
 
-            <div className="form-grid">
-              <div className="field-group">
+            <div className={gridClass}>
+              <div className={fieldGroupClass}>
                 <label htmlFor="cultivator_name">Name of Cultivator(s)</label>
                 <input
                   id="cultivator_name"
@@ -545,15 +596,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.cultivator_name}
                   onChange={handleInputChange}
-                  className={errors.cultivator_name ? "error" : ""}
+                  className={controlErrorClass(errors.cultivator_name)}
                   placeholder="Enter cultivator name"
                 />
                 {errors.cultivator_name && (
-                  <span className="error-text">{errors.cultivator_name}</span>
+                  <span className={errorTextClass}>{errors.cultivator_name}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="cultivation_area">Area (Acre / Hectare)</label>
                 <input
                   id="cultivation_area"
@@ -563,15 +614,15 @@ function RegisterFarmer() {
                   step="0.01"
                   value={formData.cultivation_area}
                   onChange={handleInputChange}
-                  className={errors.cultivation_area ? "error" : ""}
+                  className={controlErrorClass(errors.cultivation_area)}
                   placeholder="0.00"
                 />
                 {errors.cultivation_area && (
-                  <span className="error-text">{errors.cultivation_area}</span>
+                  <span className={errorTextClass}>{errors.cultivation_area}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="cultivation_khatauni">
                   Khatauni Account Number
                 </label>
@@ -581,17 +632,17 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.cultivation_khatauni}
                   onChange={handleInputChange}
-                  className={errors.cultivation_khatauni ? "error" : ""}
+                  className={controlErrorClass(errors.cultivation_khatauni)}
                   placeholder="Enter khatauni number"
                 />
                 {errors.cultivation_khatauni && (
-                  <span className="error-text">
+                  <span className={errorTextClass}>
                     {errors.cultivation_khatauni}
                   </span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="cultivation_khasra">Khasra Number</label>
                 <input
                   id="cultivation_khasra"
@@ -599,23 +650,23 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.cultivation_khasra}
                   onChange={handleInputChange}
-                  className={errors.cultivation_khasra ? "error" : ""}
+                  className={controlErrorClass(errors.cultivation_khasra)}
                   placeholder="Enter khasra number"
                 />
                 {errors.cultivation_khasra && (
-                  <span className="error-text">{errors.cultivation_khasra}</span>
+                  <span className={errorTextClass}>{errors.cultivation_khasra}</span>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="form-section">
+          <div className={sectionClass}>
             <h2>Land taken on lease</h2>
-            <div className="form-grid lease-grid">
-              <div className="field-group lease-status-group">
+            <div className={gridClass}>
+              <div className={`${fieldGroupClass} ${leaseStatusClass}`}>
                 <label>Lease status</label>
-                <div className="lease-options">
-                  <label className="radio-item">
+                <div className={leaseOptionsClass}>
+                  <label className={radioItemClass}>
                     <input
                       type="radio"
                       name="lease_status"
@@ -625,7 +676,7 @@ function RegisterFarmer() {
                     />
                     <span>Yes</span>
                   </label>
-                  <label className="radio-item">
+                  <label className={radioItemClass}>
                     <input
                       type="radio"
                       name="lease_status"
@@ -640,7 +691,7 @@ function RegisterFarmer() {
 
               {formData.lease_status === "yes" && (
                 <>
-                  <div className="field-group">
+                  <div className={fieldGroupClass}>
                     <label htmlFor="lease_cultivator_name">
                       Name of Cultivator(s)
                     </label>
@@ -650,17 +701,17 @@ function RegisterFarmer() {
                       type="text"
                       value={formData.lease_cultivator_name}
                       onChange={handleInputChange}
-                      className={errors.lease_cultivator_name ? "error" : ""}
+                      className={controlErrorClass(errors.lease_cultivator_name)}
                       placeholder="Enter cultivator name"
                     />
                     {errors.lease_cultivator_name && (
-                      <span className="error-text">
+                      <span className={errorTextClass}>
                         {errors.lease_cultivator_name}
                       </span>
                     )}
                   </div>
 
-                  <div className="field-group">
+                  <div className={fieldGroupClass}>
                     <label htmlFor="lease_period">Lease period</label>
                     <input
                       id="lease_period"
@@ -668,15 +719,15 @@ function RegisterFarmer() {
                       type="text"
                       value={formData.lease_period}
                       onChange={handleInputChange}
-                      className={errors.lease_period ? "error" : ""}
+                      className={controlErrorClass(errors.lease_period)}
                       placeholder="e.g., 2 years"
                     />
                     {errors.lease_period && (
-                      <span className="error-text">{errors.lease_period}</span>
+                      <span className={errorTextClass}>{errors.lease_period}</span>
                     )}
                   </div>
 
-                  <div className="field-group">
+                  <div className={fieldGroupClass}>
                     <label htmlFor="lease_khatauni">
                       Khatauni Account Number
                     </label>
@@ -686,15 +737,15 @@ function RegisterFarmer() {
                       type="text"
                       value={formData.lease_khatauni}
                       onChange={handleInputChange}
-                      className={errors.lease_khatauni ? "error" : ""}
+                      className={controlErrorClass(errors.lease_khatauni)}
                       placeholder="Enter khatauni number"
                     />
                     {errors.lease_khatauni && (
-                      <span className="error-text">{errors.lease_khatauni}</span>
+                      <span className={errorTextClass}>{errors.lease_khatauni}</span>
                     )}
                   </div>
 
-                  <div className="field-group">
+                  <div className={fieldGroupClass}>
                     <label htmlFor="lease_khasra">Khasra Number</label>
                     <input
                       id="lease_khasra"
@@ -702,15 +753,15 @@ function RegisterFarmer() {
                       type="text"
                       value={formData.lease_khasra}
                       onChange={handleInputChange}
-                      className={errors.lease_khasra ? "error" : ""}
+                      className={controlErrorClass(errors.lease_khasra)}
                       placeholder="Enter khasra number"
                     />
                     {errors.lease_khasra && (
-                      <span className="error-text">{errors.lease_khasra}</span>
+                      <span className={errorTextClass}>{errors.lease_khasra}</span>
                     )}
                   </div>
 
-                  <div className="field-group">
+                  <div className={fieldGroupClass}>
                     <label htmlFor="lease_area">Area (Acre / Hectare)</label>
                     <input
                       id="lease_area"
@@ -720,11 +771,11 @@ function RegisterFarmer() {
                       step="0.01"
                       value={formData.lease_area}
                       onChange={handleInputChange}
-                      className={errors.lease_area ? "error" : ""}
+                      className={controlErrorClass(errors.lease_area)}
                       placeholder="0.00"
                     />
                     {errors.lease_area && (
-                      <span className="error-text">{errors.lease_area}</span>
+                      <span className={errorTextClass}>{errors.lease_area}</span>
                     )}
                   </div>
                 </>
@@ -732,10 +783,10 @@ function RegisterFarmer() {
             </div>
           </div>
 
-          <div className="form-section">
+          <div className={sectionClass}>
             <h2>Estimates</h2>
-            <div className="form-grid">
-              <div className="field-group">
+            <div className={gridClass}>
+              <div className={fieldGroupClass}>
                 <label htmlFor="estimated_seed_date">
                   Estimated date of seed sowing
                 </label>
@@ -745,16 +796,16 @@ function RegisterFarmer() {
                   type="date"
                   value={formData.estimated_seed_date}
                   onChange={handleInputChange}
-                  className={errors.estimated_seed_date ? "error" : ""}
+                  className={controlErrorClass(errors.estimated_seed_date)}
                 />
                 {errors.estimated_seed_date && (
-                  <span className="error-text">
+                  <span className={errorTextClass}>
                     {errors.estimated_seed_date}
                   </span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="estimated_yield">Estimated yield</label>
                 <input
                   id="estimated_yield"
@@ -762,20 +813,20 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.estimated_yield}
                   onChange={handleInputChange}
-                  className={errors.estimated_yield ? "error" : ""}
+                  className={controlErrorClass(errors.estimated_yield)}
                   placeholder="Enter estimated yield"
                 />
                 {errors.estimated_yield && (
-                  <span className="error-text">{errors.estimated_yield}</span>
+                  <span className={errorTextClass}>{errors.estimated_yield}</span>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="form-section">
+          <div className={sectionClass}>
             <h2>Bank Details</h2>
-            <div className="form-grid">
-              <div className="field-group">
+            <div className={gridClass}>
+              <div className={fieldGroupClass}>
                 <label htmlFor="bank_name">Bank Name</label>
                 <input
                   id="bank_name"
@@ -783,15 +834,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.bank_name}
                   onChange={handleInputChange}
-                  className={errors.bank_name ? "error" : ""}
+                  className={controlErrorClass(errors.bank_name)}
                   placeholder="Enter bank name"
                 />
                 {errors.bank_name && (
-                  <span className="error-text">{errors.bank_name}</span>
+                  <span className={errorTextClass}>{errors.bank_name}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="account_number">
                   Bank account number of Farmer / Group
                 </label>
@@ -801,15 +852,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.account_number}
                   onChange={handleInputChange}
-                  className={errors.account_number ? "error" : ""}
+                  className={controlErrorClass(errors.account_number)}
                   placeholder="Enter account number"
                 />
                 {errors.account_number && (
-                  <span className="error-text">{errors.account_number}</span>
+                  <span className={errorTextClass}>{errors.account_number}</span>
                 )}
               </div>
 
-              <div className="field-group">
+              <div className={fieldGroupClass}>
                 <label htmlFor="ifsc">Bank IFSC Code</label>
                 <input
                   id="ifsc"
@@ -817,16 +868,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.ifsc}
                   onChange={handleInputChange}
-                  className={errors.ifsc ? "error" : ""}
+                  className={`${controlErrorClass(errors.ifsc)} uppercase`}
                   placeholder="e.g., SBIN0001234"
-                  style={{ textTransform: "uppercase" }}
                 />
                 {errors.ifsc && (
-                  <span className="error-text">{errors.ifsc}</span>
+                  <span className={errorTextClass}>{errors.ifsc}</span>
                 )}
               </div>
 
-              <div className="field-group full-width">
+              <div className={`${fieldGroupClass} ${fullWidthClass}`}>
                 <label htmlFor="bank_address">Name and address of Bank</label>
                 <input
                   id="bank_address"
@@ -834,15 +884,15 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.bank_address}
                   onChange={handleInputChange}
-                  className={errors.bank_address ? "error" : ""}
+                  className={controlErrorClass(errors.bank_address)}
                   placeholder="Enter bank address"
                 />
                 {errors.bank_address && (
-                  <span className="error-text">{errors.bank_address}</span>
+                  <span className={errorTextClass}>{errors.bank_address}</span>
                 )}
               </div>
 
-              <div className="field-group full-width">
+              <div className={`${fieldGroupClass} ${fullWidthClass}`}>
                 <label htmlFor="account_holder_name">Account Holder Name</label>
                 <input
                   id="account_holder_name"
@@ -850,11 +900,11 @@ function RegisterFarmer() {
                   type="text"
                   value={formData.account_holder_name}
                   onChange={handleInputChange}
-                  className={errors.account_holder_name ? "error" : ""}
+                  className={controlErrorClass(errors.account_holder_name)}
                   placeholder="Enter account holder name"
                 />
                 {errors.account_holder_name && (
-                  <span className="error-text">
+                  <span className={errorTextClass}>
                     {errors.account_holder_name}
                   </span>
                 )}
@@ -862,8 +912,8 @@ function RegisterFarmer() {
             </div>
           </div>
 
-          <div className="form-section declaration-section">
-            <label className="checkbox-item declaration-checkbox">
+          <div className={declarationSectionClass}>
+            <label className={declarationCheckboxClass}>
               <input
                 id="declaration"
                 name="declaration"
@@ -877,12 +927,12 @@ function RegisterFarmer() {
               </span>
             </label>
             {errors.declaration && (
-              <span className="error-text">{errors.declaration}</span>
+              <span className={errorTextClass}>{errors.declaration}</span>
             )}
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="submit-btn" disabled={submitting}>
+          <div className={formActionsClass}>
+            <button type="submit" className={submitButtonClass} disabled={submitting}>
               {submitting ? "Registering Farmer..." : "Submit Registration"}
             </button>
           </div>

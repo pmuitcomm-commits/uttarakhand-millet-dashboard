@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/landing.css';
+import { landingClasses, landingVariants } from './landingStyles';
 
 function DistrictLanding() {
   const navigate = useNavigate();
@@ -24,33 +24,33 @@ function DistrictLanding() {
   const districtName = user?.district || 'District Officer';
 
   return (
-    <div className="landing-container district-landing">
-      <div className="landing-header">
-        <div className="header-logo-section">
-          <img src="/logo1.png" alt="Logo" className="landing-logo" />
+    <div className={`${landingClasses.container} ${landingVariants.district.container}`}>
+      <div className={landingClasses.header}>
+        <div className={landingClasses.logoSection}>
+          <img src="/logo1.png" alt="Logo" className={landingClasses.logo} />
         </div>
       </div>
 
-      <div className="landing-content">
-        <div className="welcome-card district-card">
-          <h1 className="greeting">Hi, {roleDisplay}</h1>
-          <p className="welcome-message">Welcome to dashboard managing panel</p>
+      <div className={landingClasses.content}>
+        <div className={landingClasses.card}>
+          <h1 className={landingClasses.greeting}>Hi, {roleDisplay}</h1>
+          <p className={landingClasses.welcomeMessage}>Welcome to dashboard managing panel</p>
           
-          <div className="role-info district-info">
-            <p className="role-description">Manage district-level operations</p>
-            <p className="district-name">{districtName}</p>
+          <div className={`${landingClasses.roleInfo} ${landingVariants.district.roleInfo}`}>
+            <p className={landingClasses.roleDescription}>Manage district-level operations</p>
+            <p className={landingClasses.districtBlockName}>{districtName}</p>
           </div>
 
-          <button className="continue-btn district-btn" onClick={handleContinue}>
+          <button className={`${landingClasses.continueButton} ${landingVariants.district.button}`} onClick={handleContinue}>
             Enter Dashboard
           </button>
 
-          <p className="auto-redirect-text">Redirecting in 3 seconds...</p>
+          <p className={landingClasses.autoRedirect}>Redirecting in 3 seconds...</p>
         </div>
       </div>
 
-      <div className="landing-footer">
-        <p className="footer-text">Millet Dashboard Management System</p>
+      <div className={landingClasses.footer}>
+        <p className={landingClasses.footerText}>Millet Dashboard Management System</p>
       </div>
     </div>
   );
