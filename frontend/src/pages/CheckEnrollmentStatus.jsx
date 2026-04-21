@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const pageClass = "min-h-screen w-full font-lato";
+const pageClass = "min-h-full w-full font-lato";
 const backgroundClass =
-  "flex min-h-screen w-full flex-col bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)]";
+  "flex min-h-full w-full flex-col bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)]";
 const topBarClass = "h-[5px] w-full shrink-0 bg-[#024b37]";
 const wrapperClass =
   "box-border flex flex-1 items-center justify-center px-5 py-12 max-[768px]:items-start max-[768px]:px-4 max-[768px]:pb-8 max-[768px]:pt-12";

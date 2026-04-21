@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import TopBar from '../components/TopBar';
-import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import { dashboardClasses } from '../components/dashboardStyles';
 
@@ -19,12 +17,9 @@ function BlockDashboard() {
 
   return (
     <div className={dashboardClasses.pageWrapper}>
-      <TopBar />
       <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
         <div className={dashboardClasses.mainContent}>
-          <Header />
-
           <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
             <h2 className={dashboardClasses.pageHeadingTitle}>Block Officer Dashboard</h2>
           </div>

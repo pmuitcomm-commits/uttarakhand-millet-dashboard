@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    --app-font-scale: 1;
     --color-primary-dark-green: #024b37;
     --color-dark-blue: #003366;
     --color-white: #ffffff;
@@ -72,6 +73,7 @@
   }
 
   html {
+    font-size: calc(16px * var(--app-font-scale));
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }

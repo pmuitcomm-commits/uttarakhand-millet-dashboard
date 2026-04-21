@@ -1,6 +1,6 @@
 export const landingClasses = {
   container:
-    "flex min-h-screen w-full flex-col items-center justify-between p-5 font-montserrat max-[480px]:p-2.5",
+    "flex min-h-full w-full flex-col items-center justify-between p-5 font-montserrat max-[480px]:p-2.5",
   header: "flex w-full max-w-[1200px] items-center justify-center py-5",
   logoSection: "flex items-center",
   logo: "h-[60px] w-auto object-contain max-[480px]:h-[50px]",

@@ -17,6 +17,7 @@ import BlockLanding from "./pages/BlockLanding";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import TopBar from "./components/TopBar";
 import AboutPage from "./pages/aboutpage";
 
 function ProtectedOfficerRoute({ children, requiredRole = null }) {
@@ -100,8 +101,11 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div className="m-0 min-h-screen w-full overflow-auto bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
-          <AppRoutes />
+        <div className="m-0 flex h-screen w-full flex-col overflow-hidden bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
+          <TopBar />
+          <main className="relative z-0 min-h-0 flex-1 overflow-auto">
+            <AppRoutes />
+          </main>
         </div>
       </AuthProvider>
     </LanguageProvider>

@@ -45,7 +45,7 @@ const blocksByDistrict = {
 const cropOptions = ["Mandua", "Jhangora", "Ramdana", "Kauni", "Cheena"];
 
 const pageClass =
-  "flex min-h-screen w-full items-start justify-center overflow-x-hidden bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] px-5 py-8 font-lato max-[768px]:px-3 max-[768px]:py-5 max-[480px]:px-2 max-[480px]:py-4";
+  "flex min-h-full w-full items-start justify-center overflow-x-hidden bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] px-5 py-8 font-lato max-[768px]:px-3 max-[768px]:py-5 max-[480px]:px-2 max-[480px]:py-4";
 const cardClass =
   "flex w-full max-w-[1160px] flex-col rounded-[20px] border border-[#024b37]/[0.07] bg-white px-10 pb-12 pt-9 shadow-form-card max-[1100px]:px-7 max-[1100px]:pb-10 max-[1100px]:pt-7 max-[768px]:rounded-2xl max-[768px]:px-5 max-[768px]:pb-8 max-[768px]:pt-6 max-[480px]:rounded-xl max-[480px]:px-3.5 max-[480px]:pb-6 max-[480px]:pt-4 max-[480px]:shadow-[0_1px_3px_rgba(2,50,36,0.08)] max-[320px]:px-2.5 max-[320px]:pb-[18px] max-[320px]:pt-3";
 const headerClass =

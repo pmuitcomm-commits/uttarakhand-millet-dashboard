@@ -1,70 +1,39 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ForgotPassword from '../components/ForgotPassword';
-import { authClasses, authInputBase, authInputError } from '../components/authStyles';
+import React, { useState } from "react";
+
+import ForgotPassword from "../components/ForgotPassword";
+import { authClasses, authInputBase, authInputError } from "../components/authStyles";
 
 function Login() {
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    // captcha: '', // Commented out for later enablement
-    email: '',
-    fullName: ''
+    username: "",
+    password: "",
+    email: "",
+    fullName: "",
   });
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showSchemeDropdown, setShowSchemeDropdown] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const schemes = [
-    {
-      name: 'Uttarakhand Millet Mission',
-      pdfUrl: 'https://static.pib.gov.in/WriteReadData/specificdocs/documents/2023/apr/doc2023426187201.pdf'
-    },
-    {
-      name: 'National Food Security Mission (NFSM) – Nutri Cereals',
-      pdfUrl: 'https://nfsm.gov.in/Guidelines/NFSM12102018.pdf'
-    },
-    {
-      name: 'Rashtriya Krishi Vikas Yojana (RKVY-RAFTAAR)',
-      pdfUrl: 'https://cdnbbsr.s3waas.gov.in/s30fe473396242072e84af286632d3f0ff/uploads/2025/02/202502191483775042.pdf'
-    },
-    {
-      name: 'Pradhan Mantri Annadata Aay Sanrakshan Abhiyan (PM-AASHA)',
-      pdfUrl: 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=1657221&reg=3&lang=2'
-    },
-    {
-      name: 'Pradhan Mantri Fasal Bima Yojana (PMFBY)',
-      pdfUrl: 'https://pmfby.gov.in/pdf/Revised_Operational_Guidelines.pdf'
-    }
-  ];
 
   const notifications = [
-    'Department notifications and scheme alerts will appear here.',
-    'Live updates section is reserved for scrolling announcements.',
-    'You can later connect this panel to API-based notices or MIS alerts.'
+    "Department notifications and scheme alerts will appear here.",
+    "Live updates section is reserved for scrolling announcements.",
+    "You can later connect this panel to API-based notices or MIS alerts.",
   ];
-
-  const handleSchemeOpen = (pdfUrl) => {
-    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-    setShowSchemeDropdown(false);
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -73,11 +42,11 @@ function Login() {
     const newErrors = {};
 
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     }
 
     return newErrors;
@@ -96,7 +65,7 @@ function Login() {
 
     try {
       let response;
-      const { loginUser, registerUser, setAuthSession } = await import('../services/api');
+      const { loginUser, registerUser, setAuthSession } = await import("../services/api");
 
       if (isRegistering) {
         const userData = {
@@ -104,7 +73,7 @@ function Login() {
           password: formData.password,
           email: formData.email,
           full_name: formData.fullName.trim() || null,
-          role_id: 4
+          role_id: 4,
         };
         response = await registerUser(userData);
       } else {
@@ -115,14 +84,15 @@ function Login() {
 
       const normalizedUser = {
         ...user,
-        role: user.role.toLowerCase()
+        role: user.role.toLowerCase(),
       };
 
       setAuthSession(access_token, normalizedUser);
 
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Authentication failed. Please try again.';
+      const errorMsg =
+        error.response?.data?.detail || "Authentication failed. Please try again.";
       setAuthError(errorMsg);
     } finally {
       setLoading(false);
@@ -131,70 +101,6 @@ function Login() {
 
   return (
     <div className={authClasses.container}>
-      <header className={authClasses.topHeader} data-aos="fade-down">
-        <div className={authClasses.headerLeft}>
-          <img
-            src="/logo3.png"
-            alt="Logo 3"
-            className={`${authClasses.headerLogo} ${authClasses.headerLogoBlend}`}
-          />
-          <div className={authClasses.headerSeparator}>|</div>
-          <img src="/logo2.png" alt="Logo 2" className={authClasses.headerLogo} />
-          <div className={authClasses.headerSeparator}>|</div>
-          <img src="/logo1.png" alt="Logo 1" className={authClasses.headerLogo} />
-        </div>
-
-        <div className={authClasses.headerCenter}>
-          <div className={authClasses.headerTitle}>
-            <span className={authClasses.headerEyebrow}>Department of Agriculture & Horticulture, Uttarakhand</span>
-            <h1 className={authClasses.headerH1}>State Millet Monitoring & Management System</h1>
-          </div>
-        </div>
-
-        <div className={authClasses.headerRight}>
-          <button className={authClasses.headerButton} onClick={() => navigate('/procurement')}>
-            Dashboard
-          </button>
-
-          <button className={authClasses.headerButton} onClick={() => navigate('/register-farmer')}>
-            Register Farmer
-          </button>
-
-          <button className={authClasses.headerButton} onClick={() => navigate('/enrollment-status')}>
-            Enrollment Status
-          </button>
-
-          <button className={authClasses.headerButton} onClick={() => navigate('/about-programme')}>
-            About Programme
-          </button>
-
-          <div className={authClasses.dropdownContainer}>
-            <button
-              className={authClasses.headerButton}
-              onClick={() => setShowSchemeDropdown(!showSchemeDropdown)}
-            >
-              Schemes
-            </button>
-            {showSchemeDropdown && (
-              <div className={authClasses.dropdownMenu}>
-                {schemes.map((scheme, index) => (
-                  <div key={index} className={authClasses.schemeItem}>
-                    <span className={authClasses.schemeName}>{scheme.name}</span>
-                    <button
-                      className={authClasses.pdfButton}
-                      onClick={() => handleSchemeOpen(scheme.pdfUrl)}
-                      title="Open PDF"
-                    >
-                      📄 View PDF
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
       <div className={authClasses.heroContent}>
         <div className={authClasses.pageCards}>
           <div className={authClasses.leftPanel} data-aos="fade-right" data-aos-delay="100">
@@ -220,22 +126,22 @@ function Login() {
           <div className={authClasses.loginCard} data-aos="fade-up" data-aos-delay="150">
             <div className={authClasses.loginHeaderText}>
               <h2 className={authClasses.loginHeading}>
-                {isRegistering ? 'Farmer Account Registration' : 'Official Login Portal'}
+                {isRegistering ? "Farmer Account Registration" : "Official Login Portal"}
               </h2>
-              <p className={authClasses.loginDescription}>Department of Agriculture & Horticulture, Government of Uttarakhand</p>
+              <p className={authClasses.loginDescription}>
+                Department of Agriculture & Horticulture, Government of Uttarakhand
+              </p>
             </div>
 
-            {authError && (
-              <div className={authClasses.errorBanner}>
-                ⚠️ {authError}
-              </div>
-            )}
+            {authError && <div className={authClasses.errorBanner}>Warning: {authError}</div>}
 
             <form onSubmit={handleSubmit} className={authClasses.loginForm}>
               {isRegistering && (
                 <>
                   <div className={authClasses.formGroup}>
-                    <label className={authClasses.formLabel} htmlFor="fullName">Full Name</label>
+                    <label className={authClasses.formLabel} htmlFor="fullName">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       id="fullName"
@@ -243,13 +149,17 @@ function Login() {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       placeholder="Enter your full name"
-                      className={`${authInputBase} ${errors.fullName ? authInputError : ''}`}
+                      className={`${authInputBase} ${errors.fullName ? authInputError : ""}`}
                     />
-                    {errors.fullName && <span className={authClasses.errorText}>{errors.fullName}</span>}
+                    {errors.fullName && (
+                      <span className={authClasses.errorText}>{errors.fullName}</span>
+                    )}
                   </div>
 
                   <div className={authClasses.formGroup}>
-                    <label className={authClasses.formLabel} htmlFor="email">Email (Optional)</label>
+                    <label className={authClasses.formLabel} htmlFor="email">
+                      Email (Optional)
+                    </label>
                     <input
                       type="email"
                       id="email"
@@ -260,12 +170,13 @@ function Login() {
                       className={authInputBase}
                     />
                   </div>
-
                 </>
               )}
 
               <div className={authClasses.formGroup}>
-                <label className={authClasses.formLabel} htmlFor="username">Username</label>
+                <label className={authClasses.formLabel} htmlFor="username">
+                  Username
+                </label>
                 <input
                   type="text"
                   id="username"
@@ -273,13 +184,17 @@ function Login() {
                   value={formData.username}
                   onChange={handleInputChange}
                   placeholder="Enter your username"
-                  className={`${authInputBase} ${errors.username ? authInputError : ''}`}
+                  className={`${authInputBase} ${errors.username ? authInputError : ""}`}
                 />
-                {errors.username && <span className={authClasses.errorText}>{errors.username}</span>}
+                {errors.username && (
+                  <span className={authClasses.errorText}>{errors.username}</span>
+                )}
               </div>
 
               <div className={authClasses.formGroup}>
-                <label className={authClasses.formLabel} htmlFor="password">Password</label>
+                <label className={authClasses.formLabel} htmlFor="password">
+                  Password
+                </label>
                 <input
                   type="password"
                   id="password"
@@ -287,13 +202,15 @@ function Login() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter your password"
-                  className={`${authInputBase} ${errors.password ? authInputError : ''}`}
+                  className={`${authInputBase} ${errors.password ? authInputError : ""}`}
                 />
-                {errors.password && <span className={authClasses.errorText}>{errors.password}</span>}
+                {errors.password && (
+                  <span className={authClasses.errorText}>{errors.password}</span>
+                )}
               </div>
 
               <button type="submit" className={authClasses.loginButton} disabled={loading}>
-                {loading ? 'Please wait...' : (isRegistering ? 'Create Farmer Account' : 'Login')}
+                {loading ? "Please wait..." : isRegistering ? "Create Farmer Account" : "Login"}
               </button>
             </form>
 
@@ -307,7 +224,7 @@ function Login() {
                 }}
                 type="button"
               >
-                {isRegistering ? 'Already have an account? Login' : 'Create farmer account'}
+                {isRegistering ? "Already have an account? Login" : "Create farmer account"}
               </button>
 
               {!isRegistering && (
@@ -325,12 +242,10 @@ function Login() {
       </div>
 
       <div className={authClasses.globalFooter}>
-        <p>© Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
+        <p>Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
       </div>
 
-      {showForgotPassword && (
-        <ForgotPassword onClose={() => setShowForgotPassword(false)} />
-      )}
+      {showForgotPassword && <ForgotPassword onClose={() => setShowForgotPassword(false)} />}
     </div>
   );
 }

@@ -12,8 +12,6 @@ import {
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
 
-import TopBar from "../components/TopBar";
-import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import DataTable from "../components/DataTable";
 import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
@@ -327,12 +325,9 @@ function Procurement() {
 
   return (
     <div className={dashboardClasses.pageWrapper}>
-      <TopBar />
       <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
         <div className={dashboardClasses.mainContent}>
-          <Header />
-
           <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
             <h2 className={dashboardClasses.pageHeadingTitle}>{t('procurementSummary')}</h2>
           </div>

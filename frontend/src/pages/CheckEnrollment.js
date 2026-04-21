@@ -13,7 +13,7 @@ const farmerFields = [
 ];
 
 const pageClass =
-  "flex min-h-screen w-full flex-col bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] font-lato";
+  "flex min-h-full w-full flex-col bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] font-lato";
 const headerClass =
   "flex items-center justify-center border-b-[1.5px] border-[#eae6de] bg-white px-9 py-5 shadow-[0_2px_12px_rgba(2,50,36,0.06)] max-[768px]:px-5 max-[768px]:py-[18px]";
 const titleClass =

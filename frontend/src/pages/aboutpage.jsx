@@ -1,12 +1,8 @@
 import React from "react";
 import {
-  User,
-  Bell,
-  Home,
   BookOpen,
   LayoutDashboard,
   Map,
-  Award,
   Landmark,
   Wheat,
   BadgeIndianRupee,
@@ -14,7 +10,6 @@ import {
   Sprout,
   Users,
   Megaphone,
-  Truck,
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
@@ -203,41 +198,7 @@ function MiniBadge({ children }) {
 
 export default function UttarakhandMilletProjectLandingPage() {
   return (
-    <div className="min-h-screen bg-[#efefef] font-dm text-slate-900">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#053b47] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#d79652] to-[#9a5a1d] text-xs font-bold text-white shadow-lg">
-              UTTARAKHAND
-            </div>
-            <div>
-              <div className="text-3xl font-black tracking-tight">UTTARAKHAND</div>
-              <div className="text-xs uppercase tracking-[0.2em] text-white/80">
-                Millet Project
-              </div>
-            </div>
-          </div>
-
-          <nav className="hidden items-center gap-6 text-lg font-semibold lg:flex">
-            <a href="#" className="flex items-center gap-2 hover:text-[#d9ef87]"><Home className="h-4 w-4" />Home</a>
-            <a href="#about" className="hover:text-[#d9ef87]">Program</a>
-            <a href="#resources" className="hover:text-[#d9ef87]">Resources</a>
-            <a href="#dashboard" className="hover:text-[#d9ef87]">Dashboard</a>
-            <a href="#milletshakti" className="hover:text-[#d9ef87]">MilletShakti</a>
-            <a href="#notifications" className="flex items-center gap-2 hover:text-[#d9ef87]"><Bell className="h-4 w-4" />Notifications</a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/70">
-              <User className="h-5 w-5" />
-            </div>
-            <div className="hidden h-14 w-14 items-center justify-center rounded-full bg-white/85 text-[#053b47] shadow lg:flex">
-              <Landmark className="h-7 w-7" />
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-full bg-[#efefef] font-dm text-slate-900">
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-[#06351d]/45" />

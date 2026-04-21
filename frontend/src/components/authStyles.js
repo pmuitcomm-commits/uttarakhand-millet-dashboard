@@ -5,24 +5,7 @@ export const authInputError = "border-[#d14343] bg-[#fff8f8]";
 
 export const authClasses = {
   container:
-    "flex h-screen w-screen flex-col overflow-hidden bg-[#024b37] font-lato text-white max-[1100px]:h-auto max-[1100px]:min-h-screen max-[1100px]:overflow-y-auto",
-  topHeader:
-    "flex w-full shrink-0 items-center justify-between gap-2.5 px-6 py-2.5 max-[1100px]:flex-wrap max-[1100px]:gap-2 max-[640px]:px-3.5",
-  headerLeft: "flex shrink-0 items-center gap-2",
-  headerLogo: "h-[42px] w-auto object-contain",
-  headerLogoBlend: "mix-blend-darken",
-  headerSeparator: "mx-0.5 text-[1.3rem] font-light text-white/40",
-  headerCenter:
-    "flex flex-1 items-center justify-center max-[1100px]:order-3 max-[1100px]:w-full",
-  headerTitle: "text-center",
-  headerEyebrow:
-    "mb-[3px] block text-[0.78rem] tracking-[0.08em] text-white/85 max-[640px]:text-[0.7rem]",
-  headerH1:
-    "m-0 font-playfair text-[1.45rem] font-semibold tracking-[0.02em] text-white max-[640px]:text-[1.1rem]",
-  headerRight:
-    "flex shrink-0 flex-wrap items-center justify-end gap-2",
-  headerButton:
-    "whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-3.5 py-2 font-lato text-[0.82rem] font-bold tracking-[0.02em] text-white transition duration-200 hover:-translate-y-px hover:bg-[#d8800d] max-[640px]:px-[11px] max-[640px]:py-[7px] max-[640px]:text-[0.76rem]",
+    "flex h-full min-h-full w-full flex-col overflow-hidden bg-[#024b37] font-lato text-white max-[1100px]:h-auto max-[1100px]:overflow-y-auto",
   heroContent:
     "flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden px-6 py-[18px] max-[1100px]:items-start max-[1100px]:overflow-visible max-[1100px]:p-4",
   pageCards:
@@ -71,15 +54,6 @@ export const authClasses = {
     "cursor-pointer border-0 bg-transparent text-center font-lato text-[0.82rem] font-bold text-[#024b37] underline underline-offset-2 hover:text-[#035e47]",
   globalFooter:
     "flex w-full shrink-0 items-center justify-center px-0 py-2 text-[0.78rem] text-white/75",
-  dropdownContainer: "relative flex items-center",
-  dropdownMenu:
-    "absolute right-0 top-full z-[1000] mt-2 max-h-[340px] min-w-[320px] max-w-[380px] overflow-y-auto rounded-xl border border-[#eae6de] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.14)] max-[640px]:right-[-20px] max-[640px]:min-w-[260px] max-[640px]:max-w-[90vw]",
-  schemeItem:
-    "flex items-center justify-between gap-2.5 border-b border-[#eae6de] px-3.5 py-2.5 transition duration-150 last:border-b-0 hover:bg-[#f3f9f6]",
-  schemeName:
-    "flex-1 text-[0.84rem] font-bold leading-tight text-[#1a2b1e]",
-  pdfButton:
-    "whitespace-nowrap rounded-md border-0 bg-[#024b37] px-2.5 py-[5px] font-lato text-[0.74rem] font-bold text-white transition duration-200 hover:bg-[#035e47]",
 };
 
 export const modalClasses = {

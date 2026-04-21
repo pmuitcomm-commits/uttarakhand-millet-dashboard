@@ -1,11 +1,10 @@
 export const dashboardClasses = {
   pageWrapper:
-    "flex h-screen w-full flex-col overflow-hidden bg-white p-4 text-[#024b37] dark:bg-[#1a1a1a] dark:text-white",
+    "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white p-4 text-[#024b37] dark:bg-[#1a1a1a] dark:text-white",
   dashboardContainer:
     "flex min-h-0 flex-1 gap-4 overflow-hidden bg-white text-[#024b37] max-[860px]:flex-col dark:bg-[#1a1a1a] dark:text-white",
   mainContent:
     "flex min-h-0 w-full flex-1 flex-col overflow-y-auto bg-white p-0 max-[860px]:p-4 dark:bg-[#1a1a1a] dark:text-white",
-  headerSpacer: "hidden",
   pageHeadingRow: "mb-6 p-[18px] text-center",
   pageHeadingTitle: "m-0 text-[1.8rem] font-bold text-black dark:text-white",
   metricsRow:
@@ -25,22 +24,6 @@ export const dashboardClasses = {
   dashboardMessage: "p-5 text-center",
   dashboardNotice:
     "mb-5 rounded border border-red-200 bg-red-50 p-[15px] text-red-700",
-  topBar:
-    "flex h-[100px] w-full shrink-0 items-center justify-between gap-5 border-y-2 border-black bg-[#024b37] px-[26px] py-4 text-white max-[980px]:h-auto max-[980px]:flex-wrap",
-  topBarLeft: "flex shrink-0 items-center justify-start gap-2.5",
-  topBarLogo: "flex h-[60px] w-auto items-center object-contain",
-  topBarLogoBlend: "mix-blend-multiply brightness-110",
-  logoSeparator: "mx-[3px] text-2xl font-light text-white/50",
-  topBarCenter:
-    "ml-[1.3in] flex flex-1 items-center justify-center max-[980px]:order-3 max-[980px]:ml-0 max-[980px]:w-full",
-  dashboardTitle:
-    "m-0 overflow-hidden text-ellipsis whitespace-nowrap text-[1.4rem] font-extrabold tracking-[0.03em] text-white",
-  topBarRight:
-    "flex shrink-0 items-center justify-end gap-2 max-[980px]:flex-wrap",
-  topBarButton:
-    "flex h-10 min-w-[45px] cursor-pointer items-center justify-center rounded bg-[#66b9ac] px-3 py-2 text-[0.85rem] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-[#024b37] hover:shadow-[0_4px_8px_rgba(0,0,0,0.2)]",
-  topBarLogoutButton:
-    "min-w-[65px] bg-[#c12f2f] text-white hover:bg-white hover:text-[#c12f2f]",
   sidebar:
     "relative left-0 top-0 z-10 h-full w-[220px] shrink-0 overflow-y-auto border-r border-[rgba(102,185,172,0.2)] bg-[#024b37] px-[18px] py-[26px] text-white max-[860px]:h-auto max-[860px]:w-full",
   sidebarLogo: "mb-[35px] text-center",
