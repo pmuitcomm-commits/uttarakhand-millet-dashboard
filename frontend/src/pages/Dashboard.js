@@ -10,7 +10,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
-import { Line, Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 import Sidebar from "../components/Sidebar";
 import DistrictChart from "../components/DistrictChart";
@@ -264,8 +264,6 @@ function Dashboard({ page = "dashboard" }) {
   };
 
   const isMilletPage = page === "millet";
-  const isDistrictPage = page === "district";
-  const isProductionPage = page === "production";
 
   const milletTrendData = {
     labels: milletData.map((m) => m.millet),

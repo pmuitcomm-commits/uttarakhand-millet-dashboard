@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const tableButtonBase =
-  "rounded-md border border-[#024b37] bg-[#024b37] px-3 py-2 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#035344] hover:shadow-[0_2px_8px_rgba(2,75,55,0.2)] disabled:cursor-not-allowed disabled:border-[#d0d0d0] disabled:bg-[#d0d0d0] disabled:text-[#999999] disabled:shadow-none disabled:transform-none dark:border-[#024b37] dark:bg-[#024b37] dark:text-white dark:hover:bg-[#035344] dark:hover:shadow-[0_2px_8px_rgba(2,75,55,0.4)] dark:disabled:border-[#444444] dark:disabled:bg-[#444444] dark:disabled:text-[#999999]";
+  "rounded-md border border-[#024b37] bg-[#024b37] px-3 py-2 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#035344] hover:shadow-[0_2px_8px_rgba(2,75,55,0.2)] disabled:cursor-not-allowed disabled:border-[#d0d0d0] disabled:bg-[#d0d0d0] disabled:text-[#999999] disabled:shadow-none disabled:transform-none max-[480px]:px-2.5 max-[480px]:py-1.5 max-[480px]:text-xs dark:border-[#024b37] dark:bg-[#024b37] dark:text-white dark:hover:bg-[#035344] dark:hover:shadow-[0_2px_8px_rgba(2,75,55,0.4)] dark:disabled:border-[#444444] dark:disabled:bg-[#444444] dark:disabled:text-[#999999]";
 
 function pageButtonClassName(active) {
   return active
@@ -32,7 +32,7 @@ function DataTable({ data, title = "Detailed Data" }) {
       data-aos="fade-up"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="m-0 text-[1.2rem] font-bold text-[#024b37] dark:text-white">{title}</h2>
+        <h2 className="m-0 break-words text-[1.2rem] font-bold text-[#024b37] max-[480px]:text-base dark:text-white">{title}</h2>
         {totalPages > 1 && (
           <div className="text-sm font-medium text-[#666666] dark:text-[#cccccc]">
             Showing {startIndex + 1} - {Math.min(endIndex, data.length)} of {data.length}
@@ -41,13 +41,13 @@ function DataTable({ data, title = "Detailed Data" }) {
       </div>
       {data?.length > 0 ? (
         <>
-          <table className="w-full border-collapse bg-white dark:bg-[#2a2a2a]">
+          <table className="min-w-[760px] w-full border-collapse bg-white dark:bg-[#2a2a2a]">
             <thead>
               <tr>
                 {columns.map((column) => (
                   <th
                     key={column}
-                    className="border border-[#e2e8f0] bg-[#f5f5f5] px-4 py-3 text-left text-[0.85rem] font-bold uppercase text-[#003366] dark:border-[#444444] dark:bg-[#1a1a1a] dark:text-white"
+                    className="whitespace-nowrap border border-[#e2e8f0] bg-[#f5f5f5] px-4 py-3 text-left text-[0.85rem] font-bold uppercase text-[#003366] dark:border-[#444444] dark:bg-[#1a1a1a] dark:text-white"
                   >
                     {column}
                   </th>
@@ -62,7 +62,7 @@ function DataTable({ data, title = "Detailed Data" }) {
                 >
                   {columns.map((column) => (
                     <td
-                      className="border border-[#e2e8f0] px-4 py-3 text-left text-[0.95rem] text-[#024b37] dark:border-[#444444] dark:text-white"
+                      className="whitespace-nowrap border border-[#e2e8f0] px-4 py-3 text-left text-[0.95rem] text-[#024b37] dark:border-[#444444] dark:text-white"
                       key={`${index}-${column}`}
                     >
                       {row[column] ?? "-"}
@@ -74,7 +74,7 @@ function DataTable({ data, title = "Detailed Data" }) {
           </table>
           
           {totalPages > 1 && (
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 p-4">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 p-4 max-[480px]:px-0">
               <button 
                 className={tableButtonBase}
                 onClick={() => handlePageChange(1)} 
@@ -90,7 +90,7 @@ function DataTable({ data, title = "Detailed Data" }) {
                 Previous
               </button>
               
-              <div className="mx-2 flex gap-1">
+              <div className="mx-2 flex gap-1 max-[480px]:mx-0">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
                   if (totalPages <= 5) {
