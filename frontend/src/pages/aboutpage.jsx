@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   BookOpen,
   LayoutDashboard,
@@ -13,14 +13,127 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import districtGeojsonUrl from "../data/district.geojson";
 
 const stats = [
   { label: "Districts", value: "13" },
   { label: "Blocks", value: "95" },
   { label: "Gram Panchayats", value: "7791" },
   { label: "Villages", value: "16793" },
-  { label: "Registered User / Farmers", value: "250000+" },
+  { label: "Registered User / Farmers", value: "12307" },
 ];
+
+const districtBlockCounts = {
+  Almora: 11,
+  Bageshwar: 3,
+  Chamoli: 9,
+  Champawat: 4,
+  Dehradun: 6,
+  Garhwal: 15,
+  Hardwar: 6,
+  Haridwar: 6,
+  Nainital: 8,
+  Pithoragarh: 8,
+  "Rudraprayag": 3,
+  "Tehri Garhwal": 9,
+  "Udham Singh Nagar": 7,
+  Uttarkashi: 6,
+};
+
+const blockLegend = [
+  { label: "0", color: "#eef4e6" },
+  { label: "1-3", color: "#c7dfa0" },
+  { label: "4-5", color: "#8eb95a" },
+  { label: "5+", color: "#23693f" },
+];
+
+function normalizeDistrictName(name = "") {
+  return name.trim();
+}
+
+function getBlockColor(blocks = 0) {
+  if (blocks <= 0) return blockLegend[0].color;
+  if (blocks <= 3) return blockLegend[1].color;
+  if (blocks <= 5) return blockLegend[2].color;
+  return blockLegend[3].color;
+}
+
+function getRings(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === "Polygon") return geometry.coordinates || [];
+  if (geometry.type === "MultiPolygon") return (geometry.coordinates || []).flat();
+  return [];
+}
+
+function buildDistrictMap(features) {
+  const width = 720;
+  const height = 560;
+  const padding = 24;
+  const points = [];
+
+  features.forEach((feature) => {
+    getRings(feature.geometry).forEach((ring) => {
+      ring.forEach((point) => {
+        if (Array.isArray(point) && point.length >= 2) {
+          points.push(point);
+        }
+      });
+    });
+  });
+
+  if (!points.length) return null;
+
+  const longitudes = points.map(([longitude]) => longitude);
+  const latitudes = points.map(([, latitude]) => latitude);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const longitudeSpan = maxLongitude - minLongitude;
+  const latitudeSpan = maxLatitude - minLatitude;
+  const scale = Math.min(
+    (width - padding * 2) / longitudeSpan,
+    (height - padding * 2) / latitudeSpan
+  );
+  const mapWidth = longitudeSpan * scale;
+  const mapHeight = latitudeSpan * scale;
+  const offsetX = (width - mapWidth) / 2;
+  const offsetY = (height - mapHeight) / 2;
+  const project = ([longitude, latitude]) => [
+    Number((offsetX + (longitude - minLongitude) * scale).toFixed(2)),
+    Number((offsetY + (maxLatitude - latitude) * scale).toFixed(2)),
+  ];
+
+  const districts = features.map((feature) => {
+    const name = normalizeDistrictName(feature.properties?.dtname);
+    const blockCount = districtBlockCounts[name] ?? 0;
+    const path = getRings(feature.geometry)
+      .map((ring) => {
+        const stride = Math.max(1, Math.ceil(ring.length / 420));
+        const sampledRing = ring.filter(
+          (_, index) => index % stride === 0 || index === ring.length - 1
+        );
+
+        return sampledRing
+          .map((point, index) => {
+            const [x, y] = project(point);
+            return `${index === 0 ? "M" : "L"}${x} ${y}`;
+          })
+          .join(" ")
+          .concat(" Z");
+      })
+      .join(" ");
+
+    return {
+      name,
+      blockCount,
+      color: getBlockColor(blockCount),
+      path,
+    };
+  });
+
+  return { districts, height, width };
+}
 
 const recognitions = [
   "The Uttarakhand Millet Initiative is aligned with the International Year of Millets vision and promotes nutri-cereals as climate-resilient crops for hill agriculture.",
@@ -196,6 +309,95 @@ function MiniBadge({ children }) {
   );
 }
 
+function DistrictMap() {
+  const [geojson, setGeojson] = useState(null);
+  const [activeDistrict, setActiveDistrict] = useState(null);
+  const [hasMapError, setHasMapError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDistricts() {
+      try {
+        if (typeof districtGeojsonUrl !== "string") {
+          setGeojson(districtGeojsonUrl);
+          return;
+        }
+
+        const response = await fetch(districtGeojsonUrl);
+        if (!response.ok) {
+          throw new Error("District map data could not be loaded.");
+        }
+
+        const data = await response.json();
+        if (isMounted) {
+          setGeojson(data);
+        }
+      } catch {
+        if (isMounted) {
+          setHasMapError(true);
+        }
+      }
+    }
+
+    loadDistricts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const mapModel = useMemo(
+    () => buildDistrictMap(geojson?.features || []),
+    [geojson]
+  );
+
+  return (
+    <div className="relative mx-auto flex w-full max-w-[660px] flex-col items-center rounded-[2rem] border border-[#d8e3be] bg-[#f7f9f1] px-4 py-5 shadow-sm sm:px-6">
+      <div className="relative flex aspect-[1.18/1] w-full items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#edf3e5]">
+        <div className="absolute inset-4 rounded-[1.25rem] border border-dashed border-[#b2c768]" />
+        {mapModel ? (
+          <svg
+            aria-label="Uttarakhand district map"
+            className="relative h-full w-full"
+            role="img"
+            viewBox={`0 0 ${mapModel.width} ${mapModel.height}`}
+          >
+            {mapModel.districts.map((district) => (
+              <path
+                key={district.name}
+                d={district.path}
+                fill={district.color}
+                className="cursor-pointer transition-opacity hover:opacity-90 focus:opacity-90"
+                onBlur={() => setActiveDistrict(null)}
+                onFocus={() => setActiveDistrict(district)}
+                onMouseEnter={() => setActiveDistrict(district)}
+                onMouseLeave={() => setActiveDistrict(null)}
+                stroke="#ffffff"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+                tabIndex="0"
+              >
+                <title>{`${district.name}: ${district.blockCount} blocks`}</title>
+              </path>
+            ))}
+          </svg>
+        ) : (
+          <div className="relative text-center text-sm font-semibold text-slate-500">
+            {hasMapError ? "District map unavailable" : "Loading district map"}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 rounded-full bg-[#94ab1b] px-5 py-2 text-sm font-semibold text-white shadow">
+        {activeDistrict
+          ? `${activeDistrict.name} - ${activeDistrict.blockCount} blocks`
+          : "Uttarakhand District Map"}
+      </div>
+    </div>
+  );
+}
+
 export default function UttarakhandMilletProjectLandingPage() {
   return (
     <div className="min-h-full bg-[#efefef] font-dm text-slate-900">
@@ -210,39 +412,39 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       <section id="about" className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[220px_1fr_220px]">
-          <div className="overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
+        <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
+          <div className="w-full overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
             {stats.map((item, idx) => (
               <div
                 key={item.label}
-                className={`flex items-center justify-between px-5 py-5 ${idx !== stats.length - 1 ? "border-b border-[#a4b153]" : ""}`}
+                className={`flex min-h-[78px] items-center justify-between gap-4 px-5 py-4 ${idx !== stats.length - 1 ? "border-b border-[#a4b153]" : ""}`}
               >
-                <span className="text-3xl font-extrabold text-[#0e7b1b]">{item.value}</span>
-                <span className="text-2xl text-slate-800">{item.label}</span>
+                <span className="shrink-0 text-3xl font-extrabold tracking-wide text-[#0e7b1b]">
+                  {item.value}
+                </span>
+                <span className="min-w-0 flex-1 text-right text-lg font-medium leading-tight text-slate-800 xl:text-xl">
+                  {item.label}
+                </span>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col items-center gap-8">
-            <div className="relative mx-auto flex aspect-square w-full max-w-[520px] items-center justify-center rounded-[2.5rem] bg-[#eef0e8] shadow-inner">
-              <div className="absolute inset-8 rounded-[2rem] border border-dashed border-[#b2c768]" />
-              <Map className="h-28 w-28 text-[#94ab1b]" />
-              <div className="absolute bottom-5 rounded-full bg-[#94ab1b] px-5 py-2 text-white shadow">Uttarakhand District Map</div>
-            </div>
-
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-[#efc993] via-[#ca7e35] to-[#744113] p-2 shadow-xl">
-              <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#ffe2bc] bg-[#b66b2d] text-center text-sm font-extrabold uppercase tracking-wide text-white">
-                Millet Project
-              </div>
-            </div>
+          <div className="flex min-w-0 justify-center">
+            <DistrictMap />
           </div>
 
-          <div className="flex flex-col items-center justify-start pt-2 text-center">
-            <div className="text-sm leading-7 text-slate-500">
-              <div>0</div>
-              <div>1-3</div>
-              <div>4-5</div>
-              <div>5+</div>
+          <div className="flex w-full flex-col items-center justify-start rounded-2xl border border-[#d8e3be] bg-white/70 px-5 py-5 text-center shadow-sm">
+            <div className="w-full space-y-3 text-sm font-medium text-slate-600">
+              {blockLegend.map((item) => (
+                <div key={item.label} className="flex items-center justify-between gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="h-4 w-9 rounded-full border border-white shadow-sm"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span>{item.label}</span>
+                </div>
+              ))}
             </div>
             <h3 className="mt-2 text-3xl font-bold text-slate-900">No. Of Blocks</h3>
           </div>
