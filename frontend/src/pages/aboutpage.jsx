@@ -422,7 +422,7 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       <section id="about" className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-        <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
+        <div className="relative z-10 -mt-20 grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
           <div className="w-full overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
             {stats.map((item, idx) => (
               <div
