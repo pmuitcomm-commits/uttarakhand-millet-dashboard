@@ -20,7 +20,7 @@ const stats = [
   { label: "Blocks", value: "95" },
   { label: "Gram Panchayats", value: "7791" },
   { label: "Villages", value: "16793" },
-  { label: "Registered User / Farmers", value: "12307" },
+  { label: "Farmers", value: "12307" },
 ];
 
 const districtBlockCounts = {
@@ -29,33 +29,43 @@ const districtBlockCounts = {
   Chamoli: 9,
   Champawat: 4,
   Dehradun: 6,
-  Garhwal: 15,
-  Hardwar: 6,
   Haridwar: 6,
   Nainital: 8,
+  "Pauri Garhwal": 15,
   Pithoragarh: 8,
-  "Rudraprayag": 3,
+  Rudraprayag: 3,
   "Tehri Garhwal": 9,
   "Udham Singh Nagar": 7,
   Uttarkashi: 6,
 };
 
+const districtNameAliases = {
+  garhwal: "Pauri Garhwal",
+  "pauri garhwal": "Pauri Garhwal",
+  hardwar: "Haridwar",
+  haridwar: "Haridwar",
+};
+
 const blockLegend = [
-  { label: "0", color: "#eef4e6" },
-  { label: "1-3", color: "#c7dfa0" },
-  { label: "4-5", color: "#8eb95a" },
-  { label: "5+", color: "#23693f" },
+  { label: "0-3", color: "#eef4e6" },
+  { label: "4-6", color: "#c7dfa0" },
+  { label: "7-9", color: "#8eb95a" },
+  { label: "10-12", color: "#4f8f3a" },
+  { label: "13-15", color: "#23693f" },
 ];
 
 function normalizeDistrictName(name = "") {
-  return name.trim();
+  const cleanName = name.trim().replace(/\s+/g, " ");
+  const aliasKey = cleanName.toLowerCase();
+  return districtNameAliases[aliasKey] || cleanName;
 }
 
 function getBlockColor(blocks = 0) {
-  if (blocks <= 0) return blockLegend[0].color;
-  if (blocks <= 3) return blockLegend[1].color;
-  if (blocks <= 5) return blockLegend[2].color;
-  return blockLegend[3].color;
+  if (blocks <= 3) return blockLegend[0].color;   // 0–3
+  if (blocks <= 6) return blockLegend[1].color;   // 4–6
+  if (blocks <= 9) return blockLegend[2].color;   // 7–9
+  if (blocks <= 12) return blockLegend[3].color;  // 10–12
+  return blockLegend[4].color;                    // 13–15+
 }
 
 function getRings(geometry) {
