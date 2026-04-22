@@ -69,6 +69,22 @@ API.interceptors.request.use((config) => {
 export const loginUser = (username, password) =>
   API.post("/auth/login", { username, password });
 
+export const requestLoginOtp = () => {
+  // TODO: Wire this to the backend OTP request endpoint when available.
+  // Expected backend behavior: send an OTP to the mobile/email mapped to identifier.
+  return Promise.reject(
+    new Error("OTP login is not configured yet. Backend OTP request endpoint is required."),
+  );
+};
+
+export const verifyLoginOtp = () => {
+  // TODO: Wire this to the backend OTP verification endpoint when available.
+  // Expected backend response should match /auth/login: { access_token, token_type, user }.
+  return Promise.reject(
+    new Error("OTP login is not configured yet. Backend OTP verification endpoint is required."),
+  );
+};
+
 export const registerUser = (userData) =>
   API.post("/auth/register", userData);
 

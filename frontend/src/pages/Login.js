@@ -2,6 +2,19 @@ import React, { useState } from "react";
 
 import ForgotPassword from "../components/ForgotPassword";
 import { authClasses, authInputBase, authInputError } from "../components/authStyles";
+import {
+  loginUser,
+  registerUser,
+  requestLoginOtp,
+  setAuthSession,
+  verifyLoginOtp,
+} from "../services/api";
+import { getPostLoginPath } from "../utils/authNavigation";
+
+const LOGIN_METHODS = {
+  PASSWORD: "password",
+  OTP: "otp",
+};
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -9,18 +22,30 @@ function Login() {
     password: "",
     email: "",
     fullName: "",
+    otpIdentifier: "",
+    otpCode: "",
   });
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [loginMethod, setLoginMethod] = useState(LOGIN_METHODS.PASSWORD);
   const [authError, setAuthError] = useState(null);
+  const [authNotice, setAuthNotice] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [otpRequesting, setOtpRequesting] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
 
   const notifications = [
     "Department notifications and scheme alerts will appear here.",
     "Live updates section is reserved for scrolling announcements.",
     "You can later connect this panel to API-based notices or MIS alerts.",
   ];
+
+  const clearFeedback = () => {
+    setErrors({});
+    setAuthError(null);
+    setAuthNotice(null);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,6 +55,10 @@ function Login() {
       [name]: value,
     }));
 
+    if (name === "otpIdentifier") {
+      setOtpRequested(false);
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -38,7 +67,7 @@ function Login() {
     }
   };
 
-  const validateForm = () => {
+  const validatePasswordForm = () => {
     const newErrors = {};
 
     if (!formData.username.trim()) {
@@ -50,6 +79,89 @@ function Login() {
     }
 
     return newErrors;
+  };
+
+  const validateOtpIdentifier = () => {
+    const newErrors = {};
+
+    if (!formData.otpIdentifier.trim()) {
+      newErrors.otpIdentifier = "Username or mobile number is required";
+    }
+
+    return newErrors;
+  };
+
+  const validateOtpForm = () => {
+    const newErrors = validateOtpIdentifier();
+
+    if (!otpRequested) {
+      newErrors.otpIdentifier = "Please request an OTP before logging in";
+    }
+
+    if (!formData.otpCode.trim()) {
+      newErrors.otpCode = "OTP is required";
+    } else if (!/^\d{4,8}$/.test(formData.otpCode.trim())) {
+      newErrors.otpCode = "Enter a valid OTP";
+    }
+
+    return newErrors;
+  };
+
+  const validateForm = () => {
+    if (isRegistering || loginMethod === LOGIN_METHODS.PASSWORD) {
+      return validatePasswordForm();
+    }
+
+    return validateOtpForm();
+  };
+
+  const completeAuth = (response) => {
+    const { access_token, user } = response.data;
+    const normalizedUser = {
+      ...user,
+      role: (user.role || "farmer").toLowerCase(),
+    };
+
+    setAuthSession(access_token, normalizedUser);
+    window.location.href = getPostLoginPath(normalizedUser.role);
+  };
+
+  const handleRequestOtp = async () => {
+    const validationErrors = validateOtpIdentifier();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setOtpRequesting(true);
+    setAuthError(null);
+    setAuthNotice(null);
+
+    try {
+      await requestLoginOtp(formData.otpIdentifier.trim());
+      setOtpRequested(true);
+      setAuthNotice("OTP sent. Enter the code to continue.");
+    } catch (error) {
+      setOtpRequested(true);
+      setAuthNotice(
+        error.message ||
+          "OTP login UI is ready, but backend OTP sending is not configured yet.",
+      );
+    } finally {
+      setOtpRequesting(false);
+    }
+  };
+
+  const handleLoginMethodChange = (method) => {
+    setLoginMethod(method);
+    clearFeedback();
+  };
+
+  const handleRegistrationToggle = () => {
+    setIsRegistering((current) => !current);
+    setLoginMethod(LOGIN_METHODS.PASSWORD);
+    setOtpRequested(false);
+    clearFeedback();
   };
 
   const handleSubmit = async (e) => {
@@ -65,7 +177,6 @@ function Login() {
 
     try {
       let response;
-      const { loginUser, registerUser, setAuthSession } = await import("../services/api");
 
       if (isRegistering) {
         const userData = {
@@ -76,28 +187,28 @@ function Login() {
           role_id: 4,
         };
         response = await registerUser(userData);
-      } else {
+      } else if (loginMethod === LOGIN_METHODS.PASSWORD) {
         response = await loginUser(formData.username, formData.password);
+      } else {
+        response = await verifyLoginOtp(
+          formData.otpIdentifier.trim(),
+          formData.otpCode.trim(),
+        );
       }
 
-      const { access_token, user } = response.data;
-
-      const normalizedUser = {
-        ...user,
-        role: user.role.toLowerCase(),
-      };
-
-      setAuthSession(access_token, normalizedUser);
-
-      window.location.href = "/";
+      completeAuth(response);
     } catch (error) {
       const errorMsg =
-        error.response?.data?.detail || "Authentication failed. Please try again.";
+        error.response?.data?.detail ||
+        error.message ||
+        "Authentication failed. Please try again.";
       setAuthError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
+
+  const isOtpLogin = !isRegistering && loginMethod === LOGIN_METHODS.OTP;
 
   return (
     <div className={authClasses.container}>
@@ -126,14 +237,50 @@ function Login() {
           <div className={authClasses.loginCard} data-aos="fade-up" data-aos-delay="150">
             <div className={authClasses.loginHeaderText}>
               <h2 className={authClasses.loginHeading}>
-                {isRegistering ? "Farmer Account Registration" : "Official Login Portal"}
+                {isRegistering ? "Create Account" : "Officers Login"}
               </h2>
               <p className={authClasses.loginDescription}>
                 Department of Agriculture & Horticulture, Government of Uttarakhand
               </p>
             </div>
 
+            {!isRegistering && (
+              <div
+                className={authClasses.methodSelector}
+                role="tablist"
+                aria-label="Login method"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={loginMethod === LOGIN_METHODS.PASSWORD}
+                  className={`${authClasses.methodTabBase} ${
+                    loginMethod === LOGIN_METHODS.PASSWORD
+                      ? authClasses.methodTabActive
+                      : authClasses.methodTabInactive
+                  }`}
+                  onClick={() => handleLoginMethodChange(LOGIN_METHODS.PASSWORD)}
+                >
+                  Username + Password
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={loginMethod === LOGIN_METHODS.OTP}
+                  className={`${authClasses.methodTabBase} ${
+                    loginMethod === LOGIN_METHODS.OTP
+                      ? authClasses.methodTabActive
+                      : authClasses.methodTabInactive
+                  }`}
+                  onClick={() => handleLoginMethodChange(LOGIN_METHODS.OTP)}
+                >
+                  Login via OTP
+                </button>
+              </div>
+            )}
+
             {authError && <div className={authClasses.errorBanner}>Warning: {authError}</div>}
+            {authNotice && <div className={authClasses.infoBanner}>{authNotice}</div>}
 
             <form onSubmit={handleSubmit} className={authClasses.loginForm}>
               {isRegistering && (
@@ -173,61 +320,124 @@ function Login() {
                 </>
               )}
 
-              <div className={authClasses.formGroup}>
-                <label className={authClasses.formLabel} htmlFor="username">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  placeholder="Enter your username"
-                  className={`${authInputBase} ${errors.username ? authInputError : ""}`}
-                />
-                {errors.username && (
-                  <span className={authClasses.errorText}>{errors.username}</span>
-                )}
-              </div>
+              {!isOtpLogin ? (
+                <>
+                  <div className={authClasses.formGroup}>
+                    <label className={authClasses.formLabel} htmlFor="username">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      placeholder="Enter your username"
+                      className={`${authInputBase} ${errors.username ? authInputError : ""}`}
+                    />
+                    {errors.username && (
+                      <span className={authClasses.errorText}>{errors.username}</span>
+                    )}
+                  </div>
 
-              <div className={authClasses.formGroup}>
-                <label className={authClasses.formLabel} htmlFor="password">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="Enter your password"
-                  className={`${authInputBase} ${errors.password ? authInputError : ""}`}
-                />
-                {errors.password && (
-                  <span className={authClasses.errorText}>{errors.password}</span>
-                )}
-              </div>
+                  <div className={authClasses.formGroup}>
+                    <label className={authClasses.formLabel} htmlFor="password">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder="Enter your password"
+                      className={`${authInputBase} ${errors.password ? authInputError : ""}`}
+                    />
+                    {errors.password && (
+                      <span className={authClasses.errorText}>{errors.password}</span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={authClasses.otpActionRow}>
+                    <div className={authClasses.formGroup}>
+                      <label className={authClasses.formLabel} htmlFor="otpIdentifier">
+                        Username or Mobile Number
+                      </label>
+                      <input
+                        type="text"
+                        id="otpIdentifier"
+                        name="otpIdentifier"
+                        value={formData.otpIdentifier}
+                        onChange={handleInputChange}
+                        placeholder="Enter username or mobile number"
+                        className={`${authInputBase} ${
+                          errors.otpIdentifier ? authInputError : ""
+                        }`}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className={authClasses.otpSendButton}
+                      onClick={handleRequestOtp}
+                      disabled={otpRequesting || loading}
+                    >
+                      {otpRequesting ? "Sending..." : "Send OTP"}
+                    </button>
+                  </div>
+                  {errors.otpIdentifier && (
+                    <span className={authClasses.errorText}>{errors.otpIdentifier}</span>
+                  )}
+
+                  <div className={authClasses.formGroup}>
+                    <label className={authClasses.formLabel} htmlFor="otpCode">
+                      OTP
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      id="otpCode"
+                      name="otpCode"
+                      value={formData.otpCode}
+                      onChange={handleInputChange}
+                      placeholder={otpRequested ? "Enter OTP" : "Request OTP first"}
+                      disabled={!otpRequested}
+                      className={`${authInputBase} disabled:cursor-not-allowed disabled:bg-[#f5f3f0] ${
+                        errors.otpCode ? authInputError : ""
+                      }`}
+                    />
+                    {errors.otpCode && (
+                      <span className={authClasses.errorText}>{errors.otpCode}</span>
+                    )}
+                    <span className={authClasses.fieldHint}>
+                      Use the OTP sent to the registered mobile number or email.
+                    </span>
+                  </div>
+                </>
+              )}
 
               <button type="submit" className={authClasses.loginButton} disabled={loading}>
-                {loading ? "Please wait..." : isRegistering ? "Create Farmer Account" : "Login"}
+                {loading
+                  ? "Please wait..."
+                  : isRegistering
+                    ? "Create Account"
+                    : isOtpLogin
+                      ? "Login via OTP"
+                      : "Login"}
               </button>
             </form>
 
             <div className={authClasses.loginFooter}>
               <button
                 className={authClasses.registerToggle}
-                onClick={() => {
-                  setIsRegistering(!isRegistering);
-                  setErrors({});
-                  setAuthError(null);
-                }}
+                onClick={handleRegistrationToggle}
                 type="button"
               >
-                {isRegistering ? "Already have an account? Login" : "Create farmer account"}
+                {isRegistering ? "Already have an account? Login" : "Create account"}
               </button>
 
-              {!isRegistering && (
+              {!isRegistering && loginMethod === LOGIN_METHODS.PASSWORD && (
                 <button
                   className={authClasses.forgotLink}
                   onClick={() => setShowForgotPassword(true)}

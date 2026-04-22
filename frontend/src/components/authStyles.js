@@ -36,7 +36,22 @@ export const authClasses = {
   roleSelector: "mb-5",
   roleLabel:
     "mb-[5px] block text-[0.76rem] font-bold uppercase tracking-[0.04em] text-[#2a3b2e]",
+  methodSelector:
+    "mb-3 grid grid-cols-2 gap-1 rounded-xl border border-[#d8d2c6] bg-[#f5f3f0] p-1",
+  methodTabBase:
+    "rounded-lg px-3 py-2 text-center text-[0.82rem] font-bold transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#024b37]",
+  methodTabActive:
+    "bg-[#024b37] text-white shadow-[0_2px_8px_rgba(2,75,55,0.20)]",
+  methodTabInactive:
+    "text-[#024b37] hover:bg-white",
+  infoBanner:
+    "mb-2.5 rounded-[10px] border border-[#8db78c] bg-[#f3fbf4] px-[13px] py-[9px] text-[0.84rem] font-bold text-[#24562a]",
   loginForm: "flex flex-col gap-2.5",
+  otpActionRow:
+    "grid grid-cols-[1fr_auto] items-end gap-2.5 max-[480px]:grid-cols-1",
+  otpSendButton:
+    "h-[42px] whitespace-nowrap rounded-xl border-[1.5px] border-[#024b37] bg-white px-4 text-[0.84rem] font-bold text-[#024b37] transition duration-200 hover:bg-[#024b37] hover:text-white disabled:cursor-not-allowed disabled:border-[#a8c4b4] disabled:text-[#7d9285] disabled:hover:bg-white disabled:hover:text-[#7d9285]",
+  fieldHint: "text-[0.76rem] font-semibold leading-snug text-[#6b7b70]",
   formGroup: "flex flex-col gap-[5px]",
   formLabel:
     "text-[0.76rem] font-bold uppercase tracking-[0.04em] text-[#2a3b2e]",

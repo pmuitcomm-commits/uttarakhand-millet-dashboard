@@ -174,7 +174,7 @@ function CheckEnrollment() {
                 onClick={() => navigate("/")}
                 className={secondaryButtonClass}
               >
-                Back to Login
+                Back to Home
               </button>
               <button type="submit" className={primaryButtonClass} disabled={loading}>
                 {loading ? "Checking..." : "Check Status"}
@@ -237,7 +237,7 @@ function CheckEnrollment() {
                 New Search
               </button>
               <button onClick={() => navigate("/")} className={primaryButtonClass}>
-                Go to Login
+                Go Home
               </button>
             </div>
           </div>

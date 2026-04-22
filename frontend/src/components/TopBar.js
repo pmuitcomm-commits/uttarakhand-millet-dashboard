@@ -5,9 +5,10 @@ import {
   ChevronDown,
   ExternalLink,
   Home,
-  Info,
   Landmark,
   LayoutDashboard,
+  LogIn,
+  LogOut,
   SearchCheck,
   User,
   UserPlus,
@@ -16,13 +17,14 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { schemes } from "../data/schemes";
+import { getPostLoginPath } from "../utils/authNavigation";
 
 const FONT_SCALE_LEVELS = [0.9, 1, 1.1, 1.2];
 const DEFAULT_FONT_SCALE_INDEX = 1;
 
 function TopBar() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, user } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const headerRef = useRef(null);
   const [openMenu, setOpenMenu] = useState(null);
@@ -71,6 +73,11 @@ function TopBar() {
   };
 
   const handleHomeClick = () => {
+    setOpenMenu(null);
+    navigate("/", { replace: true });
+  };
+
+  const handleLogout = () => {
     setOpenMenu(null);
     logout();
     navigate("/", { replace: true });
@@ -250,6 +257,27 @@ function TopBar() {
                 aria-label="Profile links"
                 className={`${dropdownClass} right-0 w-[min(90vw,270px)]`}
               >
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-3 border-b border-[#eae6de] px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6]"
+                    onClick={() => navigateAndClose(getPostLoginPath(user?.role))}
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-[#024b37]" />
+                    {user?.role === "farmer" ? "Dashboard" : "Officer Dashboard"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-3 border-b border-[#eae6de] px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6]"
+                    onClick={() => navigateAndClose("/login")}
+                  >
+                    <LogIn className="h-4 w-4 text-[#024b37]" />
+                    Officers Login
+                  </button>
+                )}
                 <button
                   type="button"
                   role="menuitem"
@@ -257,26 +285,30 @@ function TopBar() {
                   onClick={() => navigateAndClose("/register-farmer")}
                 >
                   <UserPlus className="h-4 w-4 text-[#024b37]" />
-                  Register Farmer
+                  Farmer Registration
                 </button>
                 <button
                   type="button"
                   role="menuitem"
-                  className="flex w-full items-center gap-3 border-b border-[#eae6de] px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6]"
+                  className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6] ${
+                    isAuthenticated ? "border-b border-[#eae6de]" : ""
+                  }`}
                   onClick={() => navigateAndClose("/enrollment-status")}
                 >
                   <SearchCheck className="h-4 w-4 text-[#024b37]" />
-                  Check Enrollment Status
+                  Check Enrollment
                 </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6]"
-                  onClick={() => navigateAndClose("/about-programme")}
-                >
-                  <Info className="h-4 w-4 text-[#024b37]" />
-                  About Programme
-                </button>
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold transition hover:bg-[#f3f9f6]"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 text-[#024b37]" />
+                    Logout
+                  </button>
+                )}
               </div>
             )}
           </div>

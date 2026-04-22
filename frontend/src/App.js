@@ -19,6 +19,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import TopBar from "./components/TopBar";
 import AboutPage from "./pages/aboutpage";
+import { getPostLoginPath } from "./utils/authNavigation";
 
 function ProtectedOfficerRoute({ children, requiredRole = null }) {
   const { isAuthenticated, user, loading } = useAuth();
@@ -28,7 +29,7 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
@@ -39,23 +40,40 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
 }
 
 function AppRoutes() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   return (
     <Routes>
-      <Route path="/" element={
-        isAuthenticated ? (
-          user?.role === 'admin' ? <Navigate to="/admin-landing" replace /> :
-          user?.role === 'district_officer' ? <Navigate to="/district-landing" replace /> :
-          user?.role === 'block_officer' ? <Navigate to="/block-landing" replace /> :
-          <Navigate to="/procurement" replace />
-        ) : <Login />
-      } />
+      <Route path="/" element={<AboutPage />} />
+      <Route
+        path="/login"
+        element={
+          loading ? (
+            <div className="p-5 text-center">Loading...</div>
+          ) : isAuthenticated ? (
+            <Navigate to={getPostLoginPath(user?.role)} replace />
+          ) : (
+            <Login />
+          )
+        }
+      />
       
-      {/* Landing Pages - for officers (no auth check, rely on auto-redirect) */}
-      <Route path="/admin-landing" element={<AdminLanding />} />
-      <Route path="/district-landing" element={<DistrictLanding />} />
-      <Route path="/block-landing" element={<BlockLanding />} />
+      {/* Landing Pages - for officers */}
+      <Route path="/admin-landing" element={
+        <ProtectedOfficerRoute requiredRole="admin">
+          <AdminLanding />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/district-landing" element={
+        <ProtectedOfficerRoute requiredRole="district_officer">
+          <DistrictLanding />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/block-landing" element={
+        <ProtectedOfficerRoute requiredRole="block_officer">
+          <BlockLanding />
+        </ProtectedOfficerRoute>
+      } />
       
       {/* Public Routes - for farmers */}
       <Route path="/enrollment-status" element={<CheckEnrollment />} />

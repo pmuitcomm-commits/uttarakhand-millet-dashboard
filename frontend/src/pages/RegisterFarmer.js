@@ -394,7 +394,7 @@ function RegisterFarmer() {
       await registerFarmer(formatPayload());
       setStatusType("success");
       setStatusMessage(
-        "Farmer registration submitted successfully. Redirecting to login..."
+        "Farmer registration submitted successfully. Redirecting to home..."
       );
       setTimeout(() => navigate("/"), 1600);
     } catch (error) {
@@ -422,9 +422,9 @@ function RegisterFarmer() {
             type="button"
             className={backButtonClass}
             onClick={() => navigate("/")}
-            aria-label="Back to Login"
+            aria-label="Back to Home"
           >
-            Back to Login
+            Back to Home
           </button>
         </div>
 
