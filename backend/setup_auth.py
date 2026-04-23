@@ -1,8 +1,3 @@
-"""
-Create test users directly using SQL
-Run: python setup_auth.py
-"""
-
 import os
 import secrets
 import sys

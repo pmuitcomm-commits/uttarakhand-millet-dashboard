@@ -1,8 +1,3 @@
-"""
-Create test users in the existing users table
-Run: python add_users.py
-"""
-
 import os
 import secrets
 from datetime import datetime
