@@ -9,16 +9,20 @@ function pageButtonClassName(active) {
     : tableButtonBase;
 }
 
-function DataTable({ data, title = "Detailed Data" }) {
+function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 100;
-  
+
+  const safeRecordsPerPage =
+    Number.isFinite(recordsPerPage) && recordsPerPage > 0
+      ? recordsPerPage
+      : Math.max(data?.length || 0, 1);
   const columns = data?.length > 0 ? Object.keys(data[0]) : [];
-  const totalPages = Math.ceil((data?.length || 0) / recordsPerPage);
-  
-  const startIndex = (currentPage - 1) * recordsPerPage;
-  const endIndex = startIndex + recordsPerPage;
-  const currentData = data?.slice(startIndex, endIndex) || [];
+  const totalPages = Math.max(Math.ceil((data?.length || 0) / safeRecordsPerPage), 1);
+
+  const startIndex = (currentPage - 1) * safeRecordsPerPage;
+  const endIndex = startIndex + safeRecordsPerPage;
+  const currentData =
+    safeRecordsPerPage >= (data?.length || 0) ? data || [] : data?.slice(startIndex, endIndex) || [];
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {

@@ -55,9 +55,9 @@ const DISTRICT_ALIASES = {
   "udham singh nagar": "Udham Singh Nagar",
 };
 
-const compactPageWrapperClass = `${dashboardClasses.pageWrapper} !overflow-hidden !p-2`;
+const compactPageWrapperClass = `${dashboardClasses.pageWrapper} !overflow-y-auto !p-2`;
 const compactContainerClass = `${dashboardClasses.dashboardContainer} !gap-2`;
-const compactMainContentClass = `${dashboardClasses.mainContent} !overflow-hidden !p-0`;
+const compactMainContentClass = `${dashboardClasses.mainContent} !overflow-visible !p-0`;
 const compactHeadingRowClass = `${dashboardClasses.pageHeadingRow} !mb-1 !p-2`;
 const compactHeadingTitleClass =
   `${dashboardClasses.pageHeadingTitle} !text-[1.65rem] max-[640px]:!text-[1.3rem]`;
@@ -71,11 +71,15 @@ const compactMetricLabelClass =
   `${dashboardClasses.metricLabel} !text-[0.82rem] max-[640px]:!text-[0.78rem]`;
 const compactChartRowClass = `${dashboardClasses.chartRow} !mb-2 !gap-3 !p-2`;
 const compactChartCardClass =
-  `${dashboardClasses.chartCard} !min-h-[230px] !rounded-2xl !p-3`;
-const compactChartCanvasClass = "h-[170px] w-full";
+  `${dashboardClasses.chartCard} !h-[230px] !min-h-[230px] !rounded-2xl !p-3 flex flex-col`;
+const compactChartCanvasClass = "min-h-0 flex-1 w-full";
 const compactTableCardClass =
-  `${dashboardClasses.tableCard} !mx-2 !mb-0 !flex-1 !min-h-0 !rounded-2xl !p-3 overflow-hidden`;
-const compactTableScrollClass = "h-full overflow-auto";
+  `${dashboardClasses.tableCard} !mx-2 !mb-2 !rounded-2xl !p-3 overflow-visible`;
+
+function getSortableSNo(value) {
+  const numericValue = Number.parseFloat(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numericValue) ? numericValue : Number.MAX_SAFE_INTEGER;
+}
 
 function normalizeDistrictName(name = "") {
   const cleaned = String(name).trim().replace(/\s+/g, " ");
@@ -101,23 +105,25 @@ function Procurement() {
       const procurementRes = await getAllProcurement();
       const data = Array.isArray(procurementRes.data) ? procurementRes.data : [];
 
-      const normalizedData = data.map((item) => ({
-        "S.no": item["S.no"] || item.s_no || "",
-        District: normalizeDistrictName(item["District"] || item.district || ""),
-        Crop: item["Crop"] || item.crop || "",
-        "Nos.of Centre": item["Nos.of Centre"] || item.nos_of_centre || 0,
-        "Target (in MT)": item["Target (in MT)"] || item.target_in_mt || 0,
-        "No. of Farmer's /SHGs":
-          item["No. of Farmer's /SHGs"] || item.no_of_farmers_shgs || 0,
-        "Procurement quantity (in MT)":
-          item["Procurement quantity (in MT)"] || item.procurement_quantity_in_mt || 0,
-        "Procurement (in %)":
-          item["Procurement (in %)"] || item.procurement_in_percent || 0,
-        "Procurement by Pvt. agencies (in MT)":
-          item["Procurement by Pvt. agencies (in MT)"] ||
-          item.procurement_by_pvt_agencies_in_mt ||
-          0,
-      }));
+      const normalizedData = data
+        .map((item) => ({
+          "S.no": item["S.no"] || item.s_no || "",
+          District: normalizeDistrictName(item["District"] || item.district || ""),
+          Crop: item["Crop"] || item.crop || "",
+          "Nos.of Centre": item["Nos.of Centre"] || item.nos_of_centre || 0,
+          "Target (in MT)": item["Target (in MT)"] || item.target_in_mt || 0,
+          "No. of Farmer's /SHGs":
+            item["No. of Farmer's /SHGs"] || item.no_of_farmers_shgs || 0,
+          "Procurement quantity (in MT)":
+            item["Procurement quantity (in MT)"] || item.procurement_quantity_in_mt || 0,
+          "Procurement (in %)":
+            item["Procurement (in %)"] || item.procurement_in_percent || 0,
+          "Procurement by Pvt. agencies (in MT)":
+            item["Procurement by Pvt. agencies (in MT)"] ||
+            item.procurement_by_pvt_agencies_in_mt ||
+            0,
+        }))
+        .sort((left, right) => getSortableSNo(left["S.no"]) - getSortableSNo(right["S.no"]));
 
       setProcurementData(normalizedData);
     } catch {
@@ -229,99 +235,73 @@ function Procurement() {
     },
   };
 
-// --- Region-wise aggregation WITHOUT REGION_BY_DISTRICT ---
-const regionProcurement = procurementData.reduce(
-  (acc, item) => {
-    const district = normalizeDistrictName(item.District || "Unknown");
+  const regionProcurement = procurementData.reduce(
+    (acc, item) => {
+      const district = normalizeDistrictName(item.District || "Unknown");
+      const region = REGION_BY_DISTRICT[district];
+      const procurement = Number.parseFloat(
+        String(item["Procurement quantity (in MT)"] || 0).replace(/,/g, ""),
+      );
 
-    const procurement = Number.parseFloat(
-      String(item["Procurement quantity (in MT)"] || 0).replace(/,/g, "")
-    );
+      if (region) {
+        acc[region] += procurement;
+      }
 
-    // Garhwal districts
-    const garhwalDistricts = [
-      "Dehradun",
-      "Haridwar",
-      "Pauri Garhwal",
-      "Tehri Garhwal",
-      "Rudraprayag",
-      "Chamoli",
-      "Uttarkashi",
-    ];
-
-    // Kumaon districts
-    const kumaonDistricts = [
-      "Nainital",
-      "Almora",
-      "Bageshwar",
-      "Champawat",
-      "Pithoragarh",
-      "Udham Singh Nagar",
-    ];
-
-    if (garhwalDistricts.includes(district)) {
-      acc.Garhwal += procurement;
-    } else if (kumaonDistricts.includes(district)) {
-      acc.Kumaon += procurement;
-    }
-
-    return acc;
-  },
-  { Garhwal: 0, Kumaon: 0 }
-);
-
-// --- Chart Data ---
-const regionalProcurementData = {
-  labels: ["Garhwal", "Kumaon"],
-  datasets: [
-    {
-      data: [
-        Number(regionProcurement.Garhwal.toFixed(2)),
-        Number(regionProcurement.Kumaon.toFixed(2)),
-      ],
-      backgroundColor: ["#19a5a5", "#a7307f"],
-      borderColor: ["#ffffff", "#ffffff"],
-      borderWidth: 3,
-      hoverOffset: 10,
+      return acc;
     },
-  ],
-};
+    { Garhwal: 0, Kumaon: 0 },
+  );
 
-// --- Chart Options ---
-const regionalProcurementOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  cutout: "68%",
-  plugins: {
-    legend: {
-      display: true,
-      position: "bottom",
-      labels: {
-        color: "#024b37",
-        boxWidth: 12,
-        boxHeight: 12,
-        padding: 12,
-        font: { size: 11, weight: 700 },
+  const regionalProcurementData = {
+    labels: ["Garhwal", "Kumaon"],
+    datasets: [
+      {
+        data: [
+          Number(regionProcurement.Garhwal.toFixed(2)),
+          Number(regionProcurement.Kumaon.toFixed(2)),
+        ],
+        backgroundColor: ["#19a5a5", "#a7307f"],
+        borderColor: ["#ffffff", "#ffffff"],
+        borderWidth: 3,
+        hoverOffset: 10,
       },
-    },
-    title: {
-      display: true,
-      text: "Garhwal vs Kumaon Procurement",
-      color: "#000000",
-      font: { size: 14, weight: 700 },
-    },
-    tooltip: {
-      callbacks: {
-        label: (context) => {
-          const value = Number(context.raw || 0);
-          return `${context.label}: ${value.toLocaleString("en-IN", {
-            maximumFractionDigits: 2,
-          })} MT`;
+    ],
+  };
+
+  const regionalProcurementOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "68%",
+    plugins: {
+      legend: {
+        display: true,
+        position: "bottom",
+        labels: {
+          color: "#024b37",
+          boxWidth: 12,
+          boxHeight: 12,
+          padding: 12,
+          font: { size: 11, weight: 700 },
+        },
+      },
+      title: {
+        display: true,
+        text: "Garhwal vs Kumaon Procurement",
+        color: "#000000",
+        font: { size: 14, weight: 700 },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = Number(context.raw || 0);
+            return `${context.label}: ${value.toLocaleString("en-IN", {
+              maximumFractionDigits: 2,
+            })} MT`;
+          },
         },
       },
     },
-  },
-};
+  };
 
   const achievementData = procurementData.reduce((acc, item) => {
     const district = item.District || "Unknown";
@@ -466,15 +446,17 @@ const regionalProcurementOptions = {
           </div>
 
           <div className={compactTableCardClass} data-aos="fade-up" data-aos-delay="300">
-            <div className={compactTableScrollClass}>
-              {loading ? (
-                <p className={dashboardClasses.dashboardMessage}>Loading data...</p>
-              ) : procurementData.length === 0 ? (
-                <p className={dashboardClasses.dashboardMessage}>No procurement data available</p>
-              ) : (
-                <DataTable data={procurementData} title="Detailed Procurement Data" />
-              )}
-            </div>
+            {loading ? (
+              <p className={dashboardClasses.dashboardMessage}>Loading data...</p>
+            ) : procurementData.length === 0 ? (
+              <p className={dashboardClasses.dashboardMessage}>No procurement data available</p>
+            ) : (
+              <DataTable
+                data={procurementData}
+                title="Detailed Procurement Data"
+                recordsPerPage={procurementData.length || 1}
+              />
+            )}
           </div>
         </div>
       </div>
