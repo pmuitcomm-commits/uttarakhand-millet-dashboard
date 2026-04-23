@@ -451,10 +451,6 @@ function Login() {
         </div>
       </div>
 
-      <div className={authClasses.globalFooter}>
-        <p>Government of Uttarakhand, Department of Agriculture & Horticulture | Millet Development Programme</p>
-      </div>
-
       {showForgotPassword && <ForgotPassword onClose={() => setShowForgotPassword(false)} />}
     </div>
   );

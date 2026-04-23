@@ -480,14 +480,14 @@ export default function UttarakhandMilletProjectLandingPage() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-[#06351d]/45" />
-        <div className="relative mx-auto flex h-[220px] max-w-7xl items-center justify-center px-6 text-center">
+        <div className="relative mx-auto flex h-[185px] max-w-7xl items-center justify-center px-6 text-center">
           <div>
             <h1 className="text-4xl font-extrabold text-white md:text-6xl">About Project</h1>
           </div>
         </div>
       </section>
 
-      <section id="about" className="mx-auto max-w-7xl px-4 pt-4 pb-16 lg:px-8">
+      <section id="about" className="mx-auto max-w-7xl px-4 pt-2 pb-16 lg:px-8">
         <div className="relative z-10 grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
           <div className="w-full overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
             {stats.map((item, idx) => (

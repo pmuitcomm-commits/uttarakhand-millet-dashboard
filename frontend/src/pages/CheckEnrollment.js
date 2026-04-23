@@ -62,7 +62,6 @@ const detailLabelClass = "text-[0.82rem] font-bold tracking-[0.02em] text-[#5c6b
 const detailValueClass = "text-[0.91rem] font-bold text-[#023628]";
 const resultsActionsClass =
   "mt-1 flex justify-center gap-3 border-t-[1.5px] border-[#eae6de] pt-2 max-[768px]:flex-col";
-const footerClass = "mt-auto bg-[#023628] px-[30px] py-[18px] text-center text-white/75";
 
 function formatValue(value) {
   if (Array.isArray(value)) {
@@ -242,10 +241,6 @@ function CheckEnrollment() {
             </div>
           </div>
         )}
-      </div>
-
-      <div className={footerClass}>
-        <p className="m-0 font-lato text-[0.84rem]">Government of Uttarakhand | Millet Development Programme</p>
       </div>
     </div>
   );

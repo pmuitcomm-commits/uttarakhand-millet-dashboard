@@ -1,6 +1,6 @@
 export const landingClasses = {
   container:
-    "flex min-h-full w-full flex-col items-center justify-between p-5 font-montserrat max-[480px]:p-2.5",
+    "flex min-h-full w-full flex-col items-center justify-start p-5 font-montserrat max-[480px]:p-2.5",
   header: "flex w-full max-w-[1200px] items-center justify-center py-5",
   logoSection: "flex items-center",
   logo: "h-[60px] w-auto object-contain max-[480px]:h-[50px]",
@@ -17,8 +17,6 @@ export const landingClasses = {
   continueButton:
     "mt-5 cursor-pointer rounded-lg border-0 px-10 py-3 text-base font-semibold uppercase tracking-[0.5px] text-white transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 max-[768px]:px-[30px] max-[768px]:py-2.5 max-[768px]:text-sm max-[480px]:px-[25px] max-[480px]:text-xs",
   autoRedirect: "mt-5 text-xs italic text-[#999999]",
-  footer: "w-full p-5 text-center",
-  footerText: "m-0 text-sm text-white/70",
 };
 
 export const landingVariants = {

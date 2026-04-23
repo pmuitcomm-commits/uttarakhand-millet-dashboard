@@ -46,10 +46,6 @@ function AdminLanding() {
           <p className={landingClasses.autoRedirect}>Redirecting in 3 seconds...</p>
         </div>
       </div>
-
-      <div className={landingClasses.footer}>
-        <p className={landingClasses.footerText}>Millet Dashboard Management System</p>
-      </div>
     </div>
   );
 }

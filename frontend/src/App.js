@@ -17,6 +17,7 @@ import BlockLanding from "./pages/BlockLanding";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import Footer from "./components/Footer";
 import TopBar from "./components/TopBar";
 import AboutPage from "./pages/aboutpage";
 import { getPostLoginPath } from "./utils/authNavigation";
@@ -124,6 +125,7 @@ function App() {
           <main className="relative z-0 min-h-0 flex-1 overflow-auto">
             <AppRoutes />
           </main>
+          <Footer />
         </div>
       </AuthProvider>
     </LanguageProvider>

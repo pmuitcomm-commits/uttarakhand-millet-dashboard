@@ -67,8 +67,6 @@ export const authClasses = {
     "w-full cursor-pointer rounded-xl border-[1.5px] border-[#024b37] bg-transparent p-[9px] text-center font-lato text-[0.86rem] font-bold text-[#024b37] transition duration-200 hover:bg-[#024b37] hover:text-white",
   forgotLink:
     "cursor-pointer border-0 bg-transparent text-center font-lato text-[0.82rem] font-bold text-[#024b37] underline underline-offset-2 hover:text-[#035e47]",
-  globalFooter:
-    "flex w-full shrink-0 items-center justify-center px-0 py-2 text-[0.78rem] text-white/75",
 };
 
 export const modalClasses = {
