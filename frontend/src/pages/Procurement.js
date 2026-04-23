@@ -179,7 +179,7 @@ function Procurement() {
 
   const procurementByDistrictOptions = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
@@ -247,7 +247,7 @@ function Procurement() {
 
   const regionalProcurementOptions = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     cutout: "68%",
     plugins: {
       legend: {
@@ -335,7 +335,7 @@ function Procurement() {
   const achievementPercentageOptions = {
     indexAxis: 'y',
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
@@ -386,7 +386,7 @@ function Procurement() {
               ⚠️ {error}
             </div>
           )}
-          
+
           <div className={compactMetricsRowClass}>
             {dashboardMetrics.map((metric, index) => (
               <div key={metric.label} className={compactMetricCardClassName(index)}>
