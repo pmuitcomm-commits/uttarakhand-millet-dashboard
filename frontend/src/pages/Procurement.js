@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
+  ArcElement,
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement,
   BarElement,
   Tooltip,
   Legend,
   Filler,
 } from "chart.js";
-import { Line, Bar } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 
 import Sidebar from "../components/Sidebar";
 import DataTable from "../components/DataTable";
@@ -19,15 +19,46 @@ import { getAllProcurement, getProcurementKPIs } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 
 ChartJS.register(
+  ArcElement,
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement,
   BarElement,
   Tooltip,
   Legend,
   Filler
 );
+
+const REGION_BY_DISTRICT = {
+  Almora: "Kumaon",
+  Bageshwar: "Kumaon",
+  Champawat: "Kumaon",
+  Nainital: "Kumaon",
+  Pithoragarh: "Kumaon",
+  "Udham Singh Nagar": "Kumaon",
+  Chamoli: "Garhwal",
+  Dehradun: "Garhwal",
+  Haridwar: "Garhwal",
+  "Pauri Garhwal": "Garhwal",
+  Rudraprayag: "Garhwal",
+  "Tehri Garhwal": "Garhwal",
+  Uttarkashi: "Garhwal",
+};
+
+const DISTRICT_ALIASES = {
+  pauri: "Pauri Garhwal",
+  "pauri garhwal": "Pauri Garhwal",
+  tehri: "Tehri Garhwal",
+  "tehri garhwal": "Tehri Garhwal",
+  usnagar: "Udham Singh Nagar",
+  "u s nagar": "Udham Singh Nagar",
+  "udham singh nagar": "Udham Singh Nagar",
+};
+
+function normalizeDistrictName(name = "") {
+  const cleaned = String(name).trim().replace(/\s+/g, " ");
+  return DISTRICT_ALIASES[cleaned.toLowerCase()] || cleaned;
+}
 
 function Procurement() {
   const { t } = useLanguage();
@@ -53,7 +84,7 @@ function Procurement() {
       // Normalize field names if needed
       const normalizedData = data.map(item => ({
         "S.no": item["S.no"] || item.s_no || "",
-        "District": item["District"] || item.district || "",
+        "District": normalizeDistrictName(item["District"] || item.district || ""),
         "Crop": item["Crop"] || item.crop || "",
         "Nos.of Centre": item["Nos.of Centre"] || item.nos_of_centre || 0,
         "Target (in MT)": item["Target (in MT)"] || item.target_in_mt || 0,
@@ -149,6 +180,12 @@ function Procurement() {
     },
     scales: {
       x: {
+        title: {
+          display: true,
+          text: "District Wise Procurement",
+          color: "#000000",
+          font: { size: 12, weight: 700 },
+        },
         ticks: {
           color: '#000000',
           font: { size: 12, weight: 600 },
@@ -166,72 +203,67 @@ function Procurement() {
     },
   };
 
-  // Chart 2: Target vs Actual Procurement (Line Chart)
-  const targetVsActual = procurementData.reduce((acc, item) => {
-    const crop = item.Crop || "Unknown";
-    if (!acc[crop]) {
-      acc[crop] = { target: 0, actual: 0 };
-    }
-    acc[crop].target += parseFloat(item["Target (in MT)"] || 0);
-    acc[crop].actual += parseFloat(item["Procurement quantity (in MT)"] || 0);
-    return acc;
-  }, {});
+  const regionProcurement = procurementData.reduce(
+    (acc, item) => {
+      const district = normalizeDistrictName(item.District || "Unknown");
+      const region = REGION_BY_DISTRICT[district];
+      const procurement = parseFloat(item["Procurement quantity (in MT)"] || 0);
 
-  const targetVsActualData = {
-    labels: Object.keys(targetVsActual).sort(),
+      if (region) {
+        acc[region] += procurement;
+      }
+
+      return acc;
+    },
+    { Garhwal: 4324.47, Kumaon: 1061.55 },
+  );
+
+  const regionalProcurementData = {
+    labels: ["Garhwal", "Kumaon"],
     datasets: [
       {
-        label: "Target (MT)",
-        data: Object.keys(targetVsActual).sort().map(key => targetVsActual[key].target),
-        borderColor: "#ff6b6b",
-        backgroundColor: "rgba(255, 107, 107, 0.1)",
-        tension: 0.35,
-        pointRadius: 4,
-        fill: true,
-      },
-      {
-        label: "Actual (MT)",
-        data: Object.keys(targetVsActual).sort().map(key => targetVsActual[key].actual),
-        borderColor: "#51cf66",
-        backgroundColor: "rgba(81, 207, 102, 0.1)",
-        tension: 0.35,
-        pointRadius: 4,
-        fill: true,
+        data: [
+          Number(regionProcurement.Garhwal.toFixed(2)),
+          Number(regionProcurement.Kumaon.toFixed(2)),
+        ],
+        backgroundColor: ["#19a5a5", "#a7307f"],
+        borderColor: ["#ffffff", "#ffffff"],
+        borderWidth: 3,
+        hoverOffset: 10,
       },
     ],
   };
 
-  const targetVsActualOptions = {
+  const regionalProcurementOptions = {
     responsive: true,
     maintainAspectRatio: true,
-    interaction: { mode: 'index', intersect: false },
+    cutout: "68%",
     plugins: {
       legend: {
         display: true,
-        position: 'top',
+        position: "bottom",
+        labels: {
+          color: "#024b37",
+          boxWidth: 14,
+          boxHeight: 14,
+          font: { size: 12, weight: 700 },
+        },
       },
       title: {
         display: true,
-        text: "Target vs Actual Procurement by Crop",
-        color: '#024b37',
+        text: "Garhwal vs Kumaon Procurement",
+        color: "#000000",
         font: { size: 16, weight: 700 },
       },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = Number(context.raw || 0);
+            return `${context.label}: ${value.toLocaleString("en-IN", {
+              maximumFractionDigits: 2,
+            })} MT`;
+          },
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
-        },
-        grid: { color: 'rgba(0,0,0,0.05)' },
       },
     },
   };
@@ -297,7 +329,7 @@ function Procurement() {
       legend: { display: false },
       title: {
         display: true,
-        text: "Procurement Achievement % by District",
+        text: "District Wise Achievement",
         color: '#024b37',
         font: { size: 16, weight: 700 },
       },
@@ -306,6 +338,12 @@ function Procurement() {
       x: {
         beginAtZero: true,
         max: 100,
+        title: {
+          display: true,
+          text: "Achievement %",
+          color: "#000000",
+          font: { size: 12, weight: 700 },
+        },
         ticks: {
           color: '#000000',
           font: { size: 12, weight: 600 },
@@ -351,8 +389,8 @@ function Procurement() {
             <div className={dashboardClasses.chartCard} data-aos="fade-up" key="procurement-by-district">
               <Bar data={procurementByDistrictData} options={procurementByDistrictOptions} />
             </div>
-            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="target-vs-actual">
-              <Line data={targetVsActualData} options={targetVsActualOptions} />
+            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="regional-procurement">
+              <Doughnut data={regionalProcurementData} options={regionalProcurementOptions} />
             </div>
             <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
               <Bar data={achievementPercentageData} options={achievementPercentageOptions} />
