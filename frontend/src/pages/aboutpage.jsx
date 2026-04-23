@@ -16,14 +16,30 @@ import {
 import districtGeojsonUrl from "../data/district.geojson";
 
 const stats = [
-  { label: "Districts", value: "13" },
-  { label: "Blocks", value: "95" },
-  { label: "Gram Panchayats", value: "7791" },
-  { label: "Villages", value: "16793" },
+  { label: "Districts", value: "7/13" },
+  { label: "Blocks", value: "24/95" },
+  { label: "GPs", value: "2867/7791" },
+  { label: "Villages", value: "4817/16793" },
   { label: "Farmers", value: "12307" },
 ];
 
 const districtBlockCounts = {
+  Almora: 6,
+  Bageshwar: 1,
+  Chamoli: 4,
+  Champawat: 0,
+  Dehradun: 0,
+  Haridwar: 0,
+  Nainital: 0,
+  "Pauri Garhwal": 4,
+  Pithoragarh: 0,
+  Rudraprayag: 3,
+  "Tehri Garhwal": 4,
+  "Udham Singh Nagar": 0,
+  Uttarkashi: 2,
+};
+
+const districtTotalBlocks = {
   Almora: 11,
   Bageshwar: 3,
   Chamoli: 9,
@@ -47,11 +63,11 @@ const districtNameAliases = {
 };
 
 const blockLegend = [
-  { label: "0-3", color: "#eef4e6" },
-  { label: "4-6", color: "#c7dfa0" },
-  { label: "7-9", color: "#8eb95a" },
-  { label: "10-12", color: "#4f8f3a" },
-  { label: "13-15", color: "#23693f" },
+  { label: "0-20%", color: "#eef4e6" },
+  { label: "21-40%", color: "#c7dfa0" },
+  { label: "41-60%", color: "#8eb95a" },
+  { label: "61-80%", color: "#4f8f3a" },
+  { label: "81-100%", color: "#23693f" },
 ];
 
 function normalizeDistrictName(name = "") {
@@ -60,12 +76,16 @@ function normalizeDistrictName(name = "") {
   return districtNameAliases[aliasKey] || cleanName;
 }
 
-function getBlockColor(blocks = 0) {
-  if (blocks <= 3) return blockLegend[0].color;   // 0–3
-  if (blocks <= 6) return blockLegend[1].color;   // 4–6
-  if (blocks <= 9) return blockLegend[2].color;   // 7–9
-  if (blocks <= 12) return blockLegend[3].color;  // 10–12
-  return blockLegend[4].color;                    // 13–15+
+function getBlockColor(district) {
+  const acquired = districtBlockCounts[district] ?? 0;
+  const total = districtTotalBlocks[district] ?? 1;
+  const percentage = (acquired / total) * 100;
+
+  if (percentage === 0) return blockLegend[0].color;
+  if (percentage <= 25) return blockLegend[1].color;
+  if (percentage <= 50) return blockLegend[2].color;
+  if (percentage <= 75) return blockLegend[3].color;
+  return blockLegend[4].color;
 }
 
 function getRings(geometry) {
@@ -117,6 +137,9 @@ function buildDistrictMap(features) {
   const districts = features.map((feature) => {
     const name = normalizeDistrictName(feature.properties?.dtname);
     const blockCount = districtBlockCounts[name] ?? 0;
+    const totalBlocks = districtTotalBlocks[name] ?? 1;
+    const percentage = ((blockCount / totalBlocks) * 100).toFixed(0);
+
     const path = getRings(feature.geometry)
       .map((ring) => {
         const stride = Math.max(1, Math.ceil(ring.length / 420));
@@ -137,7 +160,9 @@ function buildDistrictMap(features) {
     return {
       name,
       blockCount,
-      color: getBlockColor(blockCount),
+      totalBlocks,
+      percentage,
+      color: getBlockColor(name),
       path,
     };
   });
@@ -155,12 +180,12 @@ const recognitions = [
 ];
 
 const milestones = [
-  "Creation of a unified digital farmer registry for millet growers across Uttarakhand.",
-  "Role-based dashboards prepared for state, district and block-level monitoring.",
-  "Farmer registration, authentication and login workflows structured for transparent data handling.",
-  "Region-wise analytics introduced for faster review of coverage and implementation progress.",
-  "Monthly employee progress reporting integrated into the MIS workflow.",
-  "Foundation established for scalable agriculture data systems using free and open-source tools.",
+  "Uttarakhand became one of the leading Himalayan states to promote traditional millets (mandua, jhangora, chaulai) through integrated government initiatives and farmer outreach programs.",
+  "Uttarakhand implemented region-specific millet promotion under state agriculture schemes, ensuring support to hill farmers through input subsidies and technical guidance.",
+  "Uttarakhand strengthened millet value chains by linking farmers with processing units and promoting local entrepreneurship in millet-based products.",
+  "Uttarakhand actively promoted millets under nutrition programs such as ICDS and Mid-Day Meal schemes to improve dietary diversity in rural and tribal areas.",
+  "Uttarakhand encouraged branding and marketing of traditional millets through fairs, exhibitions, and GI-based identity (e.g., mandua), enhancing market visibility.",
+  "Uttarakhand integrated millets into sustainable agriculture practices, promoting climate-resilient farming in rainfed and hill regions."
 ];
 
 const architectureCards = [
@@ -321,7 +346,12 @@ function MiniBadge({ children }) {
 
 function DistrictMap() {
   const [geojson, setGeojson] = useState(null);
-  const [activeDistrict, setActiveDistrict] = useState(null);
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    district: null,
+  });
   const [hasMapError, setHasMapError] = useState(false);
 
   useEffect(() => {
@@ -362,6 +392,33 @@ function DistrictMap() {
     [geojson]
   );
 
+  function handleDistrictEnter(event, district) {
+    setTooltip({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      district,
+    });
+  }
+
+  function handleDistrictMove(event, district) {
+    setTooltip({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      district,
+    });
+  }
+
+  function handleDistrictLeave() {
+    setTooltip({
+      visible: false,
+      x: 0,
+      y: 0,
+      district: null,
+    });
+  }
+
   return (
     <div className="relative mx-auto flex w-full max-w-[660px] flex-col items-center rounded-[2rem] border border-[#d8e3be] bg-[#f7f9f1] px-4 py-5 shadow-sm sm:px-6">
       <div className="relative flex aspect-[1.18/1] w-full items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#edf3e5]">
@@ -379,17 +436,16 @@ function DistrictMap() {
                 d={district.path}
                 fill={district.color}
                 className="cursor-pointer transition-opacity hover:opacity-90 focus:opacity-90"
-                onBlur={() => setActiveDistrict(null)}
-                onFocus={() => setActiveDistrict(district)}
-                onMouseEnter={() => setActiveDistrict(district)}
-                onMouseLeave={() => setActiveDistrict(null)}
+                onMouseEnter={(event) => handleDistrictEnter(event, district)}
+                onMouseMove={(event) => handleDistrictMove(event, district)}
+                onMouseLeave={handleDistrictLeave}
+                onFocus={(event) => handleDistrictEnter(event, district)}
+                onBlur={handleDistrictLeave}
                 stroke="#ffffff"
                 strokeLinejoin="round"
                 strokeWidth="1.8"
                 tabIndex="0"
-              >
-                <title>{`${district.name}: ${district.blockCount} blocks`}</title>
-              </path>
+              />
             ))}
           </svg>
         ) : (
@@ -399,10 +455,20 @@ function DistrictMap() {
         )}
       </div>
 
+      {tooltip.visible && tooltip.district ? (
+        <div
+          className="pointer-events-none fixed z-50 rounded-xl bg-slate-900/95 px-3 py-2 text-sm font-medium text-white shadow-lg"
+          style={{
+            left: tooltip.x + 14,
+            top: tooltip.y + 14,
+          }}
+        >
+          {`${tooltip.district.name}: ${tooltip.district.blockCount}/${tooltip.district.totalBlocks} blocks (${tooltip.district.percentage}%)`}
+        </div>
+      ) : null}
+
       <div className="mt-4 rounded-full bg-[#94ab1b] px-5 py-2 text-sm font-semibold text-white shadow">
-        {activeDistrict
-          ? `${activeDistrict.name} - ${activeDistrict.blockCount} blocks`
-          : "Uttarakhand District Map"}
+        Uttarakhand District Map
       </div>
     </div>
   );
@@ -456,7 +522,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                 </div>
               ))}
             </div>
-            <h3 className="mt-2 text-3xl font-bold text-slate-900">No. Of Blocks</h3>
+            <h3 className="mt-2 text-3xl font-bold text-slate-900">Block Coverage (%)</h3>
           </div>
         </div>
       </section>

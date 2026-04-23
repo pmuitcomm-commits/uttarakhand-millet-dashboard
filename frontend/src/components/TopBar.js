@@ -120,21 +120,15 @@ function TopBar() {
   return (
     <header
       ref={headerRef}
-      className="relative z-50 shrink-0 border-b border-white/10 bg-[#024b37] text-white shadow-lg"
+      className="relative z-50 shrink-0 border-b border-white/10 bg-[linear-gradient(180deg,#0e4337_0%,#0c4135_100%)] text-white shadow-lg"
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 lg:flex-nowrap lg:px-8">
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d79652] to-[#9a5a1d] text-[0.63rem] font-bold text-white shadow-lg">
-            UTTARAKHAND
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-2xl font-black tracking-tight md:text-3xl">
-              UTTARAKHAND
-            </div>
-            <div className="truncate text-xs uppercase tracking-[0.2em] text-white/80">
-              Millet Project
-            </div>
-          </div>
+        <div className="flex min-w-0 items-center">
+          <img
+            src="/topbarlogo.png"
+            alt="Uttarakhand Millet Project"
+            className="h-14 w-auto max-w-[220px] object-contain sm:max-w-[300px]"
+          />
         </div>
 
         <nav
