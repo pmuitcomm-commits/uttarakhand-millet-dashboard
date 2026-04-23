@@ -26,7 +26,7 @@ ChartJS.register(
   BarElement,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 const REGION_BY_DISTRICT = {
@@ -55,6 +55,28 @@ const DISTRICT_ALIASES = {
   "udham singh nagar": "Udham Singh Nagar",
 };
 
+const compactPageWrapperClass = `${dashboardClasses.pageWrapper} !overflow-hidden !p-2`;
+const compactContainerClass = `${dashboardClasses.dashboardContainer} !gap-2`;
+const compactMainContentClass = `${dashboardClasses.mainContent} !overflow-hidden !p-0`;
+const compactHeadingRowClass = `${dashboardClasses.pageHeadingRow} !mb-1 !p-2`;
+const compactHeadingTitleClass =
+  `${dashboardClasses.pageHeadingTitle} !text-[1.65rem] max-[640px]:!text-[1.3rem]`;
+const compactNoticeClass = `${dashboardClasses.dashboardNotice} !mb-2 !px-3 !py-2`;
+const compactMetricsRowClass = `${dashboardClasses.metricsRow} !mb-2 !gap-3 !p-2`;
+const compactMetricCardClassName = (index) =>
+  `${metricCardClassName(index)} !rounded-2xl !px-4 !py-[1.15rem] !shadow-[0_8px_18px_rgba(0,0,0,0.10)]`;
+const compactMetricValueClass =
+  `${dashboardClasses.metricValue} !mb-1.5 !text-[1.65rem] max-[640px]:!text-[1.35rem]`;
+const compactMetricLabelClass =
+  `${dashboardClasses.metricLabel} !text-[0.82rem] max-[640px]:!text-[0.78rem]`;
+const compactChartRowClass = `${dashboardClasses.chartRow} !mb-2 !gap-3 !p-2`;
+const compactChartCardClass =
+  `${dashboardClasses.chartCard} !min-h-[230px] !rounded-2xl !p-3`;
+const compactChartCanvasClass = "h-[170px] w-full";
+const compactTableCardClass =
+  `${dashboardClasses.tableCard} !mx-2 !mb-0 !flex-1 !min-h-0 !rounded-2xl !p-3 overflow-hidden`;
+const compactTableScrollClass = "h-full overflow-auto";
+
 function normalizeDistrictName(name = "") {
   const cleaned = String(name).trim().replace(/\s+/g, " ");
   return DISTRICT_ALIASES[cleaned.toLowerCase()] || cleaned;
@@ -77,23 +99,26 @@ function Procurement() {
       setLoading(true);
       setError(null);
       const procurementRes = await getAllProcurement();
-      
-      // Handle both array and non-array responses
       const data = Array.isArray(procurementRes.data) ? procurementRes.data : [];
-      
-      // Normalize field names if needed
-      const normalizedData = data.map(item => ({
+
+      const normalizedData = data.map((item) => ({
         "S.no": item["S.no"] || item.s_no || "",
-        "District": normalizeDistrictName(item["District"] || item.district || ""),
-        "Crop": item["Crop"] || item.crop || "",
+        District: normalizeDistrictName(item["District"] || item.district || ""),
+        Crop: item["Crop"] || item.crop || "",
         "Nos.of Centre": item["Nos.of Centre"] || item.nos_of_centre || 0,
         "Target (in MT)": item["Target (in MT)"] || item.target_in_mt || 0,
-        "No. of Farmer's /SHGs": item["No. of Farmer's /SHGs"] || item.no_of_farmers_shgs || 0,
-        "Procurement quantity (in MT)": item["Procurement quantity (in MT)"] || item.procurement_quantity_in_mt || 0,
-        "Procurement (in %)": item["Procurement (in %)"] || item.procurement_in_percent || 0,
-        "Procurement by Pvt. agencies (in MT)": item["Procurement by Pvt. agencies (in MT)"] || item.procurement_by_pvt_agencies_in_mt || 0,
+        "No. of Farmer's /SHGs":
+          item["No. of Farmer's /SHGs"] || item.no_of_farmers_shgs || 0,
+        "Procurement quantity (in MT)":
+          item["Procurement quantity (in MT)"] || item.procurement_quantity_in_mt || 0,
+        "Procurement (in %)":
+          item["Procurement (in %)"] || item.procurement_in_percent || 0,
+        "Procurement by Pvt. agencies (in MT)":
+          item["Procurement by Pvt. agencies (in MT)"] ||
+          item.procurement_by_pvt_agencies_in_mt ||
+          0,
       }));
-      
+
       setProcurementData(normalizedData);
     } catch {
       setError("Failed to fetch procurement data");
@@ -107,8 +132,7 @@ function Procurement() {
     try {
       const kpiRes = await getProcurementKPIs();
       const kpiData = kpiRes.data;
-      
-      // Map backend KPI keys to frontend display format
+
       setProcurementKPIs({
         totalDistricts: kpiData.total_districts || 0,
         totalCentres: kpiData.total_centres || 0,
@@ -120,7 +144,6 @@ function Procurement() {
         cropCoverage: kpiData.crop_coverage || 0,
       });
     } catch {
-      // Fallback to showing zeros if KPI fetch fails
       setProcurementKPIs({
         totalDistricts: 0,
         totalCentres: 0,
@@ -135,20 +158,19 @@ function Procurement() {
   };
 
   const dashboardMetrics = [
-    { label: t('totalDistricts'), value: procurementKPIs.totalDistricts || 0 },
-    { label: t('totalCentres'), value: procurementKPIs.totalCentres || 0 },
-    { label: t('totalTarget'), value: procurementKPIs.totalTarget || 0 },
-    { label: t('totalFarmers'), value: procurementKPIs.totalFarmers || 0 },
-    { label: t('totalProcurement'), value: procurementKPIs.totalProcurement || 0 },
-    { label: t('avgProcurement'), value: procurementKPIs.avgProcurement || 0 },
-    { label: t('pvtAgencies'), value: procurementKPIs.pvtAgenciesProcurement || 0 },
-    { label: t('cropCoverage'), value: procurementKPIs.cropCoverage || 0 },
+    { label: t("totalDistricts"), value: procurementKPIs.totalDistricts || 0 },
+    { label: t("totalCentres"), value: procurementKPIs.totalCentres || 0 },
+    { label: t("totalTarget"), value: procurementKPIs.totalTarget || 0 },
+    { label: t("totalFarmers"), value: procurementKPIs.totalFarmers || 0 },
+    { label: t("totalProcurement"), value: procurementKPIs.totalProcurement || 0 },
+    { label: t("avgProcurement"), value: procurementKPIs.avgProcurement || 0 },
+    { label: t("pvtAgencies"), value: procurementKPIs.pvtAgenciesProcurement || 0 },
+    { label: t("cropCoverage"), value: procurementKPIs.cropCoverage || 0 },
   ];
 
-  // Chart 1: Procurement by District (Bar Chart)
   const districtProcurement = procurementData.reduce((acc, item) => {
     const district = item.District || "Unknown";
-    const procurement = parseFloat(item["Procurement quantity (in MT)"] || 0);
+    const procurement = Number.parseFloat(item["Procurement quantity (in MT)"] || 0);
     acc[district] = (acc[district] || 0) + procurement;
     return acc;
   }, {});
@@ -158,7 +180,9 @@ function Procurement() {
     datasets: [
       {
         label: "Procurement (MT)",
-        data: Object.keys(districtProcurement).sort().map(key => districtProcurement[key]),
+        data: Object.keys(districtProcurement)
+          .sort()
+          .map((key) => districtProcurement[key]),
         backgroundColor: "#024b37",
         borderColor: "#035344",
         borderWidth: 1,
@@ -168,14 +192,14 @@ function Procurement() {
 
   const procurementByDistrictOptions = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
         display: true,
         text: "Procurement by District",
-        color: '#024b37',
-        font: { size: 16, weight: 700 },
+        color: "#024b37",
+        font: { size: 14, weight: 700 },
       },
     },
     scales: {
@@ -184,94 +208,124 @@ function Procurement() {
           display: true,
           text: "District Wise Procurement",
           color: "#000000",
-          font: { size: 12, weight: 700 },
+          font: { size: 11, weight: 700 },
         },
         ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
+          color: "#000000",
+          font: { size: 10, weight: 600 },
+          maxRotation: 35,
+          minRotation: 35,
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        grid: { color: "rgba(0,0,0,0.05)" },
       },
       y: {
         beginAtZero: true,
         ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
+          color: "#000000",
+          font: { size: 10, weight: 600 },
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        grid: { color: "rgba(0,0,0,0.05)" },
       },
     },
   };
 
-  const regionProcurement = procurementData.reduce(
-    (acc, item) => {
-      const district = normalizeDistrictName(item.District || "Unknown");
-      const region = REGION_BY_DISTRICT[district];
-      const procurement = parseFloat(item["Procurement quantity (in MT)"] || 0);
+// --- Region-wise aggregation WITHOUT REGION_BY_DISTRICT ---
+const regionProcurement = procurementData.reduce(
+  (acc, item) => {
+    const district = normalizeDistrictName(item.District || "Unknown");
 
-      if (region) {
-        acc[region] += procurement;
-      }
+    const procurement = Number.parseFloat(
+      String(item["Procurement quantity (in MT)"] || 0).replace(/,/g, "")
+    );
 
-      return acc;
+    // Garhwal districts
+    const garhwalDistricts = [
+      "Dehradun",
+      "Haridwar",
+      "Pauri Garhwal",
+      "Tehri Garhwal",
+      "Rudraprayag",
+      "Chamoli",
+      "Uttarkashi",
+    ];
+
+    // Kumaon districts
+    const kumaonDistricts = [
+      "Nainital",
+      "Almora",
+      "Bageshwar",
+      "Champawat",
+      "Pithoragarh",
+      "Udham Singh Nagar",
+    ];
+
+    if (garhwalDistricts.includes(district)) {
+      acc.Garhwal += procurement;
+    } else if (kumaonDistricts.includes(district)) {
+      acc.Kumaon += procurement;
+    }
+
+    return acc;
+  },
+  { Garhwal: 0, Kumaon: 0 }
+);
+
+// --- Chart Data ---
+const regionalProcurementData = {
+  labels: ["Garhwal", "Kumaon"],
+  datasets: [
+    {
+      data: [
+        Number(regionProcurement.Garhwal.toFixed(2)),
+        Number(regionProcurement.Kumaon.toFixed(2)),
+      ],
+      backgroundColor: ["#19a5a5", "#a7307f"],
+      borderColor: ["#ffffff", "#ffffff"],
+      borderWidth: 3,
+      hoverOffset: 10,
     },
-    { Garhwal: 4324.47, Kumaon: 1061.55 },
-  );
+  ],
+};
 
-  const regionalProcurementData = {
-    labels: ["Garhwal", "Kumaon"],
-    datasets: [
-      {
-        data: [
-          Number(regionProcurement.Garhwal.toFixed(2)),
-          Number(regionProcurement.Kumaon.toFixed(2)),
-        ],
-        backgroundColor: ["#19a5a5", "#a7307f"],
-        borderColor: ["#ffffff", "#ffffff"],
-        borderWidth: 3,
-        hoverOffset: 10,
+// --- Chart Options ---
+const regionalProcurementOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: "68%",
+  plugins: {
+    legend: {
+      display: true,
+      position: "bottom",
+      labels: {
+        color: "#024b37",
+        boxWidth: 12,
+        boxHeight: 12,
+        padding: 12,
+        font: { size: 11, weight: 700 },
       },
-    ],
-  };
-
-  const regionalProcurementOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    cutout: "68%",
-    plugins: {
-      legend: {
-        display: true,
-        position: "bottom",
-        labels: {
-          color: "#024b37",
-          boxWidth: 14,
-          boxHeight: 14,
-          font: { size: 12, weight: 700 },
+    },
+    title: {
+      display: true,
+      text: "Garhwal vs Kumaon Procurement",
+      color: "#000000",
+      font: { size: 14, weight: 700 },
+    },
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          const value = Number(context.raw || 0);
+          return `${context.label}: ${value.toLocaleString("en-IN", {
+            maximumFractionDigits: 2,
+          })} MT`;
         },
       },
-      title: {
-        display: true,
-        text: "Garhwal vs Kumaon Procurement",
-        color: "#000000",
-        font: { size: 16, weight: 700 },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const value = Number(context.raw || 0);
-            return `${context.label}: ${value.toLocaleString("en-IN", {
-              maximumFractionDigits: 2,
-            })} MT`;
-          },
-        },
-      },
     },
-  };
+  },
+};
 
-  // Chart 3: Procurement Achievement % (Bar Chart)
   const achievementData = procurementData.reduce((acc, item) => {
     const district = item.District || "Unknown";
-    const procurementPct = parseFloat(item["Procurement (in %)"] || 0);
+    const procurementPct = Number.parseFloat(item["Procurement (in %)"] || 0);
     if (!acc[district]) {
       acc[district] = [];
     }
@@ -280,7 +334,9 @@ function Procurement() {
   }, {});
 
   const avgAchievement = Object.keys(achievementData).reduce((acc, district) => {
-    acc[district] = achievementData[district].reduce((a, b) => a + b, 0) / achievementData[district].length;
+    acc[district] =
+      achievementData[district].reduce((sum, value) => sum + value, 0) /
+      achievementData[district].length;
     return acc;
   }, {});
 
@@ -289,7 +345,9 @@ function Procurement() {
     datasets: [
       {
         label: "Achievement %",
-        data: Object.keys(avgAchievement).sort().map(key => avgAchievement[key].toFixed(2)),
+        data: Object.keys(avgAchievement)
+          .sort()
+          .map((key) => avgAchievement[key].toFixed(2)),
         backgroundColor: [
           "rgba(255, 99, 132, 0.7)",
           "rgba(54, 162, 235, 0.7)",
@@ -322,16 +380,16 @@ function Procurement() {
   };
 
   const achievementPercentageOptions = {
-    indexAxis: 'y',
+    indexAxis: "y",
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
         display: true,
         text: "District Wise Achievement",
-        color: '#024b37',
-        font: { size: 16, weight: 700 },
+        color: "#024b37",
+        font: { size: 14, weight: 700 },
       },
     },
     scales: {
@@ -342,69 +400,81 @@ function Procurement() {
           display: true,
           text: "Achievement %",
           color: "#000000",
-          font: { size: 12, weight: 700 },
+          font: { size: 11, weight: 700 },
         },
         ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
+          color: "#000000",
+          font: { size: 10, weight: 600 },
           callback: (value) => `${value}%`,
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        grid: { color: "rgba(0,0,0,0.05)" },
       },
       y: {
         ticks: {
-          color: '#000000',
-          font: { size: 12, weight: 600 },
+          color: "#000000",
+          font: { size: 10, weight: 600 },
         },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        grid: { color: "rgba(0,0,0,0.05)" },
       },
     },
   };
 
   return (
-    <div className={dashboardClasses.pageWrapper}>
-      <div className={dashboardClasses.dashboardContainer}>
+    <div className={compactPageWrapperClass}>
+      <div className={compactContainerClass}>
         <Sidebar />
-        <div className={dashboardClasses.mainContent}>
-          <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
-            <h2 className={dashboardClasses.pageHeadingTitle}>{t('procurementSummary')}</h2>
+        <div className={compactMainContentClass}>
+          <div className={compactHeadingRowClass} data-aos="fade-up">
+            <h2 className={compactHeadingTitleClass}>{t("procurementSummary")}</h2>
           </div>
 
-          {error && (
-            <div className={dashboardClasses.dashboardNotice}>
-              ⚠️ {error}
-            </div>
-          )}
+          {error && <div className={compactNoticeClass}>Warning: {error}</div>}
 
-          <div className={dashboardClasses.metricsRow}>
+          <div className={compactMetricsRowClass}>
             {dashboardMetrics.map((metric, index) => (
-              <div key={metric.label} className={metricCardClassName(index)}>
-                <div className={dashboardClasses.metricValue}>{metric.value}</div>
-                <div className={dashboardClasses.metricLabel}>{metric.label}</div>
+              <div key={metric.label} className={compactMetricCardClassName(index)}>
+                <div className={compactMetricValueClass}>{metric.value}</div>
+                <div className={compactMetricLabelClass}>{metric.label}</div>
               </div>
             ))}
           </div>
 
-          <div className={dashboardClasses.chartRow}>
-            <div className={dashboardClasses.chartCard} data-aos="fade-up" key="procurement-by-district">
-              <Bar data={procurementByDistrictData} options={procurementByDistrictOptions} />
+          <div className={compactChartRowClass}>
+            <div className={compactChartCardClass} data-aos="fade-up" key="procurement-by-district">
+              <div className={compactChartCanvasClass}>
+                <Bar data={procurementByDistrictData} options={procurementByDistrictOptions} />
+              </div>
             </div>
-            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="regional-procurement">
-              <Doughnut data={regionalProcurementData} options={regionalProcurementOptions} />
+
+            <div className={compactChartCardClass} data-aos="fade-up" data-aos-delay="100" key="regional-procurement">
+              <div className={compactChartCanvasClass}>
+                <Doughnut
+                  data={regionalProcurementData}
+                  options={regionalProcurementOptions}
+                />
+              </div>
             </div>
-            <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
-              <Bar data={achievementPercentageData} options={achievementPercentageOptions} />
+
+            <div className={compactChartCardClass} data-aos="fade-up" data-aos-delay="200" key="achievement-percentage">
+              <div className={compactChartCanvasClass}>
+                <Bar
+                  data={achievementPercentageData}
+                  options={achievementPercentageOptions}
+                />
+              </div>
             </div>
           </div>
 
-          <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
-            {loading ? (
-              <p className={dashboardClasses.dashboardMessage}>Loading data...</p>
-            ) : procurementData.length === 0 ? (
-              <p className={dashboardClasses.dashboardMessage}>No procurement data available</p>
-            ) : (
-              <DataTable data={procurementData} title="Detailed Procurement Data" />
-            )}
+          <div className={compactTableCardClass} data-aos="fade-up" data-aos-delay="300">
+            <div className={compactTableScrollClass}>
+              {loading ? (
+                <p className={dashboardClasses.dashboardMessage}>Loading data...</p>
+              ) : procurementData.length === 0 ? (
+                <p className={dashboardClasses.dashboardMessage}>No procurement data available</p>
+              ) : (
+                <DataTable data={procurementData} title="Detailed Procurement Data" />
+              )}
+            </div>
           </div>
         </div>
       </div>
