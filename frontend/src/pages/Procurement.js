@@ -55,6 +55,17 @@ const DISTRICT_ALIASES = {
   "udham singh nagar": "Udham Singh Nagar",
 };
 
+const compactMetricsRowClass = `${dashboardClasses.metricsRow} !mb-2 !gap-3 !p-2`;
+
+const compactMetricCardClassName = (index) =>
+  `${metricCardClassName(index)} !rounded-2xl !px-4 !py-[1.15rem] !shadow-[0_8px_18px_rgba(0,0,0,0.10)]`;
+
+const compactMetricValueClass =
+  `${dashboardClasses.metricValue} !mb-1.5 !text-[1.65rem] max-[640px]:!text-[1.35rem]`;
+
+const compactMetricLabelClass =
+  `${dashboardClasses.metricLabel} !text-[0.82rem] max-[640px]:!text-[0.78rem]`;
+
 function normalizeDistrictName(name = "") {
   const cleaned = String(name).trim().replace(/\s+/g, " ");
   return DISTRICT_ALIASES[cleaned.toLowerCase()] || cleaned;
@@ -375,12 +386,12 @@ function Procurement() {
               ⚠️ {error}
             </div>
           )}
-
-          <div className={dashboardClasses.metricsRow}>
+          
+          <div className={compactMetricsRowClass}>
             {dashboardMetrics.map((metric, index) => (
-              <div key={metric.label} className={metricCardClassName(index)}>
-                <div className={dashboardClasses.metricValue}>{metric.value}</div>
-                <div className={dashboardClasses.metricLabel}>{metric.label}</div>
+              <div key={metric.label} className={compactMetricCardClassName(index)}>
+                <div className={compactMetricValueClass}>{metric.value}</div>
+                <div className={compactMetricLabelClass}>{metric.label}</div>
               </div>
             ))}
           </div>
