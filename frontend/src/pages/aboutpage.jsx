@@ -522,7 +522,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                 </div>
               ))}
             </div>
-            <h3 className="mt-2 text-3xl font-bold text-slate-900">Block Coverage (%)</h3>
+            <h3 className="mt-4 text-2xl font-bold text-slate-900">Block Coverage (%)</h3>
           </div>
         </div>
       </section>
