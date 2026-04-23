@@ -18,6 +18,7 @@ import MilletChart from "../components/MilletChart";
 import DataTable from "../components/DataTable";
 import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
 import { useLanguage } from "../context/LanguageContext";
+import { getDistrictName, uttarakhandDistricts } from "../data/districts";
 
 import {
   getKPIs,
@@ -36,6 +37,15 @@ ChartJS.register(
   Legend,
   Filler
 );
+
+function withDistrictName(record) {
+  const district = getDistrictName(record);
+
+  return {
+    ...record,
+    district,
+  };
+}
 
 function Dashboard({ page = "dashboard" }) {
   const { t } = useLanguage();
@@ -63,13 +73,13 @@ function Dashboard({ page = "dashboard" }) {
       setKpis(kpiRes.data);
 
       const districtRes = await getDistrictProduction();
-      setDistrictData(districtRes.data);
+      setDistrictData((districtRes.data || []).map(withDistrictName));
 
       const milletRes = await getMilletProduction();
       setMilletData(milletRes.data);
 
       const tableRes = await getAllProduction();
-      setTableData(tableRes.data);
+      setTableData((tableRes.data || []).map(withDistrictName));
     } catch {
       setTableData([]);
     }
@@ -83,10 +93,6 @@ function Dashboard({ page = "dashboard" }) {
   const filteredTableData = selectedDistrict === "all" 
     ? tableData 
     : tableData.filter(item => item.district === selectedDistrict);
-
-  const getUniqueDistricts = () => {
-    return [...new Set(districtData.map(item => item.district))].sort();
-  };
 
   // Filter data based on selected millet
   const filteredMilletData = selectedMillet === "all"
@@ -236,7 +242,7 @@ function Dashboard({ page = "dashboard" }) {
       { label: t('cropCoverage'), value: cropCoverage },
     ],
     district: [
-      { label: t('totalDistricts'), value: districtData.length },
+      { label: t('totalDistricts'), value: uttarakhandDistricts.length },
       { label: t('totalProduction'), value: totalProduction },
       { label: t('avgDistrictProd'), value: avgDistrictProduction },
       {
@@ -387,7 +393,7 @@ function Dashboard({ page = "dashboard" }) {
                   className={dashboardClasses.selector}
                 >
                   <option value="all">All Districts</option>
-                  {getUniqueDistricts().map((district) => (
+                  {uttarakhandDistricts.map((district) => (
                     <option key={district} value={district}>
                       {district}
                     </option>

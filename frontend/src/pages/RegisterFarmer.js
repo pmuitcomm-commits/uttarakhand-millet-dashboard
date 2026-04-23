@@ -1,22 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerFarmer } from "../services/api";
-
-const districts = [
-  "Almora",
-  "Bageshwar",
-  "Chamoli",
-  "Champawat",
-  "Dehradun",
-  "Haridwar",
-  "Nainital",
-  "Pauri Garhwal",
-  "Pithoragarh",
-  "Rudraprayag",
-  "Tehri Garhwal",
-  "Udham Singh Nagar",
-  "Uttarkashi",
-];
+import { uttarakhandDistricts } from "../data/districts";
 
 const blocksByDistrict = {
   Nainital: ["Nainital", "Bhimtal", "Haldwani", "Ramnagar"],
@@ -531,7 +516,7 @@ function RegisterFarmer() {
                   className={controlErrorClass(errors.district)}
                 >
                   <option value="">Select district</option>
-                  {districts.map((district) => (
+                  {uttarakhandDistricts.map((district) => (
                     <option key={district} value={district}>
                       {district}
                     </option>
