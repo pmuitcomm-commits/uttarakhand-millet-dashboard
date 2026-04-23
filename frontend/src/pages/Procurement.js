@@ -55,9 +55,12 @@ const DISTRICT_ALIASES = {
   "udham singh nagar": "Udham Singh Nagar",
 };
 
-const compactPageWrapperClass = `${dashboardClasses.pageWrapper} !overflow-y-auto !p-2`;
-const compactContainerClass = `${dashboardClasses.dashboardContainer} !gap-2`;
-const compactMainContentClass = `${dashboardClasses.mainContent} !overflow-visible !p-0`;
+const compactPageWrapperClass =
+  `${dashboardClasses.pageWrapper} !h-auto !min-h-full !overflow-visible !p-2`;
+const compactContainerClass =
+  `${dashboardClasses.dashboardContainer} !flex-none !overflow-visible !gap-2`;
+const compactMainContentClass =
+  `${dashboardClasses.mainContent} !h-auto !min-h-full !overflow-visible !p-0`;
 const compactHeadingRowClass = `${dashboardClasses.pageHeadingRow} !mb-1 !p-2`;
 const compactHeadingTitleClass =
   `${dashboardClasses.pageHeadingTitle} !text-[1.65rem] max-[640px]:!text-[1.3rem]`;
