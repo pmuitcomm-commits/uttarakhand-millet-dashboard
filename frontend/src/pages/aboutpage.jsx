@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+
 import {
   BookOpen,
   LayoutDashboard,
@@ -13,14 +14,24 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+
 import districtGeojsonUrl from "../data/district.geojson";
 
+// --- Constants for District Map ---
 const stats = [
   { label: "Districts", value: "7/13" },
   { label: "Blocks", value: "24/95" },
   { label: "GPs", value: "2867/7791" },
   { label: "Villages", value: "4817/16793" },
   { label: "Farmers", value: "12307" },
+];
+
+const blockLegend = [
+  { label: "0-20%", color: "#eef4e6" },
+  { label: "21-40%", color: "#c7dfa0" },
+  { label: "41-60%", color: "#8eb95a" },
+  { label: "61-80%", color: "#4f8f3a" },
+  { label: "81-100%", color: "#23693f" },
 ];
 
 const districtBlockCounts = {
@@ -62,14 +73,7 @@ const districtNameAliases = {
   haridwar: "Haridwar",
 };
 
-const blockLegend = [
-  { label: "0-20%", color: "#eef4e6" },
-  { label: "21-40%", color: "#c7dfa0" },
-  { label: "41-60%", color: "#8eb95a" },
-  { label: "61-80%", color: "#4f8f3a" },
-  { label: "81-100%", color: "#23693f" },
-];
-
+// --- Utility Functions for District Map ---
 function normalizeDistrictName(name = "") {
   const cleanName = name.trim().replace(/\s+/g, " ");
   const aliasKey = cleanName.toLowerCase();
@@ -170,180 +174,7 @@ function buildDistrictMap(features) {
   return { districts, height, width };
 }
 
-const recognitions = [
-  "The Uttarakhand Millet Initiative is aligned with the International Year of Millets vision and promotes nutri-cereals as climate-resilient crops for hill agriculture.",
-  "The project strengthens farmer registration, district-level planning and real-time monitoring through a digital MIS dashboard tailored for Uttarakhand.",
-  "The initiative supports evidence-based decision making for administrators at state, district and block level through role-based dashboards.",
-  "Special focus is placed on traditional millet cultivation, local value chains and improved access to schemes and services for farmers.",
-  "The platform is designed to improve transparency in farmer data management, regional reporting and monthly progress tracking.",
-  "The project encourages convergence between agriculture, extension systems and local institutions for sustainable millet-based livelihoods.",
-];
-
-const milestones = [
-  "Uttarakhand became one of the leading Himalayan states to promote traditional millets (mandua, jhangora, chaulai) through integrated government initiatives and farmer outreach programs.",
-  "Uttarakhand implemented region-specific millet promotion under state agriculture schemes, ensuring support to hill farmers through input subsidies and technical guidance.",
-  "Uttarakhand strengthened millet value chains by linking farmers with processing units and promoting local entrepreneurship in millet-based products.",
-  "Uttarakhand actively promoted millets under nutrition programs such as ICDS and Mid-Day Meal schemes to improve dietary diversity in rural and tribal areas.",
-  "Uttarakhand encouraged branding and marketing of traditional millets through fairs, exhibitions, and GI-based identity (e.g., mandua), enhancing market visibility.",
-  "Uttarakhand integrated millets into sustainable agriculture practices, promoting climate-resilient farming in rainfed and hill regions."
-];
-
-const architectureCards = [
-  {
-    title: "Led By Department of Agriculture, Uttarakhand",
-    points: [
-      "Programme oversight and policy direction",
-      "District-wise monitoring and review",
-      "Coordination with field offices and implementation teams",
-    ],
-  },
-  {
-    title: "Powered By MIS Dashboard System",
-    points: [
-      "Role-based access for admin, district and block users",
-      "Farmer registration, login and dashboard workflows",
-      "Data-driven reporting for planning and implementation",
-    ],
-  },
-  {
-    title: "Built On Open Digital Stack",
-    points: [
-      "PostgreSQL-based data backbone",
-      "Dashboard and reporting through open-source tools",
-      "Scalable architecture for future agriculture modules",
-    ],
-  },
-];
-
-const objectives = [
-  "Build a state-wide millet farmer registry",
-  "Enable district and block level monitoring",
-  "Track monthly field progress efficiently",
-  "Support transparent farmer data management",
-  "Strengthen millet-focused planning and reporting",
-  "Improve administrative decision-making through dashboards",
-  "Create a scalable foundation for AgriStack-like services",
-];
-
-const components = [
-  {
-    title: "Farmer Registration and Login",
-    icon: <Users className="h-6 w-6" />,
-    points: [
-      "Digital registration of millet farmers across Uttarakhand",
-      "Secure login workflows for registered users",
-      "Structured capture of farmer and regional details",
-      "Improved accessibility of farmer records for administration",
-    ],
-  },
-  {
-    title: "State, District and Block Dashboards",
-    icon: <LayoutDashboard className="h-6 w-6" />,
-    points: [
-      "Dedicated dashboards for each administrative level",
-      "Region-wise summaries for faster monitoring",
-      "Improved visibility into registrations and implementation progress",
-      "Quick review of dashboard metrics for officials",
-    ],
-  },
-  {
-    title: "Millet Crop Focus",
-    icon: <Sprout className="h-6 w-6" />,
-    points: [
-      "Exclusive focus on millet-related farmer data",
-      "Support for traditional and climate-resilient crops",
-      "Better planning for millet promotion in hill regions",
-      "Alignment with nutrition and livelihood objectives",
-    ],
-  },
-  {
-    title: "Monthly Employee Progress Reports",
-    icon: <BookOpen className="h-6 w-6" />,
-    points: [
-      "Track monthly work completed by field staff",
-      "Support accountability and performance review",
-      "Make reporting easier across administrative levels",
-      "Enable structured monitoring of implementation activities",
-    ],
-  },
-  {
-    title: "Region-Based Analytics",
-    icon: <Map className="h-6 w-6" />,
-    points: [
-      "District and block-wise analysis of farmer records",
-      "Visual summaries for decision support",
-      "Quick identification of gaps and coverage trends",
-      "Improved planning for targeted interventions",
-    ],
-  },
-  {
-    title: "Open-Source Technology Framework",
-    icon: <Factory className="h-6 w-6" />,
-    points: [
-      "Built using PostgreSQL and other free/open-source tools",
-      "Designed for sustainability and cost efficiency",
-      "Easier future expansion into additional agriculture services",
-    ],
-  },
-  {
-    title: "Administrative Decision Support",
-    icon: <Megaphone className="h-6 w-6" />,
-    points: [
-      "Support evidence-based planning for officials",
-      "Strengthen review and monitoring workflows",
-      "Enable better coordination between state and field units",
-    ],
-  },
-];
-
-const flowLevels = ["State Level", "District Level", "Block Level"];
-
-const mPassteps = [
-  "Farmer details are collected through the digital registration workflow.",
-  "Farmer records are entered and validated in the Uttarakhand millet MIS system.",
-  "District-level teams review registration and dashboard records.",
-  "Regional mapping enables block and district-wise verification of entries.",
-  "Authenticated users access dashboards based on their assigned role.",
-  "Corrections and updates are managed through administrative review.",
-  "Reports are generated for monitoring, planning and monthly progress review.",
-  "Consolidated insights support faster decision-making at state level.",
-];
-
-function SectionTitle({ title, subtitle }) {
-  return (
-    <div className="mb-10 text-center">
-      <h2 className="text-3xl md:text-5xl font-extrabold tracking-wide text-[#0f5a2c] uppercase">
-        {title}
-      </h2>
-      {subtitle ? (
-        <p className="mt-3 text-lg md:text-2xl text-slate-800">{subtitle}</p>
-      ) : null}
-      <div className="mx-auto mt-5 h-px w-full max-w-5xl bg-[#b9c89d]" />
-    </div>
-  );
-}
-
-function SoftImage({ label, className = "" }) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-3xl border border-[#cfddb4] bg-gradient-to-br from-[#d7e4bb] via-[#eef3db] to-[#ccdca6] shadow-md ${className}`}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,.7),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,90,44,.08),transparent_30%)]" />
-      <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-slate-600">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function MiniBadge({ children }) {
-  return (
-    <div className="rounded-2xl bg-[#2f7f79] px-4 py-3 text-sm md:text-base font-semibold text-white shadow-md">
-      {children}
-    </div>
-  );
-}
-
+// --- District Map Component ---
 function DistrictMap() {
   const [geojson, setGeojson] = useState(null);
   const [tooltip, setTooltip] = useState({
@@ -474,9 +305,223 @@ function DistrictMap() {
   );
 }
 
+// ============================================================================
+// SECTION 4: RECOGNITIONS
+// ============================================================================
+
+const recognitions = [
+  "The Uttarakhand Millet Initiative is aligned with the International Year of Millets vision and promotes nutri-cereals as climate-resilient crops for hill agriculture.",
+  "The project strengthens farmer registration, district-level planning and real-time monitoring through a digital MIS dashboard tailored for Uttarakhand.",
+  "The initiative supports evidence-based decision making for administrators at state, district and block level through role-based dashboards.",
+  "Special focus is placed on traditional millet cultivation, local value chains and improved access to schemes and services for farmers.",
+  "The platform is designed to improve transparency in farmer data management, regional reporting and monthly progress tracking.",
+  "The project encourages convergence between agriculture, extension systems and local institutions for sustainable millet-based livelihoods.",
+];
+
+// ============================================================================
+// SECTION 5: PROJECT MILESTONES
+// ============================================================================
+
+const milestones = [
+  "Uttarakhand became one of the leading Himalayan states to promote traditional millets (mandua, jhangora, chaulai) through integrated government initiatives and farmer outreach programs.",
+  "Uttarakhand implemented region-specific millet promotion under state agriculture schemes, ensuring support to hill farmers through input subsidies and technical guidance.",
+  "Uttarakhand strengthened millet value chains by linking farmers with processing units and promoting local entrepreneurship in millet-based products.",
+  "Uttarakhand actively promoted millets under nutrition programs such as ICDS and Mid-Day Meal schemes to improve dietary diversity in rural and tribal areas.",
+  "Uttarakhand encouraged branding and marketing of traditional millets through fairs, exhibitions, and GI-based identity (e.g., mandua), enhancing market visibility.",
+  "Uttarakhand integrated millets into sustainable agriculture practices, promoting climate-resilient farming in rainfed and hill regions."
+];
+
+// ============================================================================
+// SECTION 6: BACKGROUND
+// ============================================================================
+
+function SoftImage({ label, className = "" }) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-3xl border border-[#cfddb4] bg-gradient-to-br from-[#d7e4bb] via-[#eef3db] to-[#ccdca6] shadow-md ${className}`}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,.7),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,90,44,.08),transparent_30%)]" />
+      <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-slate-600">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// SECTION 7: SYSTEM ARCHITECTURE
+// ============================================================================
+
+const architectureCards = [
+  {
+    title: "Led By Department of Agriculture, Uttarakhand",
+    points: [
+      "Programme oversight and policy direction",
+      "District-wise monitoring and review",
+      "Coordination with field offices and implementation teams",
+    ],
+  },
+  {
+    title: "Powered By MIS Dashboard System",
+    points: [
+      "Role-based access for admin, district and block users",
+      "Farmer registration, login and dashboard workflows",
+      "Data-driven reporting for planning and implementation",
+    ],
+  },
+  {
+    title: "Built On Open Digital Stack",
+    points: [
+      "PostgreSQL-based data backbone",
+      "Dashboard and reporting through open-source tools",
+      "Scalable architecture for future agriculture modules",
+    ],
+  },
+];
+
+// ============================================================================
+// SECTION 8: OBJECTIVES & FRAMEWORK
+// ============================================================================
+
+const objectives = [
+  "Build a state-wide millet farmer registry",
+  "Enable district and block level monitoring",
+  "Track monthly field progress efficiently",
+  "Support transparent farmer data management",
+  "Strengthen millet-focused planning and reporting",
+  "Improve administrative decision-making through dashboards",
+  "Create a scalable foundation for AgriStack-like services",
+];
+
+function MiniBadge({ children }) {
+  return (
+    <div className="rounded-2xl bg-[#2f7f79] px-4 py-3 text-sm md:text-base font-semibold text-white shadow-md">
+      {children}
+    </div>
+  );
+}
+
+// ============================================================================
+// SECTION 9: COMPONENTS OF PROJECT
+// ============================================================================
+
+const components = [
+  {
+    title: "Farmer Registration and Login",
+    icon: <Users className="h-6 w-6" />,
+    points: [
+      "Digital registration of millet farmers across Uttarakhand",
+      "Secure login workflows for registered users",
+      "Structured capture of farmer and regional details",
+      "Improved accessibility of farmer records for administration",
+    ],
+  },
+  {
+    title: "State, District and Block Dashboards",
+    icon: <LayoutDashboard className="h-6 w-6" />,
+    points: [
+      "Dedicated dashboards for each administrative level",
+      "Region-wise summaries for faster monitoring",
+      "Improved visibility into registrations and implementation progress",
+      "Quick review of dashboard metrics for officials",
+    ],
+  },
+  {
+    title: "Millet Crop Focus",
+    icon: <Sprout className="h-6 w-6" />,
+    points: [
+      "Exclusive focus on millet-related farmer data",
+      "Support for traditional and climate-resilient crops",
+      "Better planning for millet promotion in hill regions",
+      "Alignment with nutrition and livelihood objectives",
+    ],
+  },
+  {
+    title: "Monthly Employee Progress Reports",
+    icon: <BookOpen className="h-6 w-6" />,
+    points: [
+      "Track monthly work completed by field staff",
+      "Support accountability and performance review",
+      "Make reporting easier across administrative levels",
+      "Enable structured monitoring of implementation activities",
+    ],
+  },
+  {
+    title: "Region-Based Analytics",
+    icon: <Map className="h-6 w-6" />,
+    points: [
+      "District and block-wise analysis of farmer records",
+      "Visual summaries for decision support",
+      "Quick identification of gaps and coverage trends",
+      "Improved planning for targeted interventions",
+    ],
+  },
+  {
+    title: "Open-Source Technology Framework",
+    icon: <Factory className="h-6 w-6" />,
+    points: [
+      "Built using PostgreSQL and other free/open-source tools",
+      "Designed for sustainability and cost efficiency",
+      "Easier future expansion into additional agriculture services",
+    ],
+  },
+  {
+    title: "Administrative Decision Support",
+    icon: <Megaphone className="h-6 w-6" />,
+    points: [
+      "Support evidence-based planning for officials",
+      "Strengthen review and monitoring workflows",
+      "Enable better coordination between state and field units",
+    ],
+  },
+];
+
+function SectionTitle({ title, subtitle }) {
+  return (
+    <div className="mb-10 text-center">
+      <h2 className="text-3xl md:text-5xl font-extrabold tracking-wide text-[#0f5a2c] uppercase">
+        {title}
+      </h2>
+      {subtitle ? (
+        <p className="mt-3 text-lg md:text-2xl text-slate-800">{subtitle}</p>
+      ) : null}
+      <div className="mx-auto mt-5 h-px w-full max-w-5xl bg-[#b9c89d]" />
+    </div>
+  );
+}
+
+// ============================================================================
+// SECTION 10: PROJECT DELIVERY MECHANISM
+// ============================================================================
+
+// (No additional constants - uses architectureCards from Section 7)
+
+// ============================================================================
+// SECTION 11: UK MILLET MIS WORKFLOW
+// ============================================================================
+
+const flowLevels = ["State Level", "District Level", "Block Level"];
+
+const mPassteps = [
+  "Farmer details are collected through the digital registration workflow.",
+  "Farmer records are entered and validated in the Uttarakhand millet MIS system.",
+  "District-level teams review registration and dashboard records.",
+  "Regional mapping enables block and district-wise verification of entries.",
+  "Authenticated users access dashboards based on their assigned role.",
+  "Corrections and updates are managed through administrative review.",
+  "Reports are generated for monitoring, planning and monthly progress review.",
+  "Consolidated insights support faster decision-making at state level.",
+];
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function UttarakhandMilletProjectLandingPage() {
   return (
     <div className="min-h-full bg-[#efefef] font-dm text-slate-900">
+      
+      {/* ========== SECTION 1: HERO SECTION ========== */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-[#06351d]/45" />
@@ -487,6 +532,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 2: DISTRICT MAP + STATS + LEGEND ========== */}
       <section id="about" className="mx-auto max-w-7xl px-4 pt-2 pb-16 lg:px-8">
         <div className="relative z-10 grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
           <div className="w-full overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
@@ -527,16 +573,12 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-6 lg:px-8">
+      {/* ========== OVERVIEW & PROJECT INFO ========== */}
+      <section className="mx-auto max-w-10xl px-4 pb-6 lg:px-8">
         <div className="flex justify-center pb-4">
-          <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-[#efc993] via-[#ca7e35] to-[#744113] p-2 shadow-xl">
-            <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#ffe2bc] bg-[#b66b2d] text-center text-sm font-extrabold uppercase tracking-wide text-white">
-              Millet Project
-            </div>
-          </div>
         </div>
         <div className="text-center">
-          <h2 className="text-3xl md:text-5xl text-slate-900">Overview and impact of the Uttarakhand Millet Project</h2>
+          <h2 className="text-3xl md:text-5xl text-slate-1900">Overview and impact of the Uttarakhand Millet Project</h2>
           <div className="mx-auto mt-4 h-px w-full max-w-5xl bg-slate-300" />
           <h3 className="mt-5 text-2xl md:text-4xl text-[#0d7b17]">
             A digital initiative for farmer registry, monitoring and millet-focused governance.
@@ -544,16 +586,24 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {recognitions.map((item) => (
-            <div key={item} className="min-h-[180px] rounded-sm bg-[#deebe6] p-7 text-xl leading-10 shadow-sm">
+      <section className="relative mx-auto max-w-7xl px-4 py-16 lg:px-1">
+        {/* Center line */}
+        <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-gray-300"></div>
+
+        <div className="flex justify-between items-center relative">
+          {recognitions.map((item, index) => (
+            <div
+              key={index}
+              className={`relative w-[200px] p-6 bg-[#deebe6] shadow-sm 
+              ${index % 2 === 0 ? "-translate-y-16" : "translate-y-16"}`}
+            >
               {item}
             </div>
           ))}
         </div>
       </section>
-
+      
+      {/* ========== SECTION 5: PROJECT MILESTONES ========== */}
       <section className="mt-10 bg-[#dde3b7] py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <SectionTitle
@@ -585,6 +635,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 6: BACKGROUND ========== */}
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-16 lg:grid-cols-2 lg:px-8">
         <SoftImage label="Background / Consultation Photograph" className="min-h-[380px]" />
         <div className="space-y-8">
@@ -604,6 +655,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 7: SYSTEM ARCHITECTURE ========== */}
       <section className="bg-[#dde6bc] py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="mb-10 text-left">
@@ -627,13 +679,13 @@ export default function UttarakhandMilletProjectLandingPage() {
               <div className="relative h-[460px] w-full max-w-[520px]">
                 <div className="absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[6px] border-[#d6ac7e]" />
                 <div className="absolute left-1/2 top-12 flex h-40 w-40 -translate-x-1/2 items-center justify-center rounded-full bg-white shadow-xl">
-                  <Landmark className="h-16 w-16 text-slate-700" />
+                  <Landmark className="h-20 w-20 text-slate-700" />
                 </div>
                 <div className="absolute bottom-10 left-10 flex h-36 w-36 items-center justify-center rounded-full bg-white shadow-xl">
-                  <Wheat className="h-16 w-16 text-[#317a6f]" />
+                  <Wheat className="h-20 w-20 text-[#317a6f]" />
                 </div>
                 <div className="absolute bottom-10 right-10 flex h-36 w-36 items-center justify-center rounded-full bg-white shadow-xl">
-                  <BookOpen className="h-16 w-16 text-[#5647a5]" />
+                  <BookOpen className="h-20 w-20 text-[#5647a5]" />
                 </div>
                 <div className="absolute left-1/2 top-1/2 flex h-52 w-52 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#d48c49] to-[#bb6c29] p-3 shadow-2xl">
                   <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#f8d5aa] text-center text-2xl font-extrabold uppercase text-white">
@@ -665,6 +717,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 8: OBJECTIVES & FRAMEWORK ========== */}
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
           <div className="rounded-3xl bg-white p-6 shadow-lg">
@@ -696,6 +749,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 9: COMPONENTS OF PROJECT ========== */}
       <section className="bg-[#dce4b5] py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <SectionTitle title="Components of the Project" />
@@ -703,9 +757,9 @@ export default function UttarakhandMilletProjectLandingPage() {
             <span className="font-extrabold">Implementation Structure:</span> The project is designed for use across state, district and block levels, supporting farmer registration, dashboard reporting, employee monitoring and millet-focused administration.
           </p>
 
-          <div className="grid gap-8">
+          <div className="grid gap-12">
             {components.map((item, idx) => (
-              <div key={item.title} className={`grid gap-8 items-center ${idx % 2 === 0 ? "lg:grid-cols-[380px_1fr]" : "lg:grid-cols-[1fr_380px]"}`}>
+              <div key={item.title} className={`grid gap-10 items-center ${idx % 2 === 0 ? "lg:grid-cols-[380px_1fr]" : "lg:grid-cols-[1fr_380px]"}`}>
                 {idx % 2 === 0 ? (
                   <SoftImage label={`${item.title} / Image`} className="min-h-[320px]" />
                 ) : null}
@@ -713,7 +767,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                 <div className="py-4">
                   <div className="mb-4 flex items-center gap-3 text-[#1a1a1a]">
                     <div className="rounded-2xl bg-white p-3 shadow">{item.icon}</div>
-                    <h3 className="text-3xl md:text-5xl">{item.title} :</h3>
+                    <h3 className="text-3xl md:text-4xl">{item.title} :</h3>
                   </div>
                   <ul className="space-y-3 text-lg md:text-2xl leading-10 text-slate-800">
                     {item.points.map((point) => (
@@ -734,6 +788,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 10: PROJECT DELIVERY MECHANISM ========== */}
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <div className="overflow-hidden rounded-[2.5rem] bg-[#a77826] text-white shadow-2xl">
           <div className="grid lg:grid-cols-[1.15fr_1fr]">
@@ -771,6 +826,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== IMPLEMENTATION FLOW (Grid Structure) ========== */}
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <div className="rounded-[2.5rem] bg-white p-8 shadow-2xl">
           <div className="grid gap-10 xl:grid-cols-[240px_1fr_1fr]">
@@ -778,12 +834,19 @@ export default function UttarakhandMilletProjectLandingPage() {
               <div className="grid place-items-center rounded-3xl bg-[#eef3d8] p-6 shadow-inner">
                 <Users className="h-20 w-20 text-[#827122]" />
               </div>
+
               <div className="text-center text-[#7a6a1e]">
-                <p className="text-xl font-semibold">Project implementation happens at three levels:</p>
+                <p className="text-xl font-semibold">
+                  Project implementation happens at three levels:
+                </p>
               </div>
+
               <div className="w-full space-y-3">
                 {flowLevels.map((level) => (
-                  <div key={level} className="rounded-xl bg-[#8a7b2a] px-4 py-4 text-center text-white text-xl font-bold shadow">
+                  <div
+                    key={level}
+                    className="flex min-h-[64px] items-center justify-center rounded-xl bg-[#8a7b2a] px-4 py-3 text-center text-xl font-bold leading-snug text-white shadow"
+                  >
                     {level}
                   </div>
                 ))}
@@ -799,7 +862,10 @@ export default function UttarakhandMilletProjectLandingPage() {
               ].map((row, idx) => (
                 <div key={idx} className="grid gap-4 md:grid-cols-3">
                   {row.map((box) => (
-                    <div key={box} className="rounded-2xl bg-[#7f7923] p-5 text-center text-lg font-semibold text-white shadow">
+                    <div
+                      key={box}
+                      className="flex min-h-[118px] items-center justify-center rounded-2xl bg-[#7f7923] p-4 text-center text-lg font-semibold leading-snug text-white shadow"
+                    >
                       {box}
                     </div>
                   ))}
@@ -808,12 +874,14 @@ export default function UttarakhandMilletProjectLandingPage() {
             </div>
 
             <div className="space-y-5">
-              <div className="rounded-2xl bg-[#8c6120] p-6 text-center text-2xl font-semibold text-white shadow">
+              <div className="flex min-h-[86px] items-center justify-center rounded-2xl bg-[#8c6120] p-5 text-center text-2xl font-semibold leading-snug text-white shadow">
                 State Project Administrator
               </div>
-              <div className="rounded-2xl bg-[#9f6c23] p-6 text-center text-2xl font-semibold text-white shadow">
+
+              <div className="flex min-h-[86px] items-center justify-center rounded-2xl bg-[#9f6c23] p-5 text-center text-2xl font-semibold leading-snug text-white shadow">
                 District Project Administrator
               </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 {[
                   "Farmer Database",
@@ -824,7 +892,10 @@ export default function UttarakhandMilletProjectLandingPage() {
                   "Progress Reporting",
                   "System Management",
                 ].map((box) => (
-                  <div key={box} className="rounded-2xl bg-[#a17025] p-5 text-center text-lg font-semibold text-white shadow">
+                  <div
+                    key={box}
+                    className="flex min-h-[92px] items-center justify-center rounded-2xl bg-[#a17025] p-4 text-center text-lg font-semibold leading-snug text-white shadow"
+                  >
                     {box}
                   </div>
                 ))}
@@ -834,8 +905,9 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
+      {/* ========== SECTION 11: UK MILLET MIS WORKFLOW ========== */}
       <section className="bg-[#dce4b5] py-16">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 lg:px-1">
           <div className="mb-10 text-center">
             <h2 className="text-3xl md:text-5xl font-extrabold uppercase">Uttarakhand Millet MIS Workflow</h2>
             <p className="mt-4 text-2xl md:text-5xl">Farmer Registry and Dashboard System</p>
@@ -845,8 +917,8 @@ export default function UttarakhandMilletProjectLandingPage() {
             Process of Farmer Registration and Monitoring
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[160px_1fr_1fr_1fr]">
-            <div className="flex flex-col items-center justify-start gap-3 rounded-3xl bg-[#ebdfc1] p-5">
+          <div className="grid gap-8 lg:grid-cols-[260px_1fr_1fr_1fr]">
+            <div className="flex flex-col items-center justify-start gap-8 rounded-3xl bg-[#ebdfc1] p-5">
               <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#f6ead1]">
                 <Users className="h-12 w-12 text-[#7f6335]" />
               </div>
@@ -856,7 +928,7 @@ export default function UttarakhandMilletProjectLandingPage() {
             {mPassteps.slice(0, 6).map((step, idx) => (
               <div
                 key={step}
-                className={`relative rounded-2xl p-6 text-center text-lg md:text-2xl shadow ${idx % 3 === 0 ? "bg-[#a8ddd8]" : idx % 3 === 1 ? "bg-[#c9dfc0]" : "bg-[#efdebc]"}`}
+                className={`relative rounded-2xl p-10 text-center text-lg md:text-2xl shadow ${idx % 3 === 0 ? "bg-[#a8ddd8]" : idx % 3 === 1 ? "bg-[#c9dfc0]" : "bg-[#efdebc]"}`}
               >
                 <div className="flex h-full items-center justify-center">{step}</div>
                 <ArrowRight className="absolute -right-3 top-1/2 hidden h-6 w-6 -translate-y-1/2 text-white lg:block" />
@@ -864,7 +936,7 @@ export default function UttarakhandMilletProjectLandingPage() {
             ))}
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_1fr]">
             <div className="rounded-2xl bg-[#d6e5a0] p-6 text-center text-lg md:text-2xl shadow">
               {mPassteps[6]}
             </div>
