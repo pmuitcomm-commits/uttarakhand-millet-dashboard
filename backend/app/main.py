@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +15,20 @@ from .routes.farmer import router as farmer_router
 load_dotenv()
 
 app = FastAPI()
+
+allowed_origins = [
+    "https://uttarakhand-millet-dashboard.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
@@ -35,20 +48,6 @@ app.add_exception_handler(
         status_code=429,
         content={"detail": "Rate limit exceeded. Too many requests."}
     )
-)
-
-# CORS
-cors_origins = os.getenv(
-    "CORS_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000"
-).split(",")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Routes

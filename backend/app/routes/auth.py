@@ -107,6 +107,15 @@ def _validate_scope_fields(user):
         )
 
 
+def _password_matches(password: str, hashed_password: Optional[str]) -> bool:
+    if not hashed_password:
+        return False
+    try:
+        return verify_password(password, hashed_password)
+    except (TypeError, ValueError):
+        return False
+
+
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -280,7 +289,7 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
 @limiter.limit("5/minute")
 def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db)):
     user = _fetch_user_by_username(db, credentials.username)
-    if user is None or not _active_user(user) or not verify_password(credentials.password, user["hashed_password"]):
+    if user is None or not _active_user(user) or not _password_matches(credentials.password, user["hashed_password"]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     access_token = create_access_token(data={"sub": user["username"]})
