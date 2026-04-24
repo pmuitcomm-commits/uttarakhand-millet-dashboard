@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +10,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Bar, Chart, Line } from "react-chartjs-2";
 
 import Sidebar from "../components/Sidebar";
 import DistrictChart from "../components/DistrictChart";
@@ -19,6 +19,20 @@ import DataTable from "../components/DataTable";
 import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
 import { useLanguage } from "../context/LanguageContext";
 import { getDistrictName, uttarakhandDistricts } from "../data/districts";
+import districtGeojsonUrl from "../data/district.geojson";
+import {
+  chcCmscProgress,
+  districtCoverage,
+  enterpriseDetails,
+  enterpriseProgress,
+  enterpriseTypes,
+  enterpriseYears,
+  getCropDemonstrationRows,
+  milletDemonstrationProgress,
+  overviewFinancialYears,
+  overviewSeasons,
+  ragiProcurementProgress,
+} from "./overviewDashboardData";
 
 import {
   getKPIs,
@@ -47,6 +61,541 @@ function withDistrictName(record) {
   };
 }
 
+const overviewCardClassName =
+  "flex min-h-[430px] min-w-0 flex-col overflow-hidden rounded-[18px] border border-[#e2e8f0] bg-white p-5 shadow-card max-[640px]:min-h-[360px] max-[640px]:rounded-xl max-[640px]:p-3 dark:border-[#444444] dark:bg-[#2a2a2a] dark:text-white";
+
+const overviewSelectClassName =
+  "min-w-[150px] rounded-lg border border-[#b9c8c1] bg-white px-3 py-2 text-sm font-semibold text-[#024b37] shadow-sm transition focus:border-[#024b37] focus:outline-none focus:ring-4 focus:ring-[#024b37]/10 max-[640px]:w-full dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-white";
+
+const overviewSearchClassName =
+  "min-w-[210px] rounded-lg border border-[#b9c8c1] bg-white px-3 py-2 text-sm font-semibold text-[#024b37] shadow-sm transition placeholder:text-[#6b8078] focus:border-[#024b37] focus:outline-none focus:ring-4 focus:ring-[#024b37]/10 max-[640px]:w-full dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-white dark:placeholder:text-[#a7b4ae]";
+
+const mapLegend = [
+  { label: "0-25%", color: "#eef4e6" },
+  { label: "26-50%", color: "#c7dfa0" },
+  { label: "51-75%", color: "#76a84c" },
+  { label: "76-100%", color: "#23693f" },
+];
+
+function toNumber(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function formatNumber(value, maximumFractionDigits = 0) {
+  return toNumber(value).toLocaleString("en-IN", {
+    maximumFractionDigits,
+  });
+}
+
+function formatCompactNumber(value) {
+  const numeric = toNumber(value);
+
+  if (numeric >= 100000) {
+    return `${(numeric / 100000).toFixed(1)}L`;
+  }
+
+  if (numeric >= 1000) {
+    return `${(numeric / 1000).toFixed(1)}k`;
+  }
+
+  return formatNumber(numeric);
+}
+
+function axisTitle(title) {
+  return {
+    display: Boolean(title),
+    text: title,
+    color: "#024b37",
+    font: { size: 12, weight: "700" },
+  };
+}
+
+function overviewChartOptions({ yTitle, y1Title, xTitle = "", stacked = false } = {}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: "bottom",
+        labels: {
+          boxHeight: 10,
+          boxWidth: 12,
+          color: "#024b37",
+          font: { size: 12, weight: "600" },
+          usePointStyle: true,
+        },
+      },
+      tooltip: {
+        backgroundColor: "rgba(2, 75, 55, 0.95)",
+        titleFont: { size: 13, weight: "700" },
+        bodyFont: { size: 12, weight: "600" },
+        padding: 12,
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || "";
+            return `${label}: ${formatNumber(context.parsed.y, 2)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        stacked,
+        title: axisTitle(xTitle),
+        ticks: {
+          autoSkip: false,
+          color: "#000000",
+          font: { size: 11, weight: "600" },
+          maxRotation: 55,
+          minRotation: 30,
+        },
+        grid: { color: "rgba(2,75,55,0.06)" },
+      },
+      y: {
+        stacked,
+        beginAtZero: true,
+        title: axisTitle(yTitle),
+        ticks: {
+          color: "#000000",
+          font: { size: 11, weight: "600" },
+          callback: (value) => formatCompactNumber(value),
+        },
+        grid: { color: "rgba(2,75,55,0.08)" },
+      },
+      ...(y1Title
+        ? {
+            y1: {
+              beginAtZero: true,
+              position: "right",
+              title: axisTitle(y1Title),
+              ticks: {
+                color: "#000000",
+                font: { size: 11, weight: "600" },
+                callback: (value) => formatCompactNumber(value),
+              },
+              grid: { drawOnChartArea: false },
+            },
+          }
+        : {}),
+    },
+  };
+}
+
+function chartOptionsWithTooltip(baseOptions, labelFormatter) {
+  return {
+    ...baseOptions,
+    plugins: {
+      ...baseOptions.plugins,
+      tooltip: {
+        ...baseOptions.plugins.tooltip,
+        callbacks: {
+          label: labelFormatter,
+        },
+      },
+    },
+  };
+}
+
+const pointValueLabelsPlugin = {
+  id: "pointValueLabels",
+  afterDatasetsDraw(chart, _args, pluginOptions) {
+    if (pluginOptions?.display === false) return;
+
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = "600 10px Montserrat, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      if (!chart.isDatasetVisible(datasetIndex)) return;
+      if ((dataset.type || chart.config.type) !== "line") return;
+
+      const meta = chart.getDatasetMeta(datasetIndex);
+      ctx.fillStyle = dataset.borderColor || "#024b37";
+
+      meta.data.forEach((point, index) => {
+        const rawValue = dataset.data?.[index];
+        const value =
+          rawValue && typeof rawValue === "object" ? rawValue.y : rawValue;
+
+        if (value == null || Number.isNaN(Number(value))) return;
+
+        const label =
+          typeof pluginOptions?.formatter === "function"
+            ? pluginOptions.formatter(value, dataset, index)
+            : formatCompactNumber(value);
+        const verticalOffset = 8 + (datasetIndex % 2) * 12;
+        ctx.fillText(label, point.x, point.y - verticalOffset);
+      });
+    });
+
+    ctx.restore();
+  },
+};
+
+function OverviewSelect({ label, value, onChange, children }) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-bold uppercase text-[#4a5f58] max-[640px]:w-full dark:text-[#d5dfdc]">
+      <span>{label}</span>
+      <select
+        aria-label={label}
+        className={overviewSelectClassName}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function OverviewCard({ title, subtitle, controls, children, className = "" }) {
+  return (
+    <section className={`${overviewCardClassName} ${className}`} data-aos="fade-up">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="m-0 break-words text-[1.08rem] font-extrabold leading-tight text-[#024b37] max-[640px]:text-base dark:text-white">
+            {title}
+          </h3>
+          {subtitle ? (
+            <p className="mb-0 mt-1 max-w-[58ch] text-sm font-medium leading-snug text-[#51645d] dark:text-[#d3d9d7]">
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+        {controls ? (
+          <div className="flex flex-wrap items-end justify-end gap-2 max-[640px]:w-full">
+            {controls}
+          </div>
+        ) : null}
+      </div>
+      <div className="mt-4 min-h-0 flex-1">{children}</div>
+    </section>
+  );
+}
+
+function LoadingState({ label = "Loading dashboard data..." }) {
+  return (
+    <div className="flex h-full min-h-[260px] items-center justify-center rounded-lg border border-dashed border-[#b9c8c1] bg-[#f7faf8] px-4 text-center text-sm font-bold text-[#024b37] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-white">
+      {label}
+    </div>
+  );
+}
+
+function EmptyState({ label = "No records available for this selection." }) {
+  return (
+    <div className="flex h-full min-h-[220px] items-center justify-center rounded-lg border border-dashed border-[#d7dfdc] bg-[#fafcfb] px-4 text-center text-sm font-bold text-[#64756f] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-[#cbd5d1]">
+      {label}
+    </div>
+  );
+}
+
+function ChartFrame({ children }) {
+  return (
+    <div className="h-[310px] min-h-0 w-full max-[640px]:h-[270px]">
+      {children}
+    </div>
+  );
+}
+
+function CardInsight({ children }) {
+  return (
+    <div className="mt-3 rounded-lg border border-[#d8e3de] bg-[#f7faf8] px-3 py-2 text-xs font-semibold leading-relaxed text-[#024b37] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-[#e5f0ed]">
+      {children}
+    </div>
+  );
+}
+
+function OverviewDataTable({ columns, rows, emptyLabel }) {
+  if (!rows.length) {
+    return <EmptyState label={emptyLabel} />;
+  }
+
+  return (
+    <div className="max-h-[325px] overflow-auto rounded-lg border border-[#e2e8f0] dark:border-[#444444]">
+      <table className="min-w-[620px] w-full border-collapse bg-white text-sm dark:bg-[#2a2a2a]">
+        <caption className="sr-only">Overview dashboard table</caption>
+        <thead className="sticky top-0 z-[1]">
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.key}
+                className={`whitespace-nowrap border-b border-[#d8e3de] bg-[#f5f8f6] px-4 py-3 text-left text-xs font-extrabold uppercase text-[#003366] dark:border-[#444444] dark:bg-[#1a1a1a] dark:text-white ${
+                  column.numeric ? "text-right" : ""
+                }`}
+              >
+                {column.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr
+              key={`${row.unitName || row.district}-${index}`}
+              className="even:bg-[#f7faf8] hover:bg-[#eef7f2] dark:even:bg-[#252525] dark:hover:bg-[#333333]"
+            >
+              {columns.map((column) => (
+                <td
+                  key={`${row.unitName || row.district}-${column.key}`}
+                  className={`border-b border-[#e9efec] px-4 py-3 text-[#024b37] dark:border-[#444444] dark:text-white ${
+                    column.numeric ? "text-right font-bold tabular-nums" : "font-semibold"
+                  }`}
+                >
+                  {column.numeric
+                    ? formatNumber(row[column.key])
+                    : row[column.key] ?? "-"}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function normalizeGeoDistrictName(name = "") {
+  const cleanName = String(name).trim().replace(/\s+/g, " ");
+  const aliases = {
+    garhwal: "Pauri Garhwal",
+    hardwar: "Haridwar",
+  };
+
+  return aliases[cleanName.toLowerCase()] || cleanName;
+}
+
+function getRings(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === "Polygon") return geometry.coordinates || [];
+  if (geometry.type === "MultiPolygon") return (geometry.coordinates || []).flat();
+  return [];
+}
+
+function getCoverageColor(percentage) {
+  if (percentage <= 25) return mapLegend[0].color;
+  if (percentage <= 50) return mapLegend[1].color;
+  if (percentage <= 75) return mapLegend[2].color;
+  return mapLegend[3].color;
+}
+
+function buildOverviewDistrictMap(features, coverageRows) {
+  const width = 720;
+  const height = 560;
+  const padding = 24;
+  const points = [];
+
+  features.forEach((feature) => {
+    getRings(feature.geometry).forEach((ring) => {
+      ring.forEach((point) => {
+        if (Array.isArray(point) && point.length >= 2) {
+          points.push(point);
+        }
+      });
+    });
+  });
+
+  if (!points.length) return null;
+
+  const longitudes = points.map(([longitude]) => longitude);
+  const latitudes = points.map(([, latitude]) => latitude);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const longitudeSpan = maxLongitude - minLongitude;
+  const latitudeSpan = maxLatitude - minLatitude;
+  const scale = Math.min(
+    (width - padding * 2) / longitudeSpan,
+    (height - padding * 2) / latitudeSpan
+  );
+  const mapWidth = longitudeSpan * scale;
+  const mapHeight = latitudeSpan * scale;
+  const offsetX = (width - mapWidth) / 2;
+  const offsetY = (height - mapHeight) / 2;
+  const coverageByDistrict = coverageRows.reduce(
+    (districts, row) => ({
+      ...districts,
+      [row.district]: row,
+    }),
+    {}
+  );
+  const maxFarmers = Math.max(...coverageRows.map((row) => row.totalFarmers), 1);
+  const project = ([longitude, latitude]) => [
+    Number((offsetX + (longitude - minLongitude) * scale).toFixed(2)),
+    Number((offsetY + (maxLatitude - latitude) * scale).toFixed(2)),
+  ];
+
+  const districts = features.map((feature) => {
+    const name = normalizeGeoDistrictName(feature.properties?.dtname);
+    const coverage = coverageByDistrict[name] || {
+      district: name,
+      totalBlocks: 0,
+      gps: 0,
+      villages: 0,
+      totalFarmers: 0,
+    };
+    const coveragePercentage = Math.round((coverage.totalFarmers / maxFarmers) * 100);
+
+    const path = getRings(feature.geometry)
+      .map((ring) => {
+        const stride = Math.max(1, Math.ceil(ring.length / 420));
+        const sampledRing = ring.filter(
+          (_, index) => index % stride === 0 || index === ring.length - 1
+        );
+
+        return sampledRing
+          .map((point, index) => {
+            const [x, y] = project(point);
+            return `${index === 0 ? "M" : "L"}${x} ${y}`;
+          })
+          .join(" ")
+          .concat(" Z");
+      })
+      .join(" ");
+
+    return {
+      ...coverage,
+      coveragePercentage,
+      color: getCoverageColor(coveragePercentage),
+      path,
+    };
+  });
+
+  return { districts, height, width };
+}
+
+function CoverageFallback({ rows }) {
+  const maxFarmers = Math.max(...rows.map((row) => row.totalFarmers), 1);
+
+  return (
+    <div className="space-y-2">
+      {rows.map((row) => {
+        const percentage = Math.round((row.totalFarmers / maxFarmers) * 100);
+
+        return (
+          <div key={row.district}>
+            <div className="mb-1 flex items-center justify-between gap-3 text-xs font-bold text-[#024b37] dark:text-white">
+              <span>{row.district}</span>
+              <span>{formatNumber(row.totalFarmers)} farmers</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[#e7efeb] dark:bg-[#1f2937]">
+              <div
+                className="h-full rounded-full bg-[#23693f]"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function DistrictCoverageMap({ geojson, rows }) {
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    district: null,
+  });
+  const mapModel = useMemo(
+    () => buildOverviewDistrictMap(geojson?.features || [], rows),
+    [geojson, rows]
+  );
+
+  function showTooltip(event, district) {
+    setTooltip({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      district,
+    });
+  }
+
+  function hideTooltip() {
+    setTooltip({
+      visible: false,
+      x: 0,
+      y: 0,
+      district: null,
+    });
+  }
+
+  if (!mapModel) {
+    return <CoverageFallback rows={rows} />;
+  }
+
+  return (
+    <div className="relative h-full min-h-[320px]">
+      <div className="relative flex h-[300px] items-center justify-center overflow-hidden rounded-lg border border-[#d8e3de] bg-[#f6faf6] max-[640px]:h-[250px] dark:border-[#444444] dark:bg-[#1f2937]">
+        <svg
+          aria-label="District-wise Shree Anna Abhiyan coverage map"
+          className="h-full w-full"
+          role="img"
+          viewBox={`0 0 ${mapModel.width} ${mapModel.height}`}
+        >
+          {mapModel.districts.map((district) => (
+            <path
+              key={district.district}
+              aria-label={`${district.district}: ${formatNumber(district.totalFarmers)} farmers`}
+              className="cursor-pointer transition-opacity hover:opacity-90 focus:opacity-90"
+              d={district.path}
+              fill={district.color}
+              onBlur={hideTooltip}
+              onFocus={(event) => showTooltip(event, district)}
+              onMouseEnter={(event) => showTooltip(event, district)}
+              onMouseLeave={hideTooltip}
+              onMouseMove={(event) => showTooltip(event, district)}
+              stroke="#ffffff"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              tabIndex="0"
+            >
+              <title>{`${district.district}: ${formatNumber(district.totalFarmers)} farmers`}</title>
+            </path>
+          ))}
+        </svg>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-[#024b37] dark:text-white">
+        <span>Coverage intensity</span>
+        {mapLegend.map((item) => (
+          <span key={item.label} className="inline-flex items-center gap-1.5">
+            <span
+              className="h-3 w-5 rounded-sm border border-[#cbd8d2]"
+              style={{ backgroundColor: item.color }}
+            />
+            {item.label}
+          </span>
+        ))}
+      </div>
+
+      {tooltip.visible && tooltip.district ? (
+        <div
+          className="pointer-events-none fixed z-50 max-w-[240px] rounded-lg bg-[#10251f] px-3 py-2 text-xs font-semibold leading-relaxed text-white shadow-lg"
+          style={{
+            left: tooltip.x + 14,
+            top: tooltip.y + 14,
+          }}
+        >
+          <div className="font-extrabold">{tooltip.district.district}</div>
+          <div>{formatNumber(tooltip.district.totalFarmers)} farmers</div>
+          <div>{formatNumber(tooltip.district.totalBlocks)} blocks</div>
+          <div>{formatNumber(tooltip.district.villages)} villages</div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Dashboard({ page = "dashboard" }) {
   const { t } = useLanguage();
   const [kpis, setKpis] = useState({});
@@ -55,6 +604,14 @@ function Dashboard({ page = "dashboard" }) {
   const [tableData, setTableData] = useState([]);
   const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [selectedMillet, setSelectedMillet] = useState("all");
+  const [selectedFinancialYear, setSelectedFinancialYear] = useState("2025-26");
+  const [selectedSeason, setSelectedSeason] = useState("All Seasons");
+  const [selectedEnterpriseYear, setSelectedEnterpriseYear] = useState("2025-26");
+  const [selectedEnterpriseDistrict, setSelectedEnterpriseDistrict] = useState("all");
+  const [enterpriseSearch, setEnterpriseSearch] = useState("");
+  const [overviewGeojson, setOverviewGeojson] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dataNotice, setDataNotice] = useState("");
 
   const pageTitles = {
     dashboard: t('overviewDashboard'),
@@ -67,8 +624,49 @@ function Dashboard({ page = "dashboard" }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (page !== "dashboard") {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadDistrictMap() {
+      try {
+        if (typeof districtGeojsonUrl !== "string") {
+          if (isMounted) {
+            setOverviewGeojson(districtGeojsonUrl);
+          }
+          return;
+        }
+
+        const response = await fetch(districtGeojsonUrl);
+        if (!response.ok) {
+          throw new Error("Map data unavailable");
+        }
+
+        const data = await response.json();
+        if (isMounted) {
+          setOverviewGeojson(data);
+        }
+      } catch {
+        if (isMounted) {
+          setOverviewGeojson(null);
+        }
+      }
+    }
+
+    loadDistrictMap();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page]);
+
   const fetchData = async () => {
     try {
+      setLoading(true);
+      setDataNotice("");
       const kpiRes = await getKPIs();
       setKpis(kpiRes.data);
 
@@ -82,6 +680,9 @@ function Dashboard({ page = "dashboard" }) {
       setTableData((tableRes.data || []).map(withDistrictName));
     } catch {
       setTableData([]);
+      setDataNotice("Live production data is unavailable. Showing page-local placeholder data where needed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,6 +701,583 @@ function Dashboard({ page = "dashboard" }) {
     : milletData.filter(item => item.millet === selectedMillet);
 
   const milletVarieties = ["Mandua", "Jhangora", "Ramdana", "Cheena", "Kauni"];
+
+  const cropDemoRows = useMemo(
+    () => getCropDemonstrationRows(tableData, selectedFinancialYear, selectedSeason),
+    [tableData, selectedFinancialYear, selectedSeason]
+  );
+
+  const enterpriseChartRows = useMemo(() => {
+    const filteredRows = enterpriseProgress.filter(
+      (row) =>
+        row.year === selectedEnterpriseYear &&
+        (selectedEnterpriseDistrict === "all" ||
+          row.district === selectedEnterpriseDistrict)
+    );
+
+    return enterpriseTypes.map((enterpriseType) =>
+      filteredRows
+        .filter((row) => row.enterpriseType === enterpriseType)
+        .reduce(
+          (summary, row) => ({
+            enterpriseType,
+            wshg: summary.wshg + row.wshg,
+            fpo: summary.fpo + row.fpo,
+          }),
+          { enterpriseType, wshg: 0, fpo: 0 }
+        )
+    );
+  }, [selectedEnterpriseDistrict, selectedEnterpriseYear]);
+
+  const filteredEnterpriseDetails = useMemo(() => {
+    const searchTerm = enterpriseSearch.trim().toLowerCase();
+
+    return enterpriseDetails.filter((row) => {
+      const matchesYear = row.year === selectedEnterpriseYear;
+      const matchesDistrict =
+        selectedEnterpriseDistrict === "all" ||
+        row.district === selectedEnterpriseDistrict;
+      const matchesSearch =
+        !searchTerm ||
+        row.unitName.toLowerCase().includes(searchTerm) ||
+        row.district.toLowerCase().includes(searchTerm);
+
+      return matchesYear && matchesDistrict && matchesSearch;
+    });
+  }, [enterpriseSearch, selectedEnterpriseDistrict, selectedEnterpriseYear]);
+
+  const highestAreaLowFarmerDistrict = useMemo(() => {
+    if (!cropDemoRows.length) return null;
+
+    return cropDemoRows.reduce((selected, row) => {
+      const rowEfficiency = row.farmers ? row.areaAchievement / row.farmers : 0;
+      const selectedEfficiency = selected.farmers
+        ? selected.areaAchievement / selected.farmers
+        : 0;
+
+      if (
+        row.areaAchievement > selected.areaAchievement &&
+        rowEfficiency < selectedEfficiency
+      ) {
+        return row;
+      }
+
+      return selected;
+    }, cropDemoRows[0]);
+  }, [cropDemoRows]);
+
+  const highFarmerLowAreaDistrict = useMemo(() => {
+    if (!cropDemoRows.length) return null;
+
+    return cropDemoRows.reduce((selected, row) => {
+      const rowAreaPerFarmer = row.farmers ? row.areaAchievement / row.farmers : 0;
+      const selectedAreaPerFarmer = selected.farmers
+        ? selected.areaAchievement / selected.farmers
+        : Number.POSITIVE_INFINITY;
+
+      if (row.farmers > selected.farmers && rowAreaPerFarmer < selectedAreaPerFarmer) {
+        return row;
+      }
+
+      return selected;
+    }, cropDemoRows[0]);
+  }, [cropDemoRows]);
+
+  const cropDemoChartData = {
+    labels: cropDemoRows.map((row) => row.district),
+    datasets: [
+      {
+        type: "bar",
+        label: "Area Achievement (ha)",
+        data: cropDemoRows.map((row) => row.areaAchievement),
+        yAxisID: "y",
+        backgroundColor: "rgba(102, 185, 172, 0.78)",
+        borderColor: "#2f7f79",
+        borderWidth: 1,
+        borderRadius: 5,
+        maxBarThickness: 28,
+      },
+      {
+        type: "line",
+        label: "Number of Farmers",
+        data: cropDemoRows.map((row) => row.farmers),
+        yAxisID: "y1",
+        borderColor: "#831843",
+        backgroundColor: "rgba(131, 24, 67, 0.16)",
+        borderWidth: 3,
+        pointBackgroundColor: "#831843",
+        pointRadius: 3.5,
+        tension: 0.34,
+      },
+    ],
+  };
+
+  const cropDemoOptions = chartOptionsWithTooltip(
+    overviewChartOptions({
+      xTitle: "Districts",
+      yTitle: "Area Achievement (ha)",
+      y1Title: "Farmers",
+    }),
+    (context) => {
+      const unit = context.dataset.yAxisID === "y" ? "ha" : "farmers";
+      return `${context.dataset.label}: ${formatNumber(context.parsed.y)} ${unit}`;
+    }
+  );
+
+  const milletProgressChartData = {
+    labels: milletDemonstrationProgress.map((row) => row.year),
+    datasets: [
+      {
+        type: "line",
+        label: "Farmers",
+        data: milletDemonstrationProgress.map((row) => row.farmers),
+        yAxisID: "y",
+        borderColor: "#024b37",
+        backgroundColor: "rgba(2, 75, 55, 0.12)",
+        borderWidth: 3,
+        pointBackgroundColor: "#024b37",
+        pointRadius: 4,
+        tension: 0.36,
+      },
+      {
+        type: "line",
+        label: "Area Demonstration (ha)",
+        data: milletDemonstrationProgress.map((row) => row.areaDemonstration),
+        yAxisID: "y1",
+        borderColor: "#e67e22",
+        backgroundColor: "rgba(230, 126, 34, 0.12)",
+        borderWidth: 3,
+        pointBackgroundColor: "#e67e22",
+        pointRadius: 4,
+        tension: 0.36,
+      },
+    ],
+  };
+
+  const milletProgressOptions = chartOptionsWithTooltip(
+    overviewChartOptions({
+      xTitle: "Financial Year",
+      yTitle: "Farmers",
+      y1Title: "Area (ha)",
+    }),
+    (context) => {
+      const unit = context.dataset.yAxisID === "y" ? "farmers" : "ha";
+      return `${context.dataset.label}: ${formatNumber(context.parsed.y)} ${unit}`;
+    }
+  );
+
+  milletProgressOptions.plugins.pointValueLabels = {
+    formatter: (value) => formatCompactNumber(value),
+  };
+
+  const ragiProcurementChartData = {
+    labels: ragiProcurementProgress.map((row) => row.year),
+    datasets: [
+      {
+        type: "line",
+        label: "Quantity Procured (quintals)",
+        data: ragiProcurementProgress.map((row) => row.quantityProcured),
+        yAxisID: "y",
+        borderColor: "#003366",
+        backgroundColor: "rgba(0, 51, 102, 0.12)",
+        borderWidth: 3,
+        pointBackgroundColor: "#003366",
+        pointRadius: 4,
+        tension: 0.34,
+      },
+      {
+        type: "line",
+        label: "Farmers Covered",
+        data: ragiProcurementProgress.map((row) => row.farmersCovered),
+        yAxisID: "y1",
+        borderColor: "#c12f2f",
+        backgroundColor: "rgba(193, 47, 47, 0.12)",
+        borderWidth: 3,
+        pointBackgroundColor: "#c12f2f",
+        pointRadius: 4,
+        tension: 0.34,
+      },
+    ],
+  };
+
+  const ragiProcurementOptions = chartOptionsWithTooltip(
+    overviewChartOptions({
+      xTitle: "Financial Year",
+      yTitle: "Quantity (quintals)",
+      y1Title: "Farmers",
+    }),
+    (context) => {
+      const unit = context.dataset.yAxisID === "y" ? "quintals" : "farmers";
+      return `${context.dataset.label}: ${formatNumber(context.parsed.y)} ${unit}`;
+    }
+  );
+
+  ragiProcurementOptions.plugins.pointValueLabels = {
+    formatter: (value) => formatCompactNumber(value),
+  };
+
+  const ragiPeak = ragiProcurementProgress.reduce((peak, row) =>
+    row.quantityProcured > peak.quantityProcured ? row : peak
+  );
+  const ragiDip = ragiProcurementProgress.reduce((dip, row) =>
+    row.quantityProcured < dip.quantityProcured ? row : dip
+  );
+
+  const infrastructureChartData = {
+    labels: chcCmscProgress.map((row) => row.district),
+    datasets: [
+      {
+        type: "bar",
+        label: "Programme Blocks",
+        data: chcCmscProgress.map((row) => row.programmeBlocks),
+        yAxisID: "y",
+        backgroundColor: "rgba(2, 75, 55, 0.76)",
+        borderColor: "#024b37",
+        borderWidth: 1,
+        borderRadius: 5,
+        maxBarThickness: 28,
+      },
+      {
+        type: "line",
+        label: "CHC count",
+        data: chcCmscProgress.map((row) => row.chcCount),
+        yAxisID: "y1",
+        borderColor: "#f0b429",
+        backgroundColor: "rgba(240, 180, 41, 0.14)",
+        borderWidth: 3,
+        pointBackgroundColor: "#f0b429",
+        pointRadius: 3.5,
+        tension: 0.34,
+      },
+      {
+        type: "line",
+        label: "CMSC count",
+        data: chcCmscProgress.map((row) => row.cmscCount),
+        yAxisID: "y1",
+        borderColor: "#831843",
+        backgroundColor: "rgba(131, 24, 67, 0.14)",
+        borderWidth: 3,
+        pointBackgroundColor: "#831843",
+        pointRadius: 3.5,
+        tension: 0.34,
+      },
+    ],
+  };
+
+  const infrastructureOptions = chartOptionsWithTooltip(
+    overviewChartOptions({
+      xTitle: "Districts",
+      yTitle: "Programme Blocks",
+      y1Title: "Facilities",
+    }),
+    (context) => `${context.dataset.label}: ${formatNumber(context.parsed.y)}`
+  );
+
+  const enterpriseChartData = {
+    labels: enterpriseChartRows.map((row) => row.enterpriseType),
+    datasets: [
+      {
+        label: "Enterprises with WSHGs",
+        data: enterpriseChartRows.map((row) => row.wshg),
+        backgroundColor: "rgba(102, 185, 172, 0.82)",
+        borderColor: "#2f7f79",
+        borderWidth: 1,
+        borderRadius: 5,
+        maxBarThickness: 32,
+      },
+      {
+        label: "Enterprises with FPOs",
+        data: enterpriseChartRows.map((row) => row.fpo),
+        backgroundColor: "rgba(254, 221, 86, 0.9)",
+        borderColor: "#b99200",
+        borderWidth: 1,
+        borderRadius: 5,
+        maxBarThickness: 32,
+      },
+    ],
+  };
+
+  const enterpriseOptions = chartOptionsWithTooltip(
+    overviewChartOptions({
+      xTitle: "Enterprise types",
+      yTitle: "Enterprise count",
+    }),
+    (context) => `${context.dataset.label}: ${formatNumber(context.parsed.y)}`
+  );
+
+  const enterpriseDetailRows = filteredEnterpriseDetails.map((row) => ({
+    unitName: row.unitName,
+    wshgCount: row.wshgCount,
+    fpoCount: row.fpoCount,
+  }));
+
+  const enterpriseDetailColumns = [
+    { key: "unitName", label: "Unit Name" },
+    { key: "wshgCount", label: "WSHG count", numeric: true },
+    { key: "fpoCount", label: "FPO count", numeric: true },
+  ];
+
+  const districtCoverageColumns = [
+    { key: "district", label: "District" },
+    { key: "totalBlocks", label: "Total Blocks", numeric: true },
+    { key: "gps", label: "No. of GPs", numeric: true },
+    { key: "villages", label: "Villages", numeric: true },
+    { key: "totalFarmers", label: "Total Farmers", numeric: true },
+  ];
+
+  const overviewSummary = {
+    farmers: districtCoverage.reduce((sum, row) => sum + row.totalFarmers, 0),
+    villages: districtCoverage.reduce((sum, row) => sum + row.villages, 0),
+    blocks: districtCoverage.reduce((sum, row) => sum + row.totalBlocks, 0),
+  };
+
+  if (page === "dashboard") {
+    return (
+      <div className={dashboardClasses.pageWrapper}>
+        <div className={dashboardClasses.dashboardContainer}>
+          <Sidebar />
+          <div className={dashboardClasses.mainContent}>
+            <div className={`${dashboardClasses.pageHeadingRow} !mb-3`} data-aos="fade-up">
+              <h2 className={dashboardClasses.pageHeadingTitle}>{pageTitles.dashboard}</h2>
+              <p className="mx-auto mt-2 max-w-4xl text-sm font-semibold leading-relaxed text-[#4a5f58] dark:text-[#d5dfdc]">
+                State overview for Shree Anna Abhiyan coverage, demonstrations,
+                procurement, infrastructure, enterprises, and district reach.
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs font-bold text-[#024b37] dark:text-white">
+                <span className="rounded-full border border-[#d8e3de] bg-[#f7faf8] px-3 py-1.5 dark:border-[#444444] dark:bg-[#1f2937]">
+                  {formatNumber(overviewSummary.blocks)} blocks
+                </span>
+                <span className="rounded-full border border-[#d8e3de] bg-[#f7faf8] px-3 py-1.5 dark:border-[#444444] dark:bg-[#1f2937]">
+                  {formatNumber(overviewSummary.villages)} villages
+                </span>
+                <span className="rounded-full border border-[#d8e3de] bg-[#f7faf8] px-3 py-1.5 dark:border-[#444444] dark:bg-[#1f2937]">
+                  {formatNumber(overviewSummary.farmers)} farmers
+                </span>
+              </div>
+            </div>
+
+            {dataNotice ? (
+              <div className="mx-4 mb-4 rounded-lg border border-[#f0d98a] bg-[#fff8dc] px-4 py-3 text-sm font-semibold text-[#5f4a00] max-[640px]:mx-2 dark:border-[#7c6a28] dark:bg-[#2b2614] dark:text-[#fff2b8]">
+                {dataNotice}
+              </div>
+            ) : null}
+
+            <div className="grid min-w-0 grid-cols-1 gap-5 p-4 min-[1024px]:grid-cols-2 max-[640px]:gap-3 max-[640px]:p-2">
+              <OverviewCard
+                title="Crop Demonstration Overview"
+                subtitle="Coverage and farmer participation by district."
+                controls={
+                  <>
+                    <OverviewSelect
+                      label="Financial Year"
+                      value={selectedFinancialYear}
+                      onChange={setSelectedFinancialYear}
+                    >
+                      {overviewFinancialYears.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </OverviewSelect>
+                    <OverviewSelect
+                      label="Select Season"
+                      value={selectedSeason}
+                      onChange={setSelectedSeason}
+                    >
+                      {overviewSeasons.map((season) => (
+                        <option key={season} value={season}>
+                          {season}
+                        </option>
+                      ))}
+                    </OverviewSelect>
+                  </>
+                }
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : cropDemoRows.length ? (
+                  <>
+                    <ChartFrame>
+                      <Chart type="bar" data={cropDemoChartData} options={cropDemoOptions} />
+                    </ChartFrame>
+                    <CardInsight>
+                      {highestAreaLowFarmerDistrict?.district || "-"} shows a high area base,
+                      while {highFarmerLowAreaDistrict?.district || "-"} indicates higher
+                      farmer participation with lower area per farmer.
+                    </CardInsight>
+                  </>
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="Millet Demonstration Progress"
+                subtitle="Year-wise comparison of farmers and demonstration area."
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : milletDemonstrationProgress.length ? (
+                  <ChartFrame>
+                    <Line
+                      data={milletProgressChartData}
+                      options={milletProgressOptions}
+                      plugins={[pointValueLabelsPlugin]}
+                    />
+                  </ChartFrame>
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="Ragi Procurement Progress"
+                subtitle="Procurement quantity and farmers covered over time."
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : ragiProcurementProgress.length ? (
+                  <>
+                    <ChartFrame>
+                      <Line
+                        data={ragiProcurementChartData}
+                        options={ragiProcurementOptions}
+                        plugins={[pointValueLabelsPlugin]}
+                      />
+                    </ChartFrame>
+                    <CardInsight>
+                      Peak procurement is {formatNumber(ragiPeak.quantityProcured)} quintals in{" "}
+                      {ragiPeak.year}; the lowest point is {formatNumber(ragiDip.quantityProcured)}{" "}
+                      quintals in {ragiDip.year}.
+                    </CardInsight>
+                  </>
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="CHC & CMSC Establishment Progress"
+                subtitle="Programme blocks compared with established facilities."
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : chcCmscProgress.length ? (
+                  <ChartFrame>
+                    <Chart
+                      type="bar"
+                      data={infrastructureChartData}
+                      options={infrastructureOptions}
+                    />
+                  </ChartFrame>
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="Millet Enterprise Progress"
+                subtitle="Enterprise ecosystem by WSHG and FPO ownership."
+                controls={
+                  <>
+                    <OverviewSelect
+                      label="Year"
+                      value={selectedEnterpriseYear}
+                      onChange={setSelectedEnterpriseYear}
+                    >
+                      {enterpriseYears.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </OverviewSelect>
+                    <OverviewSelect
+                      label="District"
+                      value={selectedEnterpriseDistrict}
+                      onChange={setSelectedEnterpriseDistrict}
+                    >
+                      <option value="all">All Districts</option>
+                      {uttarakhandDistricts.map((district) => (
+                        <option key={district} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                    </OverviewSelect>
+                  </>
+                }
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : enterpriseChartRows.some((row) => row.wshg || row.fpo) ? (
+                  <ChartFrame>
+                    <Bar data={enterpriseChartData} options={enterpriseOptions} />
+                  </ChartFrame>
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="Enterprise Details"
+                subtitle="Unit-level counts supporting the enterprise chart."
+                controls={
+                  <label className="flex flex-col gap-1 text-xs font-bold uppercase text-[#4a5f58] max-[640px]:w-full dark:text-[#d5dfdc]">
+                    <span>Search</span>
+                    <input
+                      aria-label="Search enterprise units"
+                      className={overviewSearchClassName}
+                      placeholder="Search unit or district"
+                      type="search"
+                      value={enterpriseSearch}
+                      onChange={(event) => setEnterpriseSearch(event.target.value)}
+                    />
+                  </label>
+                }
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : (
+                  <OverviewDataTable
+                    columns={enterpriseDetailColumns}
+                    emptyLabel="No enterprise units match this selection."
+                    rows={enterpriseDetailRows}
+                  />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="Scale of Shree Anna Abhiyan"
+                subtitle="District-wise spatial reach based on farmer coverage."
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : districtCoverage.length ? (
+                  <DistrictCoverageMap geojson={overviewGeojson} rows={districtCoverage} />
+                ) : (
+                  <EmptyState />
+                )}
+              </OverviewCard>
+
+              <OverviewCard
+                title="District-wise Coverage"
+                subtitle="Administrative coverage metrics for planning and monitoring."
+              >
+                {loading ? (
+                  <LoadingState />
+                ) : (
+                  <OverviewDataTable
+                    columns={districtCoverageColumns}
+                    emptyLabel="No district coverage rows available."
+                    rows={districtCoverage}
+                  />
+                )}
+              </OverviewCard>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // For millet page, use filtered data; otherwise use all data
   const dataForMilletMetrics = page === "millet" ? filteredMilletData : milletData;
