@@ -1,3 +1,10 @@
+/**
+ * CheckEnrollment page - Public masked farmer enrollment lookup.
+ *
+ * The page lets farmers verify whether a registration exists using a mobile
+ * number while keeping sensitive bank, address, and land details hidden.
+ */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -63,6 +70,12 @@ const detailValueClass = "text-[0.91rem] font-bold text-[#023628]";
 const resultsActionsClass =
   "mt-1 flex justify-center gap-3 border-t-[1.5px] border-[#eae6de] pt-2 max-[768px]:flex-col";
 
+/**
+ * Format API values for safe display in public enrollment status fields.
+ *
+ * @param {*} value - Field value returned by the backend.
+ * @returns {string} Display-safe string.
+ */
 function formatValue(value) {
   if (Array.isArray(value)) {
     return value.length ? value.join(", ") : "-";
@@ -75,6 +88,12 @@ function formatValue(value) {
   return String(value);
 }
 
+/**
+ * CheckEnrollment - Render public mobile-based enrollment status lookup.
+ *
+ * @component
+ * @returns {React.ReactElement} Public enrollment lookup page.
+ */
 function CheckEnrollment() {
   const navigate = useNavigate();
   const [mobile, setMobile] = useState("");
@@ -84,6 +103,7 @@ function CheckEnrollment() {
   const [enrollmentData, setEnrollmentData] = useState(null);
 
   const handleInputChange = (event) => {
+    // Restrict the public lookup field to a 10-digit mobile number.
     const numericValue = event.target.value.replace(/\D/g, "").slice(0, 10);
     setMobile(numericValue);
     setError("");
@@ -106,6 +126,7 @@ function CheckEnrollment() {
     setEnrollmentData(null);
 
     try {
+      // Backend returns only masked enrollment details for unauthenticated users.
       const response = await checkEnrollmentStatus(mobile.trim());
       setEnrollmentData(response.data);
     } catch (apiError) {
@@ -132,6 +153,7 @@ function CheckEnrollment() {
 
   return (
     <div className={pageClass}>
+      {/* Public Tailwind page uses stacked cards and responsive spacing for mobile farmers. */}
       <div className={headerClass}>
         <div className="flex items-center gap-5">
           <div>

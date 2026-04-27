@@ -1,3 +1,11 @@
+"""
+Legacy user seeding helper for existing database schemas.
+
+This script creates sample government users for local or controlled test
+environments. Passwords should be supplied through SEED_*_PASSWORD variables in
+shared environments so generated credentials are not lost after execution.
+"""
+
 import os
 import secrets
 from datetime import datetime
@@ -21,6 +29,15 @@ try:
     from app.security import hash_password
 
     def seed_password(env_name: str) -> str:
+        """
+        Read a seed password from the environment or generate a temporary one.
+
+        Args:
+            env_name (str): Environment variable name to inspect.
+
+        Returns:
+            str: Password value used for the seeded account.
+        """
         return os.getenv(env_name) or secrets.token_urlsafe(18)
 
     admin_password = seed_password("SEED_ADMIN_PASSWORD")
@@ -33,12 +50,12 @@ try:
     with engine.connect() as conn:
         print("Creating test users in existing schema...")
         
-        # Check if users already exist
+        # Existing seed detection keeps repeated setup runs idempotent.
         result = conn.execute(text("SELECT COUNT(*) FROM users WHERE email = 'admin@uttarakhand.gov.in'"))
         if result.scalar() > 0:
             print("✓ Users already exist!")
         else:
-            # Insert admin user
+            # Insert representative users for each MIS role.
             admin_pw = hash_password(admin_password)
             conn.execute(text("""
                 INSERT INTO users (name, email, password, role_id, district, created_at)

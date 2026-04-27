@@ -1,3 +1,11 @@
+/**
+ * TopBar component module - Provides global government navigation controls.
+ *
+ * The top bar exposes public links, resource PDFs, accessibility font scaling,
+ * language switching, and profile actions while respecting authenticated user
+ * state.
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,6 +30,15 @@ import { getPostLoginPath } from "../utils/authNavigation";
 const FONT_SCALE_LEVELS = [0.9, 1, 1.1, 1.2];
 const DEFAULT_FONT_SCALE_INDEX = 1;
 
+/**
+ * TopBar - Persistent navigation header for all MIS pages.
+ *
+ * This component manages dropdown state, accessibility font scaling, language
+ * selection, and authenticated profile actions.
+ *
+ * @component
+ * @returns {React.ReactElement} Application top navigation bar.
+ */
 function TopBar() {
   const navigate = useNavigate();
   const { logout, isAuthenticated, user } = useAuth();
@@ -31,6 +48,7 @@ function TopBar() {
   const [fontScaleIndex, setFontScaleIndex] = useState(DEFAULT_FONT_SCALE_INDEX);
 
   useEffect(() => {
+    // Restore the last selected accessibility font scale for repeat users.
     const storedIndex = Number(window.localStorage.getItem("appFontScaleIndex"));
     if (Number.isInteger(storedIndex) && FONT_SCALE_LEVELS[storedIndex]) {
       setFontScaleIndex(storedIndex);
@@ -38,6 +56,7 @@ function TopBar() {
   }, []);
 
   useEffect(() => {
+    // CSS variable updates let Tailwind-sized text scale consistently.
     document.documentElement.style.setProperty(
       "--app-font-scale",
       String(FONT_SCALE_LEVELS[fontScaleIndex]),
@@ -46,6 +65,7 @@ function TopBar() {
   }, [fontScaleIndex]);
 
   useEffect(() => {
+    // Close menus when users click outside the header or press Escape.
     const handlePointerDown = (event) => {
       if (headerRef.current && !headerRef.current.contains(event.target)) {
         setOpenMenu(null);
@@ -84,6 +104,7 @@ function TopBar() {
   };
 
   const handleSchemeOpen = (pdfUrl) => {
+    // noopener/noreferrer protects the MIS window when opening external PDFs.
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
     setOpenMenu(null);
   };
@@ -111,6 +132,7 @@ function TopBar() {
   };
 
   const navButtonClass =
+    // Responsive Tailwind buttons keep icon/text pairs aligned in wrapped nav.
     "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white transition hover:text-[#d9ef87] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d9ef87]";
   const controlButtonClass =
     "inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-white/25 bg-white/10 px-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-[#053b47]";
@@ -122,6 +144,7 @@ function TopBar() {
       ref={headerRef}
       className="relative z-50 shrink-0 border-b border-white/10 bg-[linear-gradient(180deg,#0e4337_0%,#0c4135_100%)] text-white shadow-lg"
     >
+      {/* Header layout wraps at smaller widths while keeping logo, nav, and controls accessible. */}
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 lg:flex-nowrap lg:px-8">
         <div className="flex min-w-0 items-center">
           <img

@@ -1,3 +1,10 @@
+/**
+ * Login page - Officer authentication and public account creation workflow.
+ *
+ * The page supports username/password login, a future OTP login UI, farmer-level
+ * public account registration, and a placeholder password reset modal.
+ */
+
 import React, { useState } from "react";
 
 import ForgotPassword from "../components/ForgotPassword";
@@ -16,6 +23,15 @@ const LOGIN_METHODS = {
   OTP: "otp",
 };
 
+/**
+ * Login - Render authentication form for officers and public farmer accounts.
+ *
+ * This component validates required fields, calls authentication APIs, stores
+ * successful sessions, and routes users to role-appropriate landing pages.
+ *
+ * @component
+ * @returns {React.ReactElement} Authentication page.
+ */
 function Login() {
   const [formData, setFormData] = useState({
     username: "",
@@ -42,6 +58,7 @@ function Login() {
   ];
 
   const clearFeedback = () => {
+    // Clear all transient validation and API messages when the user changes mode.
     setErrors({});
     setAuthError(null);
     setAuthNotice(null);
@@ -56,6 +73,7 @@ function Login() {
     }));
 
     if (name === "otpIdentifier") {
+      // Changing the identifier invalidates any previously requested OTP state.
       setOtpRequested(false);
     }
 
@@ -68,6 +86,7 @@ function Login() {
   };
 
   const validatePasswordForm = () => {
+    // Password login and registration share username/password required checks.
     const newErrors = {};
 
     if (!formData.username.trim()) {
@@ -92,6 +111,7 @@ function Login() {
   };
 
   const validateOtpForm = () => {
+    // OTP format is constrained to numeric codes while backend integration is pending.
     const newErrors = validateOtpIdentifier();
 
     if (!otpRequested) {
@@ -116,6 +136,7 @@ function Login() {
   };
 
   const completeAuth = (response) => {
+    // Normalize backend roles before storing the session and choosing a route.
     const { access_token, user } = response.data;
     const normalizedUser = {
       ...user,
@@ -179,6 +200,7 @@ function Login() {
       let response;
 
       if (isRegistering) {
+        // Public registration is intentionally sent with farmer role_id only.
         const userData = {
           username: formData.username,
           password: formData.password,
@@ -213,6 +235,7 @@ function Login() {
   return (
     <div className={authClasses.container}>
       <div className={authClasses.heroContent}>
+        {/* Responsive Tailwind grid: notification panel and login card stack below 1100px. */}
         <div className={authClasses.pageCards}>
           <div className={authClasses.leftPanel} data-aos="fade-right" data-aos-delay="100">
             <div className={authClasses.notificationBox}>

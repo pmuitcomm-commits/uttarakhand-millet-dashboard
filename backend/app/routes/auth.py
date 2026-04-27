@@ -1,3 +1,12 @@
+"""
+Authentication and authorization routes for the Millet MIS API.
+
+This module validates public registration, verifies officer login credentials,
+creates JWT sessions, and enforces role-based access for administrative,
+district, and block-level operations. It is security-sensitive and should be
+reviewed carefully during NIC handover and penetration testing.
+"""
+
 import re
 from typing import Optional
 
@@ -14,6 +23,8 @@ from ..security import create_access_token, decode_token, hash_password, verify_
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
 
+# Numeric role identifiers are accepted from the public registration form, but
+# public registration is constrained to low-privilege farmer accounts below.
 ROLE_MAP = {
     1: "admin",
     2: "district_officer",
@@ -26,6 +37,15 @@ PUBLIC_REGISTRATION_ROLE = "farmer"
 
 
 def validate_password_strength(password: str) -> bool:
+    """
+    Validate the minimum password policy for public account creation.
+
+    Args:
+        password (str): Password supplied by a registering user.
+
+    Returns:
+        bool: True when length, uppercase, lowercase, and digit rules pass.
+    """
     if len(password) < 8:
         return False
     if not re.search(r"[A-Z]", password):
@@ -38,6 +58,15 @@ def validate_password_strength(password: str) -> bool:
 
 
 def _normalize_role(role_value) -> str:
+    """
+    Normalize stored role values to the frontend/API role naming convention.
+
+    Args:
+        role_value: Role value from SQLAlchemy, raw SQL, or a string payload.
+
+    Returns:
+        str: Known role name, defaulting to the public farmer role.
+    """
     if role_value is None:
         return PUBLIC_REGISTRATION_ROLE
     if hasattr(role_value, "value"):
@@ -47,6 +76,15 @@ def _normalize_role(role_value) -> str:
 
 
 def _active_user(user) -> bool:
+    """
+    Check whether a database user mapping is active.
+
+    Args:
+        user: Mapping containing the ``is_active`` field.
+
+    Returns:
+        bool: True only when ``is_active`` can be interpreted as 1.
+    """
     try:
         return int(user.get("is_active") or 0) == 1
     except (TypeError, ValueError):
@@ -54,6 +92,15 @@ def _active_user(user) -> bool:
 
 
 def _user_response(user) -> dict:
+    """
+    Build the sanitized user object returned to the React client.
+
+    Args:
+        user: Database row mapping for an authenticated or listed user.
+
+    Returns:
+        dict: Non-secret user attributes used by the dashboard.
+    """
     return {
         "id": user["id"],
         "username": user["username"],
@@ -66,6 +113,16 @@ def _user_response(user) -> dict:
 
 
 def _fetch_user_by_username(db: Session, username: str):
+    """
+    Fetch a single user row by username using a parameterized query.
+
+    Args:
+        db (Session): Request-scoped database session.
+        username (str): Username supplied by login or token subject.
+
+    Returns:
+        Mapping | None: User row including hashed password when found.
+    """
     return db.execute(
         text(
             """
@@ -80,6 +137,16 @@ def _fetch_user_by_username(db: Session, username: str):
 
 
 def _fetch_user_by_id(db: Session, user_id: int):
+    """
+    Fetch a non-secret user row by internal identifier.
+
+    Args:
+        db (Session): Request-scoped database session.
+        user_id (int): User primary key.
+
+    Returns:
+        Mapping | None: User row without password hash when found.
+    """
     return db.execute(
         text(
             """
@@ -94,6 +161,15 @@ def _fetch_user_by_id(db: Session, user_id: int):
 
 
 def _validate_scope_fields(user):
+    """
+    Ensure officer roles have required geographic scope assignments.
+
+    Args:
+        user: Current user mapping.
+
+    Raises:
+        HTTPException: When district or block scoping is missing for an officer.
+    """
     role = _normalize_role(user.get("role"))
     if role in {"district_officer", "block_officer"} and not user.get("district"):
         raise HTTPException(
@@ -108,6 +184,16 @@ def _validate_scope_fields(user):
 
 
 def _password_matches(password: str, hashed_password: Optional[str]) -> bool:
+    """
+    Safely verify a password while treating malformed hashes as login failure.
+
+    Args:
+        password (str): Plain password submitted by the user.
+        hashed_password (Optional[str]): Stored password hash from the database.
+
+    Returns:
+        bool: True when the password matches; otherwise False.
+    """
     if not hashed_password:
         return False
     try:
@@ -117,6 +203,13 @@ def _password_matches(password: str, hashed_password: Optional[str]) -> bool:
 
 
 class UserRegister(BaseModel):
+    """
+    Pydantic schema for public account registration.
+
+    Public registration accepts only farmer-level accounts. Privileged officer
+    roles must be provisioned administratively so users cannot self-escalate.
+    """
+
     username: str
     password: str
     email: Optional[EmailStr] = None
@@ -126,6 +219,7 @@ class UserRegister(BaseModel):
     @field_validator("username")
     @classmethod
     def validate_username(cls, value: str) -> str:
+        """Validate username length and allowed characters."""
         value = value.strip()
         if len(value) < 3 or len(value) > 50:
             raise ValueError("Username must be between 3 and 50 characters")
@@ -136,6 +230,7 @@ class UserRegister(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, value: str) -> str:
+        """Validate the registration password against the MIS policy."""
         if not validate_password_strength(value):
             raise ValueError("Password must be at least 8 characters and contain uppercase, lowercase, and digits")
         return value
@@ -143,6 +238,7 @@ class UserRegister(BaseModel):
     @field_validator("role_id")
     @classmethod
     def validate_role_id(cls, value: Optional[int]) -> Optional[int]:
+        """Reject unknown role identifiers before business-rule checks run."""
         if value is not None and value not in ROLE_MAP:
             raise ValueError(f"Invalid role_id. Allowed values: {list(ROLE_MAP.keys())}")
         return value
@@ -150,6 +246,7 @@ class UserRegister(BaseModel):
     @field_validator("full_name")
     @classmethod
     def validate_full_name(cls, value: Optional[str]) -> Optional[str]:
+        """Normalize and validate the optional display name."""
         if value is None:
             return value
         value = value.strip()
@@ -159,12 +256,15 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
+    """Pydantic schema for username and password login requests."""
+
     username: str
     password: str
 
     @field_validator("username")
     @classmethod
     def validate_username(cls, value: str) -> str:
+        """Trim and require the submitted username."""
         value = value.strip()
         if not value:
             raise ValueError("Username is required")
@@ -172,11 +272,14 @@ class UserLogin(BaseModel):
 
 
 class UpdateUserRoleRequest(BaseModel):
+    """Request body for admin-only role updates."""
+
     new_role: str
 
     @field_validator("new_role")
     @classmethod
     def validate_new_role(cls, value: str) -> str:
+        """Normalize and validate the requested target role."""
         value = value.lower().strip()
         if value not in ROLE_ID_MAP:
             raise ValueError(f"Invalid role. Allowed roles: {list(ROLE_ID_MAP.keys())}")
@@ -184,6 +287,8 @@ class UpdateUserRoleRequest(BaseModel):
 
 
 class TokenResponse(BaseModel):
+    """Response contract returned after successful authentication."""
+
     access_token: str
     token_type: str
     user: dict
@@ -193,6 +298,19 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ):
+    """
+    Resolve the current authenticated user from the bearer token.
+
+    Args:
+        credentials (HTTPAuthorizationCredentials): Bearer token credentials.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        Mapping: Active user row for downstream role checks.
+
+    Raises:
+        HTTPException: When token validation fails or the user is inactive.
+    """
     payload = decode_token(credentials.credentials)
     if payload is None:
         raise HTTPException(
@@ -220,12 +338,28 @@ async def get_current_user(
 
 
 def require_role(*allowed_roles):
+    """
+    Build a FastAPI dependency that restricts access by role.
+
+    Args:
+        *allowed_roles: Role names or numeric role identifiers allowed for the
+            protected route.
+
+    Returns:
+        Callable: Dependency that returns the current user when authorized.
+    """
     allowed_role_names = {
         ROLE_MAP.get(role, role) if isinstance(role, int) else role
         for role in allowed_roles
     }
 
     async def check_role(current_user=Depends(get_current_user)):
+        """
+        Validate that the current user has one of the required roles.
+
+        Raises:
+            HTTPException: When the user lacks the required role or scope.
+        """
         current_role = _normalize_role(current_user.get("role"))
         if current_role not in allowed_role_names:
             raise HTTPException(
@@ -241,7 +375,24 @@ def require_role(*allowed_roles):
 @router.post("/register", response_model=TokenResponse)
 @limiter.limit("10/minute")
 def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
-    """Public registration creates only low-privilege farmer accounts."""
+    """
+    Register a public farmer account and issue an access token.
+
+    Public registration is deliberately limited to farmer role creation. This
+    prevents self-service creation of administrator or officer accounts.
+
+    Args:
+        request (Request): FastAPI request object used by the rate limiter.
+        user_data (UserRegister): Validated registration payload.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: Bearer token and sanitized user details.
+
+    Raises:
+        HTTPException: When the username exists or privileged registration is
+            attempted.
+    """
     requested_role = ROLE_MAP.get(user_data.role_id, PUBLIC_REGISTRATION_ROLE)
     if requested_role != PUBLIC_REGISTRATION_ROLE:
         raise HTTPException(
@@ -288,6 +439,20 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
 def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db)):
+    """
+    Authenticate a user with username and password credentials.
+
+    Args:
+        request (Request): FastAPI request object used by the rate limiter.
+        credentials (UserLogin): Validated login payload.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: Bearer token and sanitized user details.
+
+    Raises:
+        HTTPException: When credentials are invalid or the account is inactive.
+    """
     user = _fetch_user_by_username(db, credentials.username)
     if user is None or not _active_user(user) or not _password_matches(credentials.password, user["hashed_password"]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
@@ -302,11 +467,30 @@ def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db
 
 @router.get("/me", response_model=dict)
 def get_current_user_info(current_user=Depends(get_current_user)):
+    """
+    Return the sanitized profile for the authenticated session.
+
+    Args:
+        current_user: User mapping resolved by ``get_current_user``.
+
+    Returns:
+        dict: Non-secret user details for frontend session hydration.
+    """
     return _user_response(current_user)
 
 
 @router.get("/admin/users")
 def get_all_users(current_user=Depends(require_role("admin")), db: Session = Depends(get_db)):
+    """
+    List users for admin review and role management.
+
+    Args:
+        current_user: Admin user resolved by role dependency.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: Up to 100 sanitized user records with active status.
+    """
     result = db.execute(
         text(
             """
@@ -322,6 +506,20 @@ def get_all_users(current_user=Depends(require_role("admin")), db: Session = Dep
 
 @router.get("/admin/users/{user_id}")
 def get_user_by_id(user_id: int, current_user=Depends(require_role("admin")), db: Session = Depends(get_db)):
+    """
+    Fetch a single user for admin review.
+
+    Args:
+        user_id (int): User primary key.
+        current_user: Admin user resolved by role dependency.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: Sanitized user record with active status.
+
+    Raises:
+        HTTPException: When the target user does not exist.
+    """
     user = _fetch_user_by_id(db, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -335,6 +533,22 @@ def update_user_role(
     current_user=Depends(require_role("admin")),
     db: Session = Depends(get_db),
 ):
+    """
+    Update another user's role from the admin console.
+
+    Args:
+        user_id (int): Target user primary key.
+        request (UpdateUserRoleRequest): Validated role update payload.
+        current_user: Admin user resolved by role dependency.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: Confirmation message and assigned role.
+
+    Raises:
+        HTTPException: When admins attempt self-demotion or target user is
+            missing.
+    """
     if current_user["id"] == user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify your own role")
 
@@ -357,6 +571,21 @@ def get_district_users(
     current_user=Depends(require_role("admin", "district_officer")),
     db: Session = Depends(get_db),
 ):
+    """
+    List users visible to admin or district officers.
+
+    District officers are scoped to users within their assigned district, while
+    admins can view the broader user list.
+
+    Args:
+        limit (int): Requested page size, capped at 100.
+        offset (int): Pagination offset, normalized to zero or greater.
+        current_user: Authorized admin or district officer.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: Sanitized user records with active status.
+    """
     limit = min(max(limit, 1), 100)
     offset = max(offset, 0)
     current_role = _normalize_role(current_user.get("role"))
@@ -397,6 +626,21 @@ def get_block_users(
     current_user=Depends(require_role("admin", "district_officer", "block_officer")),
     db: Session = Depends(get_db),
 ):
+    """
+    List users visible to admin, district, or block officers.
+
+    Block officers can only see farmer accounts for their own district and
+    block, supporting least-privilege access to local records.
+
+    Args:
+        limit (int): Requested page size, capped at 100.
+        offset (int): Pagination offset, normalized to zero or greater.
+        current_user: Authorized admin, district officer, or block officer.
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: Sanitized user records with active status.
+    """
     limit = min(max(limit, 1), 100)
     offset = max(offset, 0)
     current_role = _normalize_role(current_user.get("role"))

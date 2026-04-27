@@ -1,3 +1,11 @@
+/**
+ * Dashboard page module - Production, district, millet, and overview analytics.
+ *
+ * This module builds Chart.js datasets, map models, KPI metrics, and data
+ * tables for the public Millet MIS dashboards. It uses live API data when
+ * available and page-local fallback data for the broader overview page.
+ */
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Chart as ChartJS,
@@ -52,6 +60,12 @@ ChartJS.register(
   Filler
 );
 
+/**
+ * Attach a display district name to a production record.
+ *
+ * @param {Object} record - Production record returned by the backend.
+ * @returns {Object} Record with a normalized district display name.
+ */
 function withDistrictName(record) {
   const district = getDistrictName(record);
 
@@ -77,17 +91,36 @@ const mapLegend = [
   { label: "76-100%", color: "#23693f" },
 ];
 
+/**
+ * Convert unknown numeric input into a safe number for chart calculations.
+ *
+ * @param {*} value - Value to convert.
+ * @returns {number} Numeric value or 0 when conversion fails.
+ */
 function toNumber(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : 0;
 }
 
+/**
+ * Format a number using Indian digit grouping for government reports.
+ *
+ * @param {*} value - Numeric value to format.
+ * @param {number} [maximumFractionDigits=0] - Maximum fraction digits.
+ * @returns {string} Formatted number.
+ */
 function formatNumber(value, maximumFractionDigits = 0) {
   return toNumber(value).toLocaleString("en-IN", {
     maximumFractionDigits,
   });
 }
 
+/**
+ * Format large chart labels into compact values.
+ *
+ * @param {*} value - Numeric value to format.
+ * @returns {string} Compact display value such as 1.2k or 3.4L.
+ */
 function formatCompactNumber(value) {
   const numeric = toNumber(value);
 
@@ -102,6 +135,12 @@ function formatCompactNumber(value) {
   return formatNumber(numeric);
 }
 
+/**
+ * Build a Chart.js axis title configuration.
+ *
+ * @param {string} title - Axis title text.
+ * @returns {Object} Chart.js axis title options.
+ */
 function axisTitle(title) {
   return {
     display: Boolean(title),
@@ -111,6 +150,16 @@ function axisTitle(title) {
   };
 }
 
+/**
+ * Build shared Chart.js options for overview dashboard charts.
+ *
+ * @param {Object} [config={}] - Chart option inputs.
+ * @param {string} config.yTitle - Primary y-axis title.
+ * @param {string} config.y1Title - Optional secondary y-axis title.
+ * @param {string} [config.xTitle=""] - X-axis title.
+ * @param {boolean} [config.stacked=false] - Whether axes are stacked.
+ * @returns {Object} Chart.js options object.
+ */
 function overviewChartOptions({ yTitle, y1Title, xTitle = "", stacked = false } = {}) {
   return {
     responsive: true,
@@ -187,6 +236,13 @@ function overviewChartOptions({ yTitle, y1Title, xTitle = "", stacked = false } 
   };
 }
 
+/**
+ * Attach a custom tooltip formatter to shared chart options.
+ *
+ * @param {Object} baseOptions - Existing Chart.js options.
+ * @param {Function} labelFormatter - Tooltip label callback.
+ * @returns {Object} Chart.js options with tooltip callback.
+ */
 function chartOptionsWithTooltip(baseOptions, labelFormatter) {
   return {
     ...baseOptions,
@@ -240,6 +296,17 @@ const pointValueLabelsPlugin = {
   },
 };
 
+/**
+ * OverviewSelect - Shared select control for overview filters.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} props.label - Visible and accessible label.
+ * @param {string} props.value - Selected value.
+ * @param {Function} props.onChange - Change handler receiving the new value.
+ * @param {React.ReactNode} props.children - Option elements.
+ * @returns {React.ReactElement} Labeled select control.
+ */
 function OverviewSelect({ label, value, onChange, children }) {
   return (
     <label className="flex flex-col gap-1 text-xs font-bold uppercase text-[#4a5f58] max-[640px]:w-full dark:text-[#d5dfdc]">
@@ -256,6 +323,18 @@ function OverviewSelect({ label, value, onChange, children }) {
   );
 }
 
+/**
+ * OverviewCard - Framed analytics section for the overview dashboard.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} props.title - Card title.
+ * @param {string} props.subtitle - Supporting description.
+ * @param {React.ReactNode} props.controls - Optional filter controls.
+ * @param {React.ReactNode} props.children - Card body content.
+ * @param {string} [props.className=""] - Additional Tailwind classes.
+ * @returns {React.ReactElement} Overview card section.
+ */
 function OverviewCard({ title, subtitle, controls, children, className = "" }) {
   return (
     <section className={`${overviewCardClassName} ${className}`} data-aos="fade-up">
@@ -281,6 +360,14 @@ function OverviewCard({ title, subtitle, controls, children, className = "" }) {
   );
 }
 
+/**
+ * LoadingState - Shared loading message for dashboard cards.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} [props.label] - Loading text.
+ * @returns {React.ReactElement} Loading placeholder.
+ */
 function LoadingState({ label = "Loading dashboard data..." }) {
   return (
     <div className="flex h-full min-h-[260px] items-center justify-center rounded-lg border border-dashed border-[#b9c8c1] bg-[#f7faf8] px-4 text-center text-sm font-bold text-[#024b37] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-white">
@@ -289,6 +376,14 @@ function LoadingState({ label = "Loading dashboard data..." }) {
   );
 }
 
+/**
+ * EmptyState - Shared empty-state message for dashboard cards.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} [props.label] - Empty-state text.
+ * @returns {React.ReactElement} Empty-state placeholder.
+ */
 function EmptyState({ label = "No records available for this selection." }) {
   return (
     <div className="flex h-full min-h-[220px] items-center justify-center rounded-lg border border-dashed border-[#d7dfdc] bg-[#fafcfb] px-4 text-center text-sm font-bold text-[#64756f] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-[#cbd5d1]">
@@ -297,6 +392,14 @@ function EmptyState({ label = "No records available for this selection." }) {
   );
 }
 
+/**
+ * ChartFrame - Stable-height wrapper for Chart.js canvases.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {React.ReactNode} props.children - Chart component.
+ * @returns {React.ReactElement} Chart frame.
+ */
 function ChartFrame({ children }) {
   return (
     <div className="h-[310px] min-h-0 w-full max-[640px]:h-[270px]">
@@ -305,6 +408,14 @@ function ChartFrame({ children }) {
   );
 }
 
+/**
+ * CardInsight - Inline explanatory note for overview analytics.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {React.ReactNode} props.children - Insight text.
+ * @returns {React.ReactElement} Insight callout.
+ */
 function CardInsight({ children }) {
   return (
     <div className="mt-3 rounded-lg border border-[#d8e3de] bg-[#f7faf8] px-3 py-2 text-xs font-semibold leading-relaxed text-[#024b37] dark:border-[#4b5563] dark:bg-[#1f2937] dark:text-[#e5f0ed]">
@@ -313,6 +424,16 @@ function CardInsight({ children }) {
   );
 }
 
+/**
+ * OverviewDataTable - Render compact tabular data inside overview cards.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Array<Object>} props.columns - Column definitions.
+ * @param {Array<Object>} props.rows - Row data.
+ * @param {string} props.emptyLabel - Message shown when rows are empty.
+ * @returns {React.ReactElement} Table or empty state.
+ */
 function OverviewDataTable({ columns, rows, emptyLabel }) {
   if (!rows.length) {
     return <EmptyState label={emptyLabel} />;
@@ -362,6 +483,12 @@ function OverviewDataTable({ columns, rows, emptyLabel }) {
   );
 }
 
+/**
+ * Normalize district names from GeoJSON properties.
+ *
+ * @param {string} name - District name from map data.
+ * @returns {string} Canonical district label used by dashboard data.
+ */
 function normalizeGeoDistrictName(name = "") {
   const cleanName = String(name).trim().replace(/\s+/g, " ");
   const aliases = {
@@ -372,6 +499,12 @@ function normalizeGeoDistrictName(name = "") {
   return aliases[cleanName.toLowerCase()] || cleanName;
 }
 
+/**
+ * Extract polygon rings from GeoJSON geometry.
+ *
+ * @param {Object|null} geometry - GeoJSON Polygon or MultiPolygon geometry.
+ * @returns {Array<Array>} Flattened polygon rings.
+ */
 function getRings(geometry) {
   if (!geometry) return [];
   if (geometry.type === "Polygon") return geometry.coordinates || [];
@@ -379,6 +512,12 @@ function getRings(geometry) {
   return [];
 }
 
+/**
+ * Resolve a map fill color from farmer coverage percentage.
+ *
+ * @param {number} percentage - Coverage percentage from 0 to 100.
+ * @returns {string} Hex color for the coverage legend.
+ */
 function getCoverageColor(percentage) {
   if (percentage <= 25) return mapLegend[0].color;
   if (percentage <= 50) return mapLegend[1].color;
@@ -386,6 +525,13 @@ function getCoverageColor(percentage) {
   return mapLegend[3].color;
 }
 
+/**
+ * Convert district GeoJSON features into SVG paths with coverage metadata.
+ *
+ * @param {Array<Object>} features - GeoJSON district features.
+ * @param {Array<Object>} coverageRows - District coverage metrics.
+ * @returns {Object|null} SVG map model or null when geometry is unavailable.
+ */
 function buildOverviewDistrictMap(features, coverageRows) {
   const width = 720;
   const height = 560;
@@ -446,6 +592,7 @@ function buildOverviewDistrictMap(features, coverageRows) {
 
     const path = getRings(feature.geometry)
       .map((ring) => {
+        // Sampling keeps SVG paths lightweight while preserving district shape.
         const stride = Math.max(1, Math.ceil(ring.length / 420));
         const sampledRing = ring.filter(
           (_, index) => index % stride === 0 || index === ring.length - 1
@@ -472,6 +619,14 @@ function buildOverviewDistrictMap(features, coverageRows) {
   return { districts, height, width };
 }
 
+/**
+ * CoverageFallback - Display coverage bars when GeoJSON cannot be rendered.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Array<Object>} props.rows - District coverage rows.
+ * @returns {React.ReactElement} Fallback coverage list.
+ */
 function CoverageFallback({ rows }) {
   const maxFarmers = Math.max(...rows.map((row) => row.totalFarmers), 1);
 
@@ -499,6 +654,14 @@ function CoverageFallback({ rows }) {
   );
 }
 
+/**
+ * DistrictCoverageMap - Render an interactive district coverage map.
+ *
+ * @component
+ * @param {Object|null} props.geojson - District GeoJSON data.
+ * @param {Array<Object>} props.rows - District coverage metrics.
+ * @returns {React.ReactElement} SVG map or fallback list.
+ */
 function DistrictCoverageMap({ geojson, rows }) {
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -511,6 +674,13 @@ function DistrictCoverageMap({ geojson, rows }) {
     [geojson, rows]
   );
 
+  /**
+   * Update tooltip position and district details for pointer/focus events.
+   *
+   * @param {MouseEvent|FocusEvent} event - Pointer or focus event.
+   * @param {Object} district - District map metadata.
+   * @returns {void}
+   */
   function showTooltip(event, district) {
     setTooltip({
       visible: true,
@@ -520,6 +690,11 @@ function DistrictCoverageMap({ geojson, rows }) {
     });
   }
 
+  /**
+   * Hide the district tooltip when pointer or focus leaves a district.
+   *
+   * @returns {void}
+   */
   function hideTooltip() {
     setTooltip({
       visible: false,
@@ -596,6 +771,18 @@ function DistrictCoverageMap({ geojson, rows }) {
   );
 }
 
+/**
+ * Dashboard - Render the selected Millet MIS analytics page.
+ *
+ * The ``page`` prop switches between the state overview, production summary,
+ * district analysis, and millet analysis views while sharing data fetching,
+ * KPI calculations, chart rendering, and data table behavior.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} [props.page="dashboard"] - Dashboard page variant.
+ * @returns {React.ReactElement} Dashboard page.
+ */
 function Dashboard({ page = "dashboard" }) {
   const { t } = useLanguage();
   const [kpis, setKpis] = useState({});
@@ -621,6 +808,7 @@ function Dashboard({ page = "dashboard" }) {
   };
 
   useEffect(() => {
+    // Load production data once when the dashboard variant mounts.
     fetchData();
   }, []);
 
@@ -631,6 +819,11 @@ function Dashboard({ page = "dashboard" }) {
 
     let isMounted = true;
 
+    /**
+     * Load GeoJSON only for the overview page and ignore late responses.
+     *
+     * @returns {Promise<void>} Updates overview map state when mounted.
+     */
     async function loadDistrictMap() {
       try {
         if (typeof districtGeojsonUrl !== "string") {
@@ -663,6 +856,11 @@ function Dashboard({ page = "dashboard" }) {
     };
   }, [page]);
 
+  /**
+   * Fetch production KPIs, grouped chart data, and detail records.
+   *
+   * @returns {Promise<void>} Updates dashboard state for all page variants.
+   */
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -686,7 +884,7 @@ function Dashboard({ page = "dashboard" }) {
     }
   };
 
-  // Filter data based on selected district
+  // Filter data based on selected district for district analysis.
   const filteredDistrictData = selectedDistrict === "all" 
     ? districtData 
     : districtData.filter(item => item.district === selectedDistrict);
@@ -695,7 +893,7 @@ function Dashboard({ page = "dashboard" }) {
     ? tableData 
     : tableData.filter(item => item.district === selectedDistrict);
 
-  // Filter data based on selected millet
+  // Filter data based on selected millet for crop analysis.
   const filteredMilletData = selectedMillet === "all"
     ? milletData
     : milletData.filter(item => item.millet === selectedMillet);
@@ -708,6 +906,7 @@ function Dashboard({ page = "dashboard" }) {
   );
 
   const enterpriseChartRows = useMemo(() => {
+    // Summarize enterprise counts by type after year and district filters.
     const filteredRows = enterpriseProgress.filter(
       (row) =>
         row.year === selectedEnterpriseYear &&
@@ -730,6 +929,7 @@ function Dashboard({ page = "dashboard" }) {
   }, [selectedEnterpriseDistrict, selectedEnterpriseYear]);
 
   const filteredEnterpriseDetails = useMemo(() => {
+    // Apply officer-friendly search across enterprise unit and district labels.
     const searchTerm = enterpriseSearch.trim().toLowerCase();
 
     return enterpriseDetails.filter((row) => {
@@ -747,6 +947,7 @@ function Dashboard({ page = "dashboard" }) {
   }, [enterpriseSearch, selectedEnterpriseDistrict, selectedEnterpriseYear]);
 
   const highestAreaLowFarmerDistrict = useMemo(() => {
+    // Identify districts with high area but comparatively lower farmer density.
     if (!cropDemoRows.length) return null;
 
     return cropDemoRows.reduce((selected, row) => {
@@ -767,6 +968,7 @@ function Dashboard({ page = "dashboard" }) {
   }, [cropDemoRows]);
 
   const highFarmerLowAreaDistrict = useMemo(() => {
+    // Identify districts with high farmer participation but smaller area per farmer.
     if (!cropDemoRows.length) return null;
 
     return cropDemoRows.reduce((selected, row) => {
@@ -1062,6 +1264,7 @@ function Dashboard({ page = "dashboard" }) {
               </div>
             ) : null}
 
+            {/* Overview grid uses two columns on desktop and collapses to one column on small screens. */}
             <div className="grid min-w-0 grid-cols-1 gap-5 p-4 min-[1024px]:grid-cols-2 max-[640px]:gap-3 max-[640px]:p-2">
               <OverviewCard
                 title="Crop Demonstration Overview"
@@ -1279,10 +1482,10 @@ function Dashboard({ page = "dashboard" }) {
     );
   }
 
-  // For millet page, use filtered data; otherwise use all data
+  // For millet page, use filtered data; otherwise use all data.
   const dataForMilletMetrics = page === "millet" ? filteredMilletData : milletData;
 
-  // For district page, use filtered data; otherwise use all data
+  // For district page, use filtered data; otherwise use all data.
   const dataForMetrics = page === "district" ? filteredDistrictData : districtData;
   
   const totalProduction = page === "district" 
@@ -1515,7 +1718,7 @@ function Dashboard({ page = "dashboard" }) {
     );
   }
 
-  // Always show millet chart on all pages
+  // Always show millet chart on all pages for crop-level comparison.
   chartCards.push(
     <div className={dashboardClasses.chartCard} data-aos="fade-up" data-aos-delay="100" key="millet-chart">
       <MilletChart data={page === "millet" ? filteredMilletData : (page === "district" ? filteredDistrictData : milletData)} />
@@ -1538,7 +1741,7 @@ function Dashboard({ page = "dashboard" }) {
 
   const pageTitle = pageTitles[page] || pageTitles.dashboard;
 
-  // Determine table data based on page and filters
+  // Determine table data based on page and filters.
   const getTableData = () => {
     if (page === "district") return filteredTableData;
     if (page === "millet") {
@@ -1561,6 +1764,7 @@ function Dashboard({ page = "dashboard" }) {
       <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
         <div className={dashboardClasses.mainContent}>
+          {/* Shared Tailwind heading block includes responsive filter controls for district/millet pages. */}
           <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
             <h2 className={dashboardClasses.pageHeadingTitle}>{pageTitle}</h2>
             {page === "district" && (

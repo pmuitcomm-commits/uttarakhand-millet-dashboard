@@ -1,3 +1,11 @@
+/**
+ * App module - Defines the top-level route structure for the Millet MIS.
+ *
+ * The application wraps all pages with language and authentication providers,
+ * renders persistent government header/footer UI, and separates public farmer
+ * routes from protected officer dashboards.
+ */
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from 'react';
 import AOS from 'aos';
@@ -22,6 +30,19 @@ import TopBar from "./components/TopBar";
 import AboutPage from "./pages/aboutpage";
 import { getPostLoginPath } from "./utils/authNavigation";
 
+/**
+ * ProtectedOfficerRoute - Guards officer-only dashboard pages.
+ *
+ * This component checks the authenticated user context before rendering an
+ * officer route. It redirects unauthenticated users to login and prevents users
+ * from opening dashboards outside their assigned role.
+ *
+ * @component
+ * @param {Object} props - Route guard properties.
+ * @param {React.ReactNode} props.children - Protected page content.
+ * @param {string|null} props.requiredRole - Required role for the page.
+ * @returns {React.ReactElement} Route guard result.
+ */
 function ProtectedOfficerRoute({ children, requiredRole = null }) {
   const { isAuthenticated, user, loading } = useAuth();
 
@@ -40,6 +61,15 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
   return children;
 }
 
+/**
+ * AppRoutes - Registers all public and protected dashboard routes.
+ *
+ * Public farmer routes remain accessible without authentication, while admin,
+ * district, and block dashboard routes are wrapped by role checks.
+ *
+ * @component
+ * @returns {React.ReactElement} Application route tree.
+ */
 function AppRoutes() {
   const { isAuthenticated, user, loading } = useAuth();
 
@@ -107,6 +137,15 @@ function AppRoutes() {
   );
 }
 
+/**
+ * App - Root React component for the Millet MIS frontend.
+ *
+ * The component initializes page animation behavior and composes global
+ * providers required by authentication, localization, and routing.
+ *
+ * @component
+ * @returns {React.ReactElement} Complete MIS application shell.
+ */
 function App() {
   useEffect(() => {
     AOS.init({
@@ -120,6 +159,7 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
+        {/* Full-height Tailwind shell keeps the header/footer fixed while page content scrolls responsively. */}
         <div className="m-0 flex h-screen w-full flex-col overflow-hidden bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
           <TopBar />
           <main className="relative z-0 min-h-0 flex-1 overflow-auto">

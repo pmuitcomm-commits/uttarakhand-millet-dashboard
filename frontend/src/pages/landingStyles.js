@@ -1,3 +1,10 @@
+/**
+ * Shared Tailwind style tokens for role landing pages.
+ *
+ * The responsive utility strings define a compact officer handoff screen after
+ * login and adapt the card layout for mobile devices.
+ */
+
 export const landingClasses = {
   container:
     "flex min-h-full w-full flex-col items-center justify-start p-5 font-montserrat max-[480px]:p-2.5",
@@ -19,6 +26,8 @@ export const landingClasses = {
   autoRedirect: "mt-5 text-xs italic text-[#999999]",
 };
 
+// Role variants communicate administrative level without changing component
+// logic. Each variant supplies container, role block, and action button styling.
 export const landingVariants = {
   admin: {
     container: "bg-gradient-to-br from-[#024b37] to-[#013b2a]",

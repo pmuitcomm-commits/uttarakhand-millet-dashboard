@@ -1,8 +1,17 @@
+"""
+Procurement model for millet purchase targets, centers, and achievement data.
+
+The procurement table supports the public procurement dashboard and KPI
+aggregation used by state and district monitoring teams.
+"""
+
 from sqlalchemy import Column, Integer, String, Float, BigInteger
 from ..database import Base
 
 
 class Procurement(Base):
+    """SQLAlchemy mapping for district and crop-wise procurement records."""
+
     __tablename__ = "procurement"
 
     id = Column(BigInteger, primary_key=True, index=True)

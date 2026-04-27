@@ -1,3 +1,12 @@
+"""
+FastAPI application entry point for the Uttarakhand Millet MIS backend.
+
+This module wires together database initialization, CORS policy, rate-limit
+handling, and all public API routers used by the React dashboard. It is the
+primary runtime surface reviewed during deployment, NIC handover, and API
+security testing.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +25,8 @@ load_dotenv()
 
 app = FastAPI()
 
+# Frontend origins allowed to call this API. Keep this list narrow in
+# production so browser-based access is restricted to approved MIS hosts.
 allowed_origins = [
     "https://uttarakhand-millet-dashboard.onrender.com",
     "http://localhost:3000",
@@ -33,6 +44,13 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup():
+    """
+    Create database tables during application startup.
+
+    SQLAlchemy metadata creation keeps the small MIS schema available in hosted
+    deployments where migrations may not yet be configured. Exceptions are
+    logged to the service console for deployment diagnostics.
+    """
     try:
         Base.metadata.create_all(bind=engine)
         print("✅ Tables created")
@@ -50,7 +68,7 @@ app.add_exception_handler(
     )
 )
 
-# Routes
+# Route registration keeps each government MIS domain in its own router.
 app.include_router(production_router)
 app.include_router(dashboard_router)
 app.include_router(procurement_router)
@@ -60,4 +78,10 @@ app.include_router(farmer_router, prefix="/farmers", tags=["Farmers"])
 
 @app.get("/")
 def root():
+    """
+    Return a lightweight health message for uptime checks.
+
+    Returns:
+        dict: Static service status message for load balancers and operators.
+    """
     return {"message": "Millet Dashboard API Running"}

@@ -1,15 +1,28 @@
+/**
+ * BlockDashboard page - Block officer workspace for the Millet MIS.
+ *
+ * The page is scoped to block-level users and documents expected read-only and
+ * farmer-monitoring capabilities for future implementation.
+ */
+
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { dashboardClasses } from '../components/dashboardStyles';
 
+/**
+ * BlockDashboard - Render the block officer dashboard placeholder.
+ *
+ * @component
+ * @returns {React.ReactElement} Block officer dashboard view.
+ */
 function BlockDashboard() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not block officer
+    // Redirect authenticated users who are outside the block officer role.
     if (isAuthenticated && user?.role !== 'block_officer') {
       navigate('/');
     }

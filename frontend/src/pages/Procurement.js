@@ -1,3 +1,11 @@
+/**
+ * Procurement page - Displays procurement KPIs, charts, and detailed records.
+ *
+ * The page combines backend procurement data with district/region normalization
+ * so state officers can review centre coverage, procurement quantity, and
+ * achievement percentages.
+ */
+
 import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
@@ -66,11 +74,23 @@ const compactMetricValueClass =
 const compactMetricLabelClass =
   `${dashboardClasses.metricLabel} !text-[0.82rem] max-[640px]:!text-[0.78rem]`;
 
+/**
+ * Normalize district labels from source data and aliases.
+ *
+ * @param {string} name - District name from backend procurement records.
+ * @returns {string} Canonical Uttarakhand district label.
+ */
 function normalizeDistrictName(name = "") {
   const cleaned = String(name).trim().replace(/\s+/g, " ");
   return DISTRICT_ALIASES[cleaned.toLowerCase()] || cleaned;
 }
 
+/**
+ * Procurement - Render the procurement monitoring dashboard.
+ *
+ * @component
+ * @returns {React.ReactElement} Procurement dashboard page.
+ */
 function Procurement() {
   const { t } = useLanguage();
   const [procurementData, setProcurementData] = useState([]);
@@ -83,16 +103,21 @@ function Procurement() {
     fetchKPIs();
   }, []);
 
+  /**
+   * Fetch and normalize detailed procurement records.
+   *
+   * @returns {Promise<void>} Updates component state with table records.
+   */
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
       const procurementRes = await getAllProcurement();
       
-      // Handle both array and non-array responses
+      // Handle both array and non-array responses from transitional APIs.
       const data = Array.isArray(procurementRes.data) ? procurementRes.data : [];
       
-      // Normalize field names if needed
+      // Normalize field names so chart/table code can use one stable contract.
       const normalizedData = data.map(item => ({
         "S.no": item["S.no"] || item.s_no || "",
         "District": normalizeDistrictName(item["District"] || item.district || ""),
@@ -114,12 +139,17 @@ function Procurement() {
     }
   };
 
+  /**
+   * Fetch procurement KPI totals for the metric cards.
+   *
+   * @returns {Promise<void>} Updates component state with KPI values.
+   */
   const fetchKPIs = async () => {
     try {
       const kpiRes = await getProcurementKPIs();
       const kpiData = kpiRes.data;
       
-      // Map backend KPI keys to frontend display format
+      // Map backend snake_case KPI keys to frontend display format.
       setProcurementKPIs({
         totalDistricts: kpiData.total_districts || 0,
         totalCentres: kpiData.total_centres || 0,
@@ -131,7 +161,7 @@ function Procurement() {
         cropCoverage: kpiData.crop_coverage || 0,
       });
     } catch {
-      // Fallback to showing zeros if KPI fetch fails
+      // Fallback to showing zeros if KPI fetch fails.
       setProcurementKPIs({
         totalDistricts: 0,
         totalCentres: 0,
@@ -156,7 +186,7 @@ function Procurement() {
     { label: t('cropCoverage'), value: procurementKPIs.cropCoverage || 0 },
   ];
 
-  // Chart 1: Procurement by District (Bar Chart)
+  // Chart 1: Procurement by District (bar chart) aggregates MT quantities.
   const districtProcurement = procurementData.reduce((acc, item) => {
     const district = item.District || "Unknown";
     const procurement = parseFloat(item["Procurement quantity (in MT)"] || 0);
@@ -226,6 +256,7 @@ function Procurement() {
 
       return acc;
     },
+    // Baseline values preserve regional comparison until all districts are live.
     { Garhwal: 4324.47, Kumaon: 1061.55 },
   );
 
@@ -279,7 +310,7 @@ function Procurement() {
     },
   };
 
-  // Chart 3: Procurement Achievement % (Bar Chart)
+  // Chart 3: Procurement Achievement % averages district achievement entries.
   const achievementData = procurementData.reduce((acc, item) => {
     const district = item.District || "Unknown";
     const procurementPct = parseFloat(item["Procurement (in %)"] || 0);
@@ -387,6 +418,7 @@ function Procurement() {
             </div>
           )}
 
+          {/* Compact responsive KPI grid uses smaller Tailwind spacing than the production dashboard. */}
           <div className={compactMetricsRowClass}>
             {dashboardMetrics.map((metric, index) => (
               <div key={metric.label} className={compactMetricCardClassName(index)}>

@@ -1,3 +1,10 @@
+/**
+ * Translation catalogue for English and Hindi interface labels.
+ *
+ * Keys are consumed through LanguageContext.t(). Keeping labels centralized
+ * allows NIC maintenance teams to review public-facing terminology in one file.
+ */
+
 export const translations = {
   en: {
     // TopBar

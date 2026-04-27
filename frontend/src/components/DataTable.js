@@ -1,14 +1,39 @@
+/**
+ * DataTable component module - Renders paginated MIS records.
+ *
+ * The component is shared by production, procurement, and overview sections so
+ * officers and public users receive consistent tabular formatting.
+ */
+
 import { useState } from "react";
 
+// Tailwind utility composition for action buttons, including disabled states
+// and compact max-[480px] sizing for mobile audit/review devices.
 const tableButtonBase =
   "rounded-md border border-[#024b37] bg-[#024b37] px-3 py-2 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#035344] hover:shadow-[0_2px_8px_rgba(2,75,55,0.2)] disabled:cursor-not-allowed disabled:border-[#d0d0d0] disabled:bg-[#d0d0d0] disabled:text-[#999999] disabled:shadow-none disabled:transform-none max-[480px]:px-2.5 max-[480px]:py-1.5 max-[480px]:text-xs dark:border-[#024b37] dark:bg-[#024b37] dark:text-white dark:hover:bg-[#035344] dark:hover:shadow-[0_2px_8px_rgba(2,75,55,0.4)] dark:disabled:border-[#444444] dark:disabled:bg-[#444444] dark:disabled:text-[#999999]";
 
+/**
+ * Resolve the pagination button style for active and inactive pages.
+ *
+ * @param {boolean} active - Whether the button represents the current page.
+ * @returns {string} Tailwind class string for the pagination button.
+ */
 function pageButtonClassName(active) {
   return active
     ? `${tableButtonBase} !border-[#0a7c59] !bg-[#0a7c59] !font-bold`
     : tableButtonBase;
 }
 
+/**
+ * DataTable - Display an array of MIS records with optional pagination.
+ *
+ * @component
+ * @param {Object} props - Table properties.
+ * @param {Array<Object>} props.data - Records to render.
+ * @param {string} [props.title="Detailed Data"] - Table heading.
+ * @param {number} [props.recordsPerPage=100] - Page size for large datasets.
+ * @returns {React.ReactElement} Paginated data table or empty state.
+ */
 function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -25,12 +50,14 @@ function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
     safeRecordsPerPage >= (data?.length || 0) ? data || [] : data?.slice(startIndex, endIndex) || [];
 
   const handlePageChange = (page) => {
+    // Guard against invalid page indexes from repeated clicks or stale UI state.
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
   return (
+    /* Horizontal overflow preserves all MIS columns on smaller screens. */
     <div
       className="!block !transform-none !overflow-x-auto !visible w-full rounded-lg !opacity-100"
       data-aos="fade-up"

@@ -1,3 +1,11 @@
+/**
+ * Shared Tailwind style tokens for dashboard pages.
+ *
+ * These class maps keep production, procurement, district, millet, and officer
+ * dashboards visually consistent. Responsive breakpoints convert dense desktop
+ * grids into stacked mobile layouts for field review devices.
+ */
+
 export const dashboardClasses = {
   pageWrapper:
     "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white p-4 text-[#024b37] max-[1024px]:p-3 max-[640px]:p-0 dark:bg-[#1a1a1a] dark:text-white",
@@ -34,6 +42,8 @@ export const dashboardClasses = {
     "mb-2.5 block rounded-xl px-4 py-3.5 font-semibold text-white/95 no-underline transition duration-200 hover:translate-x-[3px] hover:bg-[#66b9ac] max-[900px]:mb-0 max-[900px]:shrink-0 max-[900px]:whitespace-nowrap max-[900px]:px-3 max-[900px]:py-2.5 max-[900px]:text-sm max-[900px]:hover:translate-x-0",
 };
 
+// Metric tone classes provide repeatable color rotation for KPI cards while
+// keeping contrast readable in both light and dark dashboard contexts.
 const metricToneClasses = [
   "border-0 bg-[#024b37] text-white",
   "border-0 bg-[#003366] text-white",
@@ -45,6 +55,12 @@ const metricToneClasses = [
   "border-0 bg-[#e67e22] text-white",
 ];
 
+/**
+ * Build the KPI card class string for a given card position.
+ *
+ * @param {number} index - Metric index used to rotate visual tone classes.
+ * @returns {string} Tailwind class string for a metric card.
+ */
 export function metricCardClassName(index) {
   return [
     "group min-w-0 cursor-pointer rounded-[20px] px-5 py-6 text-center shadow-card transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] max-[640px]:rounded-xl max-[640px]:px-4 max-[640px]:py-4 max-[640px]:hover:translate-y-0 max-[640px]:hover:scale-100",
@@ -52,6 +68,8 @@ export function metricCardClassName(index) {
   ].join(" ");
 }
 
+// Chart wrappers establish stable canvas height so Chart.js does not resize the
+// surrounding dashboard grid during loading or data updates.
 export const chartClasses = {
   wrapper:
     "relative flex h-full min-h-[280px] w-full min-w-0 flex-col [&_canvas]:max-h-[270px] [&_canvas]:max-w-full",

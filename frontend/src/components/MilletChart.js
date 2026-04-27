@@ -1,6 +1,21 @@
+/**
+ * MilletChart component module - Visualizes millet-wise production share.
+ *
+ * The pie chart supports dashboard pages that compare production across millet
+ * crop categories.
+ */
+
 import { Pie } from "react-chartjs-2";
 import { chartClasses } from "./dashboardStyles";
 
+/**
+ * MilletChart - Render millet production as a pie chart.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Array<Object>} props.data - Millet production records.
+ * @returns {React.ReactElement} Chart container.
+ */
 function MilletChart({ data }) {
   const chartData = {
     labels: data.map((m) => m.millet),

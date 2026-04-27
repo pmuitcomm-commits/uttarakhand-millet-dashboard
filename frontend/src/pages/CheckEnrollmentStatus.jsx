@@ -1,3 +1,11 @@
+/**
+ * CheckEnrollmentStatus page - Alternate enrollment status entry screen.
+ *
+ * This page currently provides a UI shell for Aadhaar, enrollment ID, or farmer
+ * ID lookup. The backend integration remains pending and is represented by a
+ * placeholder status notification.
+ */
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,12 +49,19 @@ const checkButtonClass = (isInputFilled) =>
 const backButtonClass =
   `${buttonBase} border-[1.5px] border-[#024b37] bg-white text-[#024b37] hover:-translate-y-px hover:border-[#035e47] hover:bg-[#f3f9f6] hover:shadow-[0_2px_8px_rgba(2,75,55,0.12)] active:translate-y-0 active:bg-[#eaf3ee] active:shadow-none`;
 
+/**
+ * CheckEnrollmentStatus - Render the alternate lookup selection UI.
+ *
+ * @component
+ * @returns {React.ReactElement} Enrollment status lookup form.
+ */
 function CheckEnrollmentStatus() {
   const [checkType, setCheckType] = useState('aadhaar');
   const [inputValue, setInputValue] = useState('');
   const navigate = useNavigate();
 
   const getInputLabel = () => {
+    // Label changes with the selected lookup identifier.
     switch (checkType) {
       case 'aadhaar':
         return 'Aadhaar Number';
@@ -60,6 +75,7 @@ function CheckEnrollmentStatus() {
   };
 
   const getInputPlaceholder = () => {
+    // Placeholder mirrors the selected identifier to reduce data-entry errors.
     switch (checkType) {
       case 'aadhaar':
         return 'Enter Aadhaar Number (12 digits)';
@@ -74,7 +90,7 @@ function CheckEnrollmentStatus() {
 
   const handleCheckStatus = () => {
     if (inputValue.trim()) {
-      // Mock API call - in real app this would fetch from backend
+      // Placeholder until the backend supports Aadhaar/enrollment/farmer ID lookup.
       alert("Status lookup request received.");
     }
   };
@@ -88,10 +104,10 @@ function CheckEnrollmentStatus() {
   return (
     <div className={pageClass}>
       <div className={backgroundClass}>
-        {/* Decorative top bar */}
+        {/* Decorative Tailwind top bar anchors the public lookup screen. */}
         <div className={topBarClass}></div>
 
-        {/* Main content */}
+        {/* Main content wrapper centers the card and shifts upward on small screens. */}
         <div className={wrapperClass}>
           <div className={cardClass}>
             {/* Header */}

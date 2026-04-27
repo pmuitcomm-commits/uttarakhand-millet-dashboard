@@ -1,3 +1,10 @@
+/**
+ * DistrictChart component module - Visualizes district-wise production totals.
+ *
+ * The bar chart supports public and officer dashboards by showing relative
+ * production contribution across Uttarakhand districts.
+ */
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,6 +27,14 @@ ChartJS.register(
   Legend
 );
 
+/**
+ * DistrictChart - Render district production as a bar chart.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Array<Object>} props.data - District production records.
+ * @returns {React.ReactElement} Chart container.
+ */
 function DistrictChart({ data }) {
   const chartData = {
     labels: data.map((d) => d.district),

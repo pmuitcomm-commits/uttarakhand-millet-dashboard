@@ -1,7 +1,22 @@
+/**
+ * ForgotPassword component module - Displays the reset-password modal.
+ *
+ * The current implementation validates email format client-side and shows a
+ * success state placeholder until a backend reset endpoint is integrated.
+ */
+
 import React, { useState } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 import { modalClasses } from './authStyles';
 
+/**
+ * ForgotPassword - Modal workflow for password reset requests.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Function} props.onClose - Callback invoked when the modal closes.
+ * @returns {React.ReactElement} Password reset modal.
+ */
 function ForgotPassword({ onClose }) {
   const [email, setEmail] = useState('');
   const [step, setStep] = useState(1); // 1: email input, 2: success message
@@ -19,7 +34,7 @@ function ForgotPassword({ onClose }) {
       return;
     }
 
-    // Mock password reset - in real app, this would call an API
+    // Placeholder until the password-reset API is connected.
     setStep(2);
     setError('');
   };

@@ -1,3 +1,10 @@
+/**
+ * Government scheme resource links shown from the top navigation.
+ *
+ * These entries provide quick access to official policy documents relevant to
+ * millet promotion, procurement, crop insurance, and agriculture funding.
+ */
+
 export const schemes = [
   {
     name: "Uttarakhand Millet Mission",

@@ -1,15 +1,28 @@
+/**
+ * DistrictDashboard page - District officer workspace for the Millet MIS.
+ *
+ * The page verifies role assignment and displays district-scoped operational
+ * capabilities for future district-level management features.
+ */
+
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { dashboardClasses } from '../components/dashboardStyles';
 
+/**
+ * DistrictDashboard - Render the district officer dashboard placeholder.
+ *
+ * @component
+ * @returns {React.ReactElement} District officer dashboard view.
+ */
 function DistrictDashboard() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not district officer
+    // Redirect authenticated users who are outside the district officer role.
     if (isAuthenticated && user?.role !== 'district_officer') {
       navigate('/');
     }

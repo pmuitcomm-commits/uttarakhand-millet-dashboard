@@ -1,3 +1,11 @@
+/**
+ * API service module - Centralizes HTTP access for the Millet MIS frontend.
+ *
+ * This file defines the Axios client, session persistence helpers, and API
+ * wrappers used by authentication, farmer enrollment, production, and
+ * procurement dashboard pages.
+ */
+
 import axios from "axios";
 
 const AUTH_TOKEN_KEY = "authToken";
@@ -15,11 +23,19 @@ const API = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// TODO: migrate auth to HttpOnly SameSite cookies when backend cookie sessions are available.
+// Security note: localStorage is currently used for bearer tokens because the
+// backend exposes JWT responses. Migrate to HttpOnly SameSite cookies when
+// backend cookie sessions are available.
 export function getAuthToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
+/**
+ * Read and validate the persisted user session snapshot.
+ *
+ * @returns {Object|null} Minimal user object or null when storage is empty or
+ * corrupted.
+ */
 export function getStoredUser() {
   const storedUser = localStorage.getItem(AUTH_USER_KEY);
   if (!storedUser) {
@@ -34,6 +50,13 @@ export function getStoredUser() {
   }
 }
 
+/**
+ * Persist the authenticated session received from the backend.
+ *
+ * @param {string} accessToken - JWT access token returned by the API.
+ * @param {Object} user - Authenticated user object returned by the API.
+ * @returns {void}
+ */
 export function setAuthSession(accessToken, user) {
   const minimalUser = {
     id: user.id,
@@ -48,13 +71,18 @@ export function setAuthSession(accessToken, user) {
   localStorage.setItem(AUTH_ROLE_KEY, minimalUser.role);
 }
 
+/**
+ * Remove all persisted authentication data from browser storage.
+ *
+ * @returns {void}
+ */
 export function clearAuthSession() {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
   localStorage.removeItem(AUTH_ROLE_KEY);
 }
 
-// Attach token if available
+// Attach the bearer token to API requests when a session is present.
 API.interceptors.request.use((config) => {
   const token = getAuthToken();
   if (token) {

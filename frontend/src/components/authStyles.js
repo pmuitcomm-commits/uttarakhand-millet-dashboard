@@ -1,8 +1,21 @@
+/**
+ * Authentication style tokens for login and modal screens.
+ *
+ * Tailwind utility strings are centralized here so audit-facing forms maintain
+ * consistent spacing, responsive breakpoints, validation states, and dark-mode
+ * behavior across authentication workflows.
+ */
+
+// Shared input styling: rounded government form controls, focus ring for
+// accessibility, and full-width layout for compact mobile screens.
 export const authInputBase =
   "w-full appearance-none rounded-[10px] border-[1.5px] border-[#d8d2c6] bg-white px-3 py-[9px] font-lato text-[0.88rem] text-[#1a2b1e] outline-none transition duration-200 placeholder:text-[#a8a099] focus:border-[#024b37] focus:bg-[#f7fbf9] focus:shadow-[0_0_0_3px_rgba(2,75,55,0.10)]";
 
+// Error state is intentionally additive so it can be composed with authInputBase.
 export const authInputError = "border-[#d14343] bg-[#fff8f8]";
 
+// Login page layout utilities. max-[1100px] switches the two-panel desktop view
+// to a stacked mobile/tablet layout; max-[640px] tightens card spacing.
 export const authClasses = {
   container:
     "flex h-full min-h-full w-full flex-col overflow-hidden bg-[#024b37] font-lato text-white max-[1100px]:h-auto max-[1100px]:overflow-y-auto",
@@ -69,6 +82,8 @@ export const authClasses = {
     "cursor-pointer border-0 bg-transparent text-center font-lato text-[0.82rem] font-bold text-[#024b37] underline underline-offset-2 hover:text-[#035e47]",
 };
 
+// Modal utilities for password reset and other authentication dialogs. The
+// overlay uses fixed positioning and z-index isolation to stay above dashboards.
 export const modalClasses = {
   overlay:
     "fixed inset-0 z-[1000] flex animate-fade-in items-center justify-center bg-black/60",

@@ -1,3 +1,11 @@
+"""
+Authentication schema and seed user setup for the Millet MIS backend.
+
+This script creates the current users table shape and inserts representative
+admin, district officer, block officer, and farmer accounts for controlled
+setup/testing environments.
+"""
+
 import os
 import secrets
 import sys
@@ -15,6 +23,15 @@ try:
     db = SessionLocal()
 
     def seed_password(env_name: str) -> str:
+        """
+        Read a seed password from the environment or generate a temporary one.
+
+        Args:
+            env_name (str): Environment variable name to inspect.
+
+        Returns:
+            str: Password value used for the seeded account.
+        """
         return os.getenv(env_name) or secrets.token_urlsafe(18)
 
     admin_password = seed_password("SEED_ADMIN_PASSWORD")
@@ -24,7 +41,7 @@ try:
     
     print("Creating users table with SQL...")
     
-    # Create users table with correct schema
+    # Create the authentication table expected by the active API routes.
     db.execute(text("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -41,12 +58,12 @@ try:
     db.commit()
     print("✓ Users table created")
     
-    # Check if admin exists
+    # Existing admin detection keeps repeated setup runs idempotent.
     result = db.execute(text("SELECT COUNT(*) FROM users WHERE username = 'admin_uttarakhand'"))
     if result.scalar() == 0:
         print("\nCreating test users...")
         
-        # Create admin
+        # Create representative users for each MIS role and scope level.
         admin_pw = hash_password(admin_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, is_active)

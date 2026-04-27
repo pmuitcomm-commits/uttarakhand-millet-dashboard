@@ -1,3 +1,5 @@
 # https://www.robotstxt.org/robotstxt.html
+# Public dashboard routes are client-rendered; indexing policy can be tightened
+# during production deployment if NIC requires restricted crawler access.
 User-agent: *
 Disallow:

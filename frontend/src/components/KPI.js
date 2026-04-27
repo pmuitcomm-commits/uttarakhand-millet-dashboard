@@ -1,5 +1,19 @@
+/**
+ * KPI component module - Displays high-level dashboard metric cards.
+ *
+ * This component is retained for reusable production KPI summaries.
+ */
+
 import { dashboardClasses, metricCardClassName } from "./dashboardStyles";
 
+/**
+ * KPI - Render production KPI cards from dashboard data.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Object} props.data - KPI response object from the backend.
+ * @returns {React.ReactElement} KPI metric row.
+ */
 function KPI({ data }) {
   return (
     <div className={dashboardClasses.metricsRow}>

@@ -1,14 +1,27 @@
+/**
+ * DistrictLanding page - Post-login transition screen for district officers.
+ *
+ * The screen displays the assigned district context before forwarding the user
+ * to the district dashboard.
+ */
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { landingClasses, landingVariants } from './landingStyles';
 
+/**
+ * DistrictLanding - Render the district officer landing screen.
+ *
+ * @component
+ * @returns {React.ReactElement} District landing page.
+ */
 function DistrictLanding() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
-    // Auto-redirect after 3 seconds, or allow manual navigation
+    // Auto-redirect after 3 seconds while keeping a manual continue option.
     const timer = setTimeout(() => {
       navigate('/district-dashboard');
     }, 3000);

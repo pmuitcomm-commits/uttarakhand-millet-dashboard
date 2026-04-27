@@ -1,3 +1,10 @@
+/**
+ * District reference data for Uttarakhand Millet MIS dashboards.
+ *
+ * The exported district order is reused by filters, map legends, and fallback
+ * data generation so district labels remain consistent across pages.
+ */
+
 export const uttarakhandDistricts = [
   "Almora",
   "Bageshwar",
@@ -22,6 +29,12 @@ export const districtNameById = uttarakhandDistricts.reduce(
   {},
 );
 
+/**
+ * Resolve a display district name from a production/procurement record.
+ *
+ * @param {Object|null} record - API or local data record.
+ * @returns {string} District display name or an empty string.
+ */
 export function getDistrictName(record) {
   if (!record) {
     return "";

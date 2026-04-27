@@ -1,3 +1,10 @@
+"""
+Dashboard aggregate endpoints for the Millet MIS overview page.
+
+These routes expose state-level KPI values derived from production records so
+the React dashboard can display high-level scheme performance indicators.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -11,7 +18,21 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 @router.get("/kpis")
 def get_kpis(db: Session = Depends(get_db)):
+    """
+    Calculate top-level production KPIs for the public dashboard.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: District count, millet count, total production, and total area.
+
+    Raises:
+        HTTPException: When KPI aggregation fails.
+    """
     try:
+        # Distinct counts and sums intentionally coerce null aggregates to zero
+        # so the frontend receives stable numeric values during empty datasets.
         total_districts = db.query(
             func.count(func.distinct(Production.district_id))
         ).scalar()

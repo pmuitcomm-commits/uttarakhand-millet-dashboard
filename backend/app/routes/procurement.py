@@ -1,3 +1,10 @@
+"""
+Procurement reporting endpoints for the Millet MIS dashboard.
+
+These endpoints publish procurement targets, procurement achievement, centre
+counts, and farmer/SHG coverage used by the procurement monitoring page.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -11,6 +18,18 @@ router = APIRouter(prefix="/procurement", tags=["Procurement"])
 
 @router.get("/all")
 def get_all_procurement(db: Session = Depends(get_db)):
+    """
+    Return procurement records with display labels expected by the frontend.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: District and crop-wise procurement metrics.
+
+    Raises:
+        HTTPException: When procurement records cannot be fetched.
+    """
     try:
         records = db.query(Procurement).all()
 
@@ -38,7 +57,21 @@ def get_all_procurement(db: Session = Depends(get_db)):
 
 @router.get("/kpis")
 def get_procurement_kpis(db: Session = Depends(get_db)):
+    """
+    Calculate procurement summary KPIs for dashboard cards.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        dict: Centre, target, farmer, procurement, and crop coverage metrics.
+
+    Raises:
+        HTTPException: When procurement KPI aggregation fails.
+    """
     try:
+        # Null aggregate results are normalized to zero so dashboard cards do
+        # not show missing values while source data is being onboarded.
         total_districts = db.query(Procurement.district).distinct().count()
         total_centres = db.query(func.sum(Procurement.centres)).scalar() or 0
         total_target = db.query(func.sum(Procurement.target_mt)).scalar() or 0
@@ -64,4 +97,3 @@ def get_procurement_kpis(db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error fetching procurement KPIs"
         )
-    

@@ -1,3 +1,10 @@
+"""
+Production reporting endpoints for the Millet MIS dashboard.
+
+The routes provide raw production records and grouped summaries used by chart
+components, KPI cards, and detailed production tables.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -11,6 +18,18 @@ router = APIRouter(prefix="/production", tags=["Production"])
 
 @router.get("/all")
 def get_all_production(db: Session = Depends(get_db)):
+    """
+    Return all production records in frontend-friendly field names.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: Production rows with numeric values normalized to floats.
+
+    Raises:
+        HTTPException: When production records cannot be fetched.
+    """
     try:
         records = db.query(Production).all()
 
@@ -37,6 +56,18 @@ def get_all_production(db: Session = Depends(get_db)):
 
 @router.get("/district")
 def district_production(db: Session = Depends(get_db)):
+    """
+    Aggregate production quantity by district identifier.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: District identifiers with total production quantities.
+
+    Raises:
+        HTTPException: When district aggregation fails.
+    """
     try:
         data = (
             db.query(
@@ -64,6 +95,18 @@ def district_production(db: Session = Depends(get_db)):
 
 @router.get("/millet")
 def millet_production(db: Session = Depends(get_db)):
+    """
+    Aggregate production quantity by millet crop identifier.
+
+    Args:
+        db (Session): Request-scoped database session.
+
+    Returns:
+        list[dict]: Millet identifiers with total production quantities.
+
+    Raises:
+        HTTPException: When millet aggregation fails.
+    """
     try:
         data = (
             db.query(

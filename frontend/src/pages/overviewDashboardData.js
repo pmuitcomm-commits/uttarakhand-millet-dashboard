@@ -1,7 +1,15 @@
+/**
+ * Overview dashboard data helpers and fallback datasets.
+ *
+ * These exports support the public state overview page when dedicated backend
+ * endpoints are unavailable. The data shape mirrors expected API responses so
+ * migration to live MIS services can be done with minimal component changes.
+ */
+
 import { uttarakhandDistricts } from "../data/districts";
 
-// Page-local placeholder MIS data for the overview dashboard.
-// Replace these exports with API-shaped data when dedicated endpoints are available.
+// Page-local placeholder MIS data for the overview dashboard. Replace these
+// exports with API-shaped data when dedicated endpoints are available.
 export const overviewFinancialYears = [
   "2025-26",
   "2024-25",
@@ -44,6 +52,13 @@ const financialYearMultipliers = {
   "2017-18": 0.38,
 };
 
+/**
+ * Resolve the seasonal multiplier for crop demonstration fallback rows.
+ *
+ * @param {Object} base - District baseline record.
+ * @param {string} season - Selected season filter.
+ * @returns {number} Multiplier for Kharif, Rabi, or all seasons.
+ */
 function seasonFactor(base, season) {
   if (season === "Kharif") return base.kharifShare;
   if (season === "Rabi") return 1 - base.kharifShare;
@@ -180,6 +195,12 @@ export const districtCoverage = [
   { district: "Uttarkashi", totalBlocks: 6, gps: 565, villages: 898, totalFarmers: 1090 },
 ];
 
+/**
+ * Convert numeric production years to financial-year display format.
+ *
+ * @param {string|number|null} value - Source year value from API data.
+ * @returns {string} Financial year string such as "2025-26".
+ */
 function normalizeRecordFinancialYear(value) {
   if (value == null) return "";
   const text = String(value).trim();
@@ -190,6 +211,12 @@ function normalizeRecordFinancialYear(value) {
   return `${numericYear}-${String((numericYear + 1) % 100).padStart(2, "0")}`;
 }
 
+/**
+ * Translate numeric season identifiers into dashboard filter labels.
+ *
+ * @param {number|string} seasonId - Season identifier from production data.
+ * @returns {string} Season display name.
+ */
 function getSeasonName(seasonId) {
   const seasonMap = {
     1: "Kharif",
@@ -199,6 +226,17 @@ function getSeasonName(seasonId) {
   return seasonMap[Number(seasonId)] || "All Seasons";
 }
 
+/**
+ * Build district-wise crop demonstration rows for the overview chart.
+ *
+ * Live production rows are preferred when year, season, and district labels
+ * match. Otherwise, the dashboard falls back to page-local planning data.
+ *
+ * @param {Array<Object>} productionRows - Production records from the API.
+ * @param {string} financialYear - Selected financial year.
+ * @param {string} season - Selected season.
+ * @returns {Array<Object>} District-level demonstration rows.
+ */
 export function getCropDemonstrationRows(productionRows, financialYear, season) {
   const fallbackRows = cropDemonstrationOverview.filter(
     (row) => row.financialYear === financialYear && row.season === season
@@ -241,4 +279,3 @@ export function getCropDemonstrationRows(productionRows, financialYear, season) 
     farmers: fallbackFarmersByDistrict[district] || 0,
   }));
 }
-

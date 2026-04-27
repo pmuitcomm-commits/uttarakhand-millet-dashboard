@@ -1,15 +1,28 @@
+/**
+ * AdminDashboard page - Administrative overview for system-level MIS users.
+ *
+ * The page is protected by role routing and presents the administrative
+ * capabilities expected for user management and statewide data access.
+ */
+
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { dashboardClasses } from '../components/dashboardStyles';
 
+/**
+ * AdminDashboard - Render the admin-only dashboard placeholder.
+ *
+ * @component
+ * @returns {React.ReactElement} Admin dashboard view.
+ */
 function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not admin
+    // Redirect any authenticated non-admin user away from system-level pages.
     if (isAuthenticated && user?.role !== 'admin') {
       navigate('/');
     }
@@ -19,6 +32,7 @@ function AdminDashboard() {
     <div className={dashboardClasses.pageWrapper}>
       <div className={dashboardClasses.dashboardContainer}>
         <Sidebar />
+        {/* Tailwind layout uses the shared dashboard content area for consistent officer pages. */}
         <div className={dashboardClasses.mainContent}>
           <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
             <h2 className={dashboardClasses.pageHeadingTitle}>Admin Dashboard</h2>

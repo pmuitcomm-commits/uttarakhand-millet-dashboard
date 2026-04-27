@@ -1,3 +1,11 @@
+/**
+ * About page module - Public project narrative for the Uttarakhand Millet MIS.
+ *
+ * The page combines programme statistics, an interactive district map,
+ * milestones, system architecture, and workflow content for public awareness
+ * and government handover documentation.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 
 import {
@@ -17,7 +25,7 @@ import {
 
 import districtGeojsonUrl from "../data/district.geojson";
 
-// --- Constants for District Map ---
+// District map constants describe current block coverage and programme reach.
 const stats = [
   { label: "Districts", value: "7/13" },
   { label: "Blocks", value: "24/95" },
@@ -73,13 +81,24 @@ const districtNameAliases = {
   haridwar: "Haridwar",
 };
 
-// --- Utility Functions for District Map ---
+/**
+ * Normalize district labels from GeoJSON data to dashboard names.
+ *
+ * @param {string} name - District name from map data.
+ * @returns {string} Canonical district label.
+ */
 function normalizeDistrictName(name = "") {
   const cleanName = name.trim().replace(/\s+/g, " ");
   const aliasKey = cleanName.toLowerCase();
   return districtNameAliases[aliasKey] || cleanName;
 }
 
+/**
+ * Resolve the legend color for a district based on acquired block coverage.
+ *
+ * @param {string} district - Canonical district name.
+ * @returns {string} Hex color used in the SVG map.
+ */
 function getBlockColor(district) {
   const acquired = districtBlockCounts[district] ?? 0;
   const total = districtTotalBlocks[district] ?? 1;
@@ -92,6 +111,12 @@ function getBlockColor(district) {
   return blockLegend[4].color;
 }
 
+/**
+ * Extract polygon rings from GeoJSON geometry.
+ *
+ * @param {Object|null} geometry - GeoJSON Polygon or MultiPolygon geometry.
+ * @returns {Array<Array>} Flattened polygon rings.
+ */
 function getRings(geometry) {
   if (!geometry) return [];
   if (geometry.type === "Polygon") return geometry.coordinates || [];
@@ -99,6 +124,12 @@ function getRings(geometry) {
   return [];
 }
 
+/**
+ * Build the SVG map model used by the public about page.
+ *
+ * @param {Array<Object>} features - District GeoJSON features.
+ * @returns {Object|null} SVG dimensions and district path metadata.
+ */
 function buildDistrictMap(features) {
   const width = 720;
   const height = 560;
@@ -146,6 +177,7 @@ function buildDistrictMap(features) {
 
     const path = getRings(feature.geometry)
       .map((ring) => {
+        // Sampling keeps the inline SVG light enough for public landing pages.
         const stride = Math.max(1, Math.ceil(ring.length / 420));
         const sampledRing = ring.filter(
           (_, index) => index % stride === 0 || index === ring.length - 1
@@ -174,7 +206,12 @@ function buildDistrictMap(features) {
   return { districts, height, width };
 }
 
-// --- District Map Component ---
+/**
+ * DistrictMap - Render an interactive district block-coverage map.
+ *
+ * @component
+ * @returns {React.ReactElement} District map with hover/focus tooltip.
+ */
 function DistrictMap() {
   const [geojson, setGeojson] = useState(null);
   const [tooltip, setTooltip] = useState({
@@ -188,6 +225,11 @@ function DistrictMap() {
   useEffect(() => {
     let isMounted = true;
 
+    /**
+     * Load district GeoJSON and avoid state updates after unmount.
+     *
+     * @returns {Promise<void>} Updates map state when data is available.
+     */
     async function loadDistricts() {
       try {
         if (typeof districtGeojsonUrl !== "string") {
@@ -223,6 +265,13 @@ function DistrictMap() {
     [geojson]
   );
 
+  /**
+   * Show tooltip when a district receives hover or keyboard focus.
+   *
+   * @param {MouseEvent|FocusEvent} event - Pointer or focus event.
+   * @param {Object} district - District map metadata.
+   * @returns {void}
+   */
   function handleDistrictEnter(event, district) {
     setTooltip({
       visible: true,
@@ -232,6 +281,13 @@ function DistrictMap() {
     });
   }
 
+  /**
+   * Keep tooltip aligned to the current pointer position.
+   *
+   * @param {MouseEvent} event - Pointer move event.
+   * @param {Object} district - District map metadata.
+   * @returns {void}
+   */
   function handleDistrictMove(event, district) {
     setTooltip({
       visible: true,
@@ -241,6 +297,11 @@ function DistrictMap() {
     });
   }
 
+  /**
+   * Hide tooltip when pointer/focus leaves a district path.
+   *
+   * @returns {void}
+   */
   function handleDistrictLeave() {
     setTooltip({
       visible: false,
@@ -305,9 +366,7 @@ function DistrictMap() {
   );
 }
 
-// ============================================================================
-// SECTION 4: RECOGNITIONS
-// ============================================================================
+// Programme recognition text shown in the public overview timeline.
 
 const recognitions = [
   "The Uttarakhand Millet Initiative is aligned with the International Year of Millets vision and promotes nutri-cereals as climate-resilient crops for hill agriculture.",
@@ -318,9 +377,7 @@ const recognitions = [
   "The project encourages convergence between agriculture, extension systems and local institutions for sustainable millet-based livelihoods.",
 ];
 
-// ============================================================================
-// SECTION 5: PROJECT MILESTONES
-// ============================================================================
+// Project milestone text for the visual timeline.
 
 const milestones = [
   "Uttarakhand became one of the leading Himalayan states to promote traditional millets (mandua, jhangora, chaulai) through integrated government initiatives and farmer outreach programs.",
@@ -331,10 +388,15 @@ const milestones = [
   "Uttarakhand integrated millets into sustainable agriculture practices, promoting climate-resilient farming in rainfed and hill regions."
 ];
 
-// ============================================================================
-// SECTION 6: BACKGROUND
-// ============================================================================
-
+/**
+ * SoftImage - Placeholder visual block for project content sections.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} props.label - Placeholder label.
+ * @param {string} [props.className=""] - Additional Tailwind classes.
+ * @returns {React.ReactElement} Styled image placeholder.
+ */
 function SoftImage({ label, className = "" }) {
   return (
     <div
@@ -348,9 +410,7 @@ function SoftImage({ label, className = "" }) {
   );
 }
 
-// ============================================================================
-// SECTION 7: SYSTEM ARCHITECTURE
-// ============================================================================
+// Architecture cards document the department, MIS, and open-stack responsibilities.
 
 const architectureCards = [
   {
@@ -379,9 +439,7 @@ const architectureCards = [
   },
 ];
 
-// ============================================================================
-// SECTION 8: OBJECTIVES & FRAMEWORK
-// ============================================================================
+// Project objectives shown in the public framework section.
 
 const objectives = [
   "Build a state-wide millet farmer registry",
@@ -393,6 +451,14 @@ const objectives = [
   "Create a scalable foundation for AgriStack-like services",
 ];
 
+/**
+ * MiniBadge - Compact visual label used inside the objectives framework.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {React.ReactNode} props.children - Badge content.
+ * @returns {React.ReactElement} Styled badge.
+ */
 function MiniBadge({ children }) {
   return (
     <div className="rounded-2xl bg-[#2f7f79] px-4 py-3 text-sm md:text-base font-semibold text-white shadow-md">
@@ -401,9 +467,7 @@ function MiniBadge({ children }) {
   );
 }
 
-// ============================================================================
-// SECTION 9: COMPONENTS OF PROJECT
-// ============================================================================
+// Project component cards describe the functional areas supported by the MIS.
 
 const components = [
   {
@@ -476,6 +540,15 @@ const components = [
   },
 ];
 
+/**
+ * SectionTitle - Shared title block for public information sections.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} props.title - Section title.
+ * @param {string} props.subtitle - Optional supporting text.
+ * @returns {React.ReactElement} Section heading.
+ */
 function SectionTitle({ title, subtitle }) {
   return (
     <div className="mb-10 text-center">
@@ -490,15 +563,7 @@ function SectionTitle({ title, subtitle }) {
   );
 }
 
-// ============================================================================
-// SECTION 10: PROJECT DELIVERY MECHANISM
-// ============================================================================
-
-// (No additional constants - uses architectureCards from Section 7)
-
-// ============================================================================
-// SECTION 11: UK MILLET MIS WORKFLOW
-// ============================================================================
+// UK Millet MIS workflow labels and steps for the implementation flow section.
 
 const flowLevels = ["State Level", "District Level", "Block Level"];
 
@@ -513,15 +578,17 @@ const mPassteps = [
   "Consolidated insights support faster decision-making at state level.",
 ];
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
+/**
+ * UttarakhandMilletProjectLandingPage - Render the public about/project page.
+ *
+ * @component
+ * @returns {React.ReactElement} Public project information page.
+ */
 export default function UttarakhandMilletProjectLandingPage() {
   return (
     <div className="min-h-full bg-[#efefef] font-dm text-slate-900">
       
-      {/* ========== SECTION 1: HERO SECTION ========== */}
+      {/* Hero section uses a full-bleed responsive background image with text overlay. */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-[#06351d]/45" />
@@ -532,7 +599,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
-      {/* ========== SECTION 2: DISTRICT MAP + STATS + LEGEND ========== */}
+      {/* District map section uses a three-column desktop grid and stacks naturally on smaller screens. */}
       <section id="about" className="mx-auto max-w-7xl px-4 pt-2 pb-16 lg:px-8">
         <div className="relative z-10 grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)_220px] xl:grid-cols-[300px_minmax(0,1fr)_230px]">
           <div className="w-full overflow-hidden rounded-2xl border border-[#a4b153] bg-white shadow-sm">
@@ -573,7 +640,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
-      {/* ========== OVERVIEW & PROJECT INFO ========== */}
+      {/* Overview text introduces the governance purpose of the public page. */}
       <section className="mx-auto max-w-10xl px-4 pb-6 lg:px-8">
         <div className="flex justify-center pb-4">
         </div>

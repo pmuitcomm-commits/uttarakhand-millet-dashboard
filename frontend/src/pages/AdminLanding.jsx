@@ -1,14 +1,27 @@
+/**
+ * AdminLanding page - Post-login transition screen for administrators.
+ *
+ * The screen confirms the role context before automatically forwarding the user
+ * to the admin dashboard.
+ */
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { landingClasses, landingVariants } from './landingStyles';
 
+/**
+ * AdminLanding - Render the administrator landing screen.
+ *
+ * @component
+ * @returns {React.ReactElement} Admin landing page.
+ */
 function AdminLanding() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
-    // Auto-redirect after 3 seconds, or allow manual navigation
+    // Auto-redirect after 3 seconds while keeping a manual continue option.
     const timer = setTimeout(() => {
       navigate('/admin-dashboard');
     }, 3000);
@@ -30,6 +43,7 @@ function AdminLanding() {
         </div>
       </div>
 
+      {/* Responsive Tailwind card centers the short role handoff on desktop and mobile. */}
       <div className={landingClasses.content}>
         <div className={landingClasses.card}>
           <h1 className={landingClasses.greeting}>Hi, {roleDisplay}</h1>

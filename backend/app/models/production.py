@@ -1,12 +1,22 @@
+"""
+Production model for district, crop, season, and year-wise millet output.
+
+Records from this table feed dashboard KPIs, district charts, millet charts,
+and production data tables used for scheme monitoring.
+"""
+
 from sqlalchemy import Column, Integer, Numeric, BigInteger, DateTime
 from ..database import Base
 
 
 class Production(Base):
+    """SQLAlchemy mapping for the production reporting table."""
+
     __tablename__ = "production"
 
     id = Column(BigInteger, primary_key=True, index=True)
 
+    # Foreign-key style identifiers mirror the source MIS lookup tables.
     district_id = Column(BigInteger, nullable=True)
     block_id = Column(BigInteger, nullable=True)
     millet_id = Column(BigInteger, nullable=True)

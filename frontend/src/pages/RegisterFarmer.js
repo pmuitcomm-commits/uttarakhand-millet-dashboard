@@ -1,3 +1,11 @@
+/**
+ * RegisterFarmer page - Public farmer registration form for Millet MIS.
+ *
+ * The page captures farmer identity, district/block assignment, millet crop
+ * selection, land parcel details, bank information, consent, and declaration
+ * before submitting the backend registration payload.
+ */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerFarmer } from "../services/api";
@@ -27,8 +35,12 @@ const blocksByDistrict = {
   ],
 };
 
+// Crop options match the millet varieties currently accepted by the backend.
 const cropOptions = ["Mandua", "Jhangora", "Ramdana", "Kauni", "Cheena"];
 
+// Tailwind layout classes define a responsive single-screen form. max-[1100px],
+// max-[768px], and max-[480px] progressively reduce columns and spacing for
+// tablets and mobile farmer registration devices.
 const pageClass =
   "flex min-h-full w-full items-start justify-center overflow-x-hidden bg-[#f0ece4] bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgba(2,75,55,0.10)_0%,transparent_60%),radial-gradient(ellipse_50%_40%_at_92%_100%,rgba(134,179,116,0.14)_0%,transparent_55%)] px-5 py-8 font-lato max-[768px]:px-3 max-[768px]:py-5 max-[640px]:px-0 max-[640px]:py-0";
 const cardClass =
@@ -81,10 +93,18 @@ const statusBannerClass = (type) =>
   }`;
 const controlErrorClass = (error) => (error ? errorControlClass : "");
 
+// Client-side patterns mirror backend validation so users receive immediate
+// feedback before submitting sensitive farmer and bank records.
 const ifscPattern = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const mobilePattern = /^\d{10}$/;
 
+/**
+ * RegisterFarmer - Render and submit the public farmer registration form.
+ *
+ * @component
+ * @returns {React.ReactElement} Farmer registration page.
+ */
 function RegisterFarmer() {
   const navigate = useNavigate();
 
@@ -128,6 +148,13 @@ function RegisterFarmer() {
     ? blocksByDistrict[formData.district] || []
     : [];
 
+  /**
+   * Update form state for text inputs, checkboxes, crop lists, and dependent
+   * district/block selections.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement|HTMLSelectElement>} event - Form control event.
+   * @returns {void}
+   */
   const handleInputChange = (event) => {
     const { name, value, checked } = event.target;
 
@@ -140,6 +167,7 @@ function RegisterFarmer() {
     }
 
     if (name === "lease_status") {
+      // Clearing lease area when lease is disabled prevents stale land data.
       setFormData((prev) => ({
         ...prev,
         lease_status: value,
@@ -152,6 +180,7 @@ function RegisterFarmer() {
     }
 
     if (name === "crops") {
+      // Maintain the crop checkbox group as a list for backend submission.
       const updated = checked
         ? [...formData.crops, value]
         : formData.crops.filter((item) => item !== value);
@@ -165,6 +194,7 @@ function RegisterFarmer() {
     }
 
     if (name === "district") {
+      // Reset block when district changes because block options are district-specific.
       setFormData((prev) => ({
         ...prev,
         district: value,
@@ -183,6 +213,11 @@ function RegisterFarmer() {
     }
   };
 
+  /**
+   * Validate all required farmer, land, bank, and consent fields.
+   *
+   * @returns {Object} Field-level validation errors keyed by form field name.
+   */
   const validateForm = () => {
     const validationErrors = {};
 
@@ -242,6 +277,7 @@ function RegisterFarmer() {
     }
 
     if (formData.lease_status === "yes") {
+      // Lease parcel fields are required only when the farmer reports leased land.
       if (!formData.lease_cultivator_name.trim()) {
         validationErrors.lease_cultivator_name =
           "Lease cultivator name is required";
@@ -316,6 +352,11 @@ function RegisterFarmer() {
     return validationErrors;
   };
 
+  /**
+   * Convert UI form state into the backend FarmerRegistrationRequest shape.
+   *
+   * @returns {Object} API-ready registration payload.
+   */
   const formatPayload = () => ({
     farmer: {
       name: formData.full_name.trim(),
@@ -361,6 +402,12 @@ function RegisterFarmer() {
     consent_text_version: "farmer-registration-v1",
   });
 
+  /**
+   * Validate the form, submit registration data, and report success/failure.
+   *
+   * @param {React.FormEvent} event - Form submission event.
+   * @returns {Promise<void>} Completes when the submission workflow finishes.
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatusMessage("");
@@ -398,6 +445,7 @@ function RegisterFarmer() {
   return (
     <div className={pageClass}>
       <div className={cardClass}>
+        {/* Responsive Tailwind header keeps the page title and home action usable on mobile. */}
         <div className={headerClass}>
           <div className={headerContentClass}>
             <h1 className={headerTitleClass}>Farmer Registration</h1>
@@ -420,6 +468,7 @@ function RegisterFarmer() {
         )}
 
         <form onSubmit={handleSubmit} className={formClass}>
+          {/* Farmer identity and administrative geography captured for enrollment scope. */}
           <div className={sectionClass}>
             <h2>Farmer / Group Details</h2>
             <div className={gridClass}>
@@ -565,6 +614,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
+          {/* Land and crop section captures millet cultivation details for scheme monitoring. */}
           <div className={sectionClass}>
             <h2>Land under Millet Cultivation</h2>
             <div className={checkboxGridClass}>
@@ -656,6 +706,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
+          {/* Leased land fields are conditionally shown to avoid unnecessary data collection. */}
           <div className={sectionClass}>
             <h2>Land taken on lease</h2>
             <div className={gridClass}>
@@ -779,6 +830,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
+          {/* Estimates section supports planning review for seed sowing and expected yield. */}
           <div className={sectionClass}>
             <h2>Estimates</h2>
             <div className={gridClass}>
@@ -819,6 +871,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
+          {/* Bank details are sensitive and are submitted only after validation and consent. */}
           <div className={sectionClass}>
             <h2>Bank Details</h2>
             <div className={gridClass}>
@@ -908,6 +961,7 @@ function RegisterFarmer() {
             </div>
           </div>
 
+          {/* Consent and declaration are required before personal, bank, and land data is stored. */}
           <div className={declarationSectionClass}>
             <label className={declarationCheckboxClass}>
               <input
