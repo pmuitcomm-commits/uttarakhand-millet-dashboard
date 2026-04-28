@@ -22,8 +22,8 @@ function DistrictDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect authenticated users who are outside the district officer role.
-    if (isAuthenticated && user?.role !== 'district_officer') {
+    // Redirect authenticated users who are outside the district role.
+    if (isAuthenticated && user?.role !== 'district') {
       navigate('/');
     }
   }, [isAuthenticated, user, navigate]);

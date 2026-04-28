@@ -38,7 +38,7 @@ function Sidebar() {
           </>
         )}
 
-        {isAuthenticated && user?.role === 'district_officer' && (
+        {isAuthenticated && user?.role === 'district' && (
           <>
             <Link className={dashboardClasses.sidebarLink} to="/district-dashboard" data-aos="fade-right" data-aos-delay="100">
               District Dashboard
@@ -46,7 +46,7 @@ function Sidebar() {
           </>
         )}
 
-        {isAuthenticated && user?.role === 'block_officer' && (
+        {isAuthenticated && user?.role === 'block' && (
           <>
             <Link className={dashboardClasses.sidebarLink} to="/block-dashboard" data-aos="fade-right" data-aos-delay="100">
               Block Dashboard

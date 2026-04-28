@@ -22,8 +22,8 @@ function BlockDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect authenticated users who are outside the block officer role.
-    if (isAuthenticated && user?.role !== 'block_officer') {
+    // Redirect authenticated users who are outside the block role.
+    if (isAuthenticated && user?.role !== 'block') {
       navigate('/');
     }
   }, [isAuthenticated, user, navigate]);

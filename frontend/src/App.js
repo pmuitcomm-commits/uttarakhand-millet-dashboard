@@ -96,12 +96,12 @@ function AppRoutes() {
         </ProtectedOfficerRoute>
       } />
       <Route path="/district-landing" element={
-        <ProtectedOfficerRoute requiredRole="district_officer">
+        <ProtectedOfficerRoute requiredRole="district">
           <DistrictLanding />
         </ProtectedOfficerRoute>
       } />
       <Route path="/block-landing" element={
-        <ProtectedOfficerRoute requiredRole="block_officer">
+        <ProtectedOfficerRoute requiredRole="block">
           <BlockLanding />
         </ProtectedOfficerRoute>
       } />
@@ -124,12 +124,12 @@ function AppRoutes() {
         </ProtectedOfficerRoute>
       } />
       <Route path="/district-dashboard" element={
-        <ProtectedOfficerRoute requiredRole="district_officer">
+        <ProtectedOfficerRoute requiredRole="district">
           <DistrictDashboard />
         </ProtectedOfficerRoute>
       } />
       <Route path="/block-dashboard" element={
-        <ProtectedOfficerRoute requiredRole="block_officer">
+        <ProtectedOfficerRoute requiredRole="block">
           <BlockDashboard />
         </ProtectedOfficerRoute>
       } />

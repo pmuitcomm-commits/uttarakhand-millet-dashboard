@@ -1,22 +1,12 @@
 """
 User model definitions for role-based access in the Millet MIS.
 
-The users table supports administrative, district, block, and farmer personas
-used by the dashboard and protected API routes.
+The users table stores role values as lowercase strings in the existing
+Supabase schema.
 """
 
-from sqlalchemy import Column, Integer, String, Enum
-from enum import Enum as PyEnum
+from sqlalchemy import Column, Integer, String
 from ..database import Base
-
-
-class UserRole(PyEnum):
-    """Supported authorization roles for dashboard and API access."""
-
-    ADMIN = "admin"
-    DISTRICT_OFFICER = "district_officer"
-    BLOCK_OFFICER = "block_officer"
-    FARMER = "farmer"
 
 
 class User(Base):
@@ -34,7 +24,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String)
     full_name = Column(String, nullable=True)
-    role = Column(Enum(UserRole), default=UserRole.FARMER, index=True)
+    role = Column(String, default="farmer", index=True)
     district = Column(String, nullable=True)  # District-level access scope.
     block = Column(String, nullable=True)  # Block-level access scope.
     is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive.

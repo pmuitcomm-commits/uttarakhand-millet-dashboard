@@ -23,17 +23,30 @@ from ..security import create_access_token, decode_token, hash_password, verify_
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
 
-# Numeric role identifiers are accepted from the public registration form, but
-# public registration is constrained to low-privilege farmer accounts below.
+# Numeric role identifiers are accepted from legacy clients. Officer roles are
+# stored and returned using the existing lowercase Supabase role strings.
 ROLE_MAP = {
     1: "admin",
-    2: "district_officer",
-    3: "block_officer",
+    2: "district",
+    3: "block",
     4: "farmer",
 }
 
-ROLE_ID_MAP = {role: role_id for role_id, role in ROLE_MAP.items()}
+OFFICER_ROLES = {"admin", "district", "block"}
+VALID_ROLE_VALUES = set(ROLE_MAP.values())
+ROLE_ALIASES = {
+    "district_officer": "district",
+    "block_officer": "block",
+}
 PUBLIC_REGISTRATION_ROLE = "farmer"
+
+
+def _canonical_role_value(role_value) -> str:
+    """Return the lowercase app role value, including legacy alias support."""
+    if hasattr(role_value, "value"):
+        role_value = role_value.value
+    role = str(role_value).split(".")[-1].lower()
+    return ROLE_ALIASES.get(role, role)
 
 
 def validate_password_strength(password: str) -> bool:
@@ -69,10 +82,8 @@ def _normalize_role(role_value) -> str:
     """
     if role_value is None:
         return PUBLIC_REGISTRATION_ROLE
-    if hasattr(role_value, "value"):
-        role_value = role_value.value
-    role = str(role_value).split(".")[-1].lower()
-    return role if role in ROLE_ID_MAP else PUBLIC_REGISTRATION_ROLE
+    role = _canonical_role_value(role_value)
+    return role if role in VALID_ROLE_VALUES else PUBLIC_REGISTRATION_ROLE
 
 
 def _active_user(user) -> bool:
@@ -171,12 +182,12 @@ def _validate_scope_fields(user):
         HTTPException: When district or block scoping is missing for an officer.
     """
     role = _normalize_role(user.get("role"))
-    if role in {"district_officer", "block_officer"} and not user.get("district"):
+    if role in {"district", "block"} and not user.get("district"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is missing district assignment",
         )
-    if role == "block_officer" and not user.get("block"):
+    if role == "block" and not user.get("block"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is missing block assignment",
@@ -280,9 +291,9 @@ class UpdateUserRoleRequest(BaseModel):
     @classmethod
     def validate_new_role(cls, value: str) -> str:
         """Normalize and validate the requested target role."""
-        value = value.lower().strip()
-        if value not in ROLE_ID_MAP:
-            raise ValueError(f"Invalid role. Allowed roles: {list(ROLE_ID_MAP.keys())}")
+        value = _canonical_role_value(value.strip())
+        if value not in OFFICER_ROLES:
+            raise ValueError(f"Invalid role. Allowed roles: {sorted(OFFICER_ROLES)}")
         return value
 
 
@@ -349,7 +360,7 @@ def require_role(*allowed_roles):
         Callable: Dependency that returns the current user when authorized.
     """
     allowed_role_names = {
-        ROLE_MAP.get(role, role) if isinstance(role, int) else role
+        _canonical_role_value(ROLE_MAP.get(role, role) if isinstance(role, int) else role)
         for role in allowed_roles
     }
 
@@ -568,7 +579,7 @@ def update_user_role(
 def get_district_users(
     limit: int = 50,
     offset: int = 0,
-    current_user=Depends(require_role("admin", "district_officer")),
+    current_user=Depends(require_role("admin", "district")),
     db: Session = Depends(get_db),
 ):
     """
@@ -608,7 +619,7 @@ def get_district_users(
                 """
                 SELECT id, username, email, full_name, role, district, block, is_active
                 FROM users
-                WHERE district = :district AND LOWER(CAST(role AS TEXT)) IN ('block_officer', 'farmer')
+                WHERE district = :district AND LOWER(CAST(role AS TEXT)) IN ('block', 'farmer')
                 ORDER BY id ASC
                 LIMIT :limit OFFSET :offset
                 """
@@ -623,7 +634,7 @@ def get_district_users(
 def get_block_users(
     limit: int = 50,
     offset: int = 0,
-    current_user=Depends(require_role("admin", "district_officer", "block_officer")),
+    current_user=Depends(require_role("admin", "district", "block")),
     db: Session = Depends(get_db),
 ):
     """
@@ -657,13 +668,13 @@ def get_block_users(
             ),
             {"limit": limit, "offset": offset},
         )
-    elif current_role == "district_officer":
+    elif current_role == "district":
         result = db.execute(
             text(
                 """
                 SELECT id, username, email, full_name, role, district, block, is_active
                 FROM users
-                WHERE district = :district AND LOWER(CAST(role AS TEXT)) IN ('block_officer', 'farmer')
+                WHERE district = :district AND LOWER(CAST(role AS TEXT)) IN ('block', 'farmer')
                 ORDER BY id ASC
                 LIMIT :limit OFFSET :offset
                 """

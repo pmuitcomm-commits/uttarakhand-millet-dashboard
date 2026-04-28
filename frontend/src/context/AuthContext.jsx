@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     // Block scope is intentionally stricter than district scope for local records.
     if (!user) return false;
     if (user.role === 'admin') return true;
-    if (user.role === 'district_officer') return true;
+    if (user.role === 'district') return true;
     return user.block === blockName;
   };
 

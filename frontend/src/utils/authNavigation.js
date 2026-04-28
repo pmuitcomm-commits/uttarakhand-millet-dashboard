@@ -15,9 +15,9 @@ export function getPostLoginPath(role) {
   switch (role) {
     case "admin":
       return "/admin-landing";
-    case "district_officer":
+    case "district":
       return "/district-landing";
-    case "block_officer":
+    case "block":
       return "/block-landing";
     default:
       return "/procurement";

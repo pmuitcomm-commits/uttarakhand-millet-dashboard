@@ -18,7 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from app.database import engine, Base
-    from app.models.user import User, UserRole
+    from app.models.farmer import Farmer, LandParcel
+    from app.models.user import User
     from app.models.procurement import Procurement
     
     print("Creating all database tables...")
@@ -26,6 +27,8 @@ try:
     print("✓ Database tables created successfully!")
     print("\nTables created:")
     print("  - users")
+    print("  - farmers")
+    print("  - land_parcels")
     print("  - millet_production")
     print("  - procurement")
     

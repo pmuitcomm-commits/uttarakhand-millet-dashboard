@@ -2,7 +2,7 @@
 Authentication schema and seed user setup for the Millet MIS backend.
 
 This script creates the current users table shape and inserts representative
-admin, district officer, block officer, and farmer accounts for controlled
+admin, district, block, and farmer accounts for controlled
 setup/testing environments.
 """
 
@@ -78,7 +78,7 @@ try:
         })
         print("✓ Created Admin user admin_uttarakhand")
         
-        # District officer - Nainital
+        # District user - Nainital
         dist_pw = hash_password(district_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, district, is_active)
@@ -88,13 +88,13 @@ try:
             "email": "nainital@uttarakhand.gov.in",
             "hashed_password": dist_pw,
             "full_name": "District Officer - Nainital",
-            "role": "district_officer",
+            "role": "district",
             "district": "Nainital",
             "is_active": 1
         })
         print("✓ Created District Officer user district_nainital")
         
-        # District officer - Almora
+        # District user - Almora
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, district, is_active)
             VALUES (:username, :email, :hashed_password, :full_name, :role, :district, :is_active)
@@ -103,13 +103,13 @@ try:
             "email": "almora@uttarakhand.gov.in",
             "hashed_password": dist_pw,
             "full_name": "District Officer - Almora",
-            "role": "district_officer",
+            "role": "district",
             "district": "Almora",
             "is_active": 1
         })
         print("✓ Created District Officer user district_almora")
         
-        # Block officer
+        # Block user
         block_pw = hash_password(block_password)
         db.execute(text("""
             INSERT INTO users (username, email, hashed_password, full_name, role, district, block, is_active)
@@ -119,7 +119,7 @@ try:
             "email": "nainital_city@uttarakhand.gov.in",
             "hashed_password": block_pw,
             "full_name": "Block Officer - Nainital City",
-            "role": "block_officer",
+            "role": "block",
             "district": "Nainital",
             "block": "Nainital",
             "is_active": 1

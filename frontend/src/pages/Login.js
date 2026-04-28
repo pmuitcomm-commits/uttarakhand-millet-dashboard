@@ -200,13 +200,12 @@ function Login() {
       let response;
 
       if (isRegistering) {
-        // Public registration is intentionally sent with farmer role_id only.
+        // Backend defaults public registration to the low-privilege public role.
         const userData = {
           username: formData.username,
           password: formData.password,
           email: formData.email,
           full_name: formData.fullName.trim() || null,
-          role_id: 4,
         };
         response = await registerUser(userData);
       } else if (loginMethod === LOGIN_METHODS.PASSWORD) {

@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..models.farmer import Farmer, LandParcel  # noqa: F401 - registers table metadata for create_all
 from ..rate_limit import limiter
 from .auth import require_role
 
@@ -259,7 +260,11 @@ def _normalize_role(role_value) -> str:
         return "farmer"
     if hasattr(role_value, "value"):
         role_value = role_value.value
-    return str(role_value).split(".")[-1].lower()
+    role = str(role_value).split(".")[-1].lower()
+    return {
+        "district_officer": "district",
+        "block_officer": "block",
+    }.get(role, role)
 
 
 def _enforce_farmer_scope(current_user, farmer_row):
@@ -283,9 +288,9 @@ def _enforce_farmer_scope(current_user, farmer_row):
     farmer_district = farmer_row.get("district_name")
     farmer_block = farmer_row.get("block_name")
 
-    if role == "district_officer" and user_district == farmer_district:
+    if role == "district" and user_district == farmer_district:
         return
-    if role == "block_officer" and user_district == farmer_district and user_block == farmer_block:
+    if role == "block" and user_district == farmer_district and user_block == farmer_block:
         return
 
     raise HTTPException(
@@ -493,7 +498,7 @@ def check_enrollment_status(
 def check_enrollment_status_full(
     request: Request,
     mobile: str,
-    current_user=Depends(require_role("admin", "district_officer", "block_officer")),
+    current_user=Depends(require_role("admin", "district", "block")),
     db: Session = Depends(get_db),
 ):
     """
