@@ -46,6 +46,15 @@ const roleSidebarItems = {
 
 const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+const roleSidebarRoutes = {
+  district: {
+    "District Data": "/district/data",
+  },
+  block: {
+    "Block Data": "/block/data",
+  },
+};
+
 /**
  * Sidebar - Responsive navigation panel for MIS dashboard pages.
  *
@@ -77,7 +86,7 @@ function Sidebar() {
           <Link
             key={item}
             className={dashboardClasses.sidebarLink}
-            to={`${roleConfig.basePath}#${slugify(item)}`}
+            to={roleSidebarRoutes[user?.role]?.[item] || `${roleConfig.basePath}#${slugify(item)}`}
             data-aos="fade-right"
             data-aos-delay={String(450 + index * 50)}
           >

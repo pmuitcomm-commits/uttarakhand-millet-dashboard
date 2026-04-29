@@ -9,3 +9,4 @@ from .procurement import Procurement
 from .production import Production
 from .farmer import Farmer, LandParcel
 from .user import User
+from .data_entry import DistrictBlockDataEntry

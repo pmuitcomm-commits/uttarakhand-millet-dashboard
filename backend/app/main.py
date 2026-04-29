@@ -20,6 +20,7 @@ from .routes.dashboard import router as dashboard_router
 from .routes.procurement import router as procurement_router
 from .routes.auth import router as auth_router
 from .routes.farmer import router as farmer_router
+from .routes.data_entries import router as data_entries_router
 
 load_dotenv()
 
@@ -80,6 +81,7 @@ app.include_router(dashboard_router)
 app.include_router(procurement_router)
 app.include_router(auth_router)
 app.include_router(farmer_router, prefix="/farmers", tags=["Farmers"])
+app.include_router(data_entries_router)
 
 
 @app.get("/")

@@ -18,6 +18,7 @@ import Procurement from "./pages/Procurement";
 import AdminDashboard from "./pages/AdminDashboard";
 import DistrictDashboard from "./pages/DistrictDashboard";
 import BlockDashboard from "./pages/BlockDashboard";
+import DataEntryPage from "./pages/DataEntryPage";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -37,10 +38,12 @@ import { getPostLoginPath } from "./utils/authNavigation";
  * @param {Object} props - Route guard properties.
  * @param {React.ReactNode} props.children - Protected page content.
  * @param {string|null} props.requiredRole - Required role for the page.
+ * @param {string[]|null} props.allowedRoles - Allowed roles for shared pages.
  * @returns {React.ReactElement} Route guard result.
  */
-function ProtectedOfficerRoute({ children, requiredRole = null }) {
+function ProtectedOfficerRoute({ children, requiredRole = null, allowedRoles = null }) {
   const { isAuthenticated, user, loading } = useAuth();
+  const roles = allowedRoles || (requiredRole ? [requiredRole] : null);
 
   if (loading) {
     return <div className="p-5 text-center">Loading...</div>;
@@ -50,7 +53,7 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  if (roles && !roles.includes(user?.role)) {
     return <Navigate to="/" replace />;
   }
 
@@ -126,6 +129,16 @@ function AppRoutes() {
       <Route path="/block" element={
         <ProtectedOfficerRoute requiredRole="block">
           <BlockDashboard />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/district/data" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "district"]}>
+          <DataEntryPage scopeType="district" />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/block/data" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "block"]}>
+          <DataEntryPage scopeType="block" />
         </ProtectedOfficerRoute>
       } />
       <Route path="/admin-dashboard" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />

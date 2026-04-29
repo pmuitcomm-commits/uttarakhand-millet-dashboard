@@ -96,4 +96,13 @@ export const getProcurementKPIs = () => API.get("/procurement/kpis");
 
 export const getAllProcurement = () => API.get("/procurement/all");
 
+// =========================
+// Officer Data Entry APIs
+// =========================
+export const getDataEntries = (scopeType) =>
+  API.get(`/data-entries/${encodeURIComponent(scopeType)}`);
+
+export const saveDataEntries = (scopeType, entries) =>
+  API.post(`/data-entries/${encodeURIComponent(scopeType)}`, { entries });
+
 export default API;
