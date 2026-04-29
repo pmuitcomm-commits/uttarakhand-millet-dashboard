@@ -13,7 +13,6 @@ import 'aos/dist/aos.css';
 
 import Login from "./pages/Login";
 import CheckEnrollment from "./pages/CheckEnrollment";
-import CheckEnrollmentStatus from "./pages/CheckEnrollmentStatus";
 import Dashboard from "./pages/Dashboard";
 import Procurement from "./pages/Procurement";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -110,7 +109,6 @@ function AppRoutes() {
       
       {/* Public Routes - for farmers */}
       <Route path="/enrollment-status" element={<CheckEnrollment />} />
-      <Route path="/check-status" element={<CheckEnrollmentStatus />} />
       <Route path="/register-farmer" element={<RegisterFarmer />} />
       <Route path="/procurement" element={<Procurement />} />
       <Route path="/dashboard" element={<Dashboard page="dashboard" />} />
