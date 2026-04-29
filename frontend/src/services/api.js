@@ -8,67 +8,27 @@
 
 import axios from "axios";
 
-const AUTH_TOKEN_KEY = "authToken";
-const AUTH_USER_KEY = "userInfo";
-const AUTH_ROLE_KEY = "userRole";
+const LEGACY_AUTH_KEYS = ["authToken", "userInfo", "userRole"];
 
 const API_BASE_URL =
   (
     process.env.REACT_APP_API_URL ||
     process.env.REACT_APP_API_BASE_URL ||
-    "http://127.0.0.1:8000"
+    "http://localhost:8000"
   ).replace(/\/+$/, "");
 
 const API = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
-
-// Security note: localStorage is currently used for bearer tokens because the
-// backend exposes JWT responses. Migrate to HttpOnly SameSite cookies when
-// backend cookie sessions are available.
-export function getAuthToken() {
-  return localStorage.getItem(AUTH_TOKEN_KEY);
-}
-
-/**
- * Read and validate the persisted user session snapshot.
- *
- * @returns {Object|null} Minimal user object or null when storage is empty or
- * corrupted.
- */
-export function getStoredUser() {
-  const storedUser = localStorage.getItem(AUTH_USER_KEY);
-  if (!storedUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedUser);
-  } catch {
-    clearAuthSession();
-    return null;
-  }
-}
 
 /**
  * Persist the authenticated session received from the backend.
  *
- * @param {string} accessToken - JWT access token returned by the API.
- * @param {Object} user - Authenticated user object returned by the API.
  * @returns {void}
  */
-export function setAuthSession(accessToken, user) {
-  const minimalUser = {
-    id: user.id,
-    username: user.username,
-    role: user.role,
-    district: user.district || null,
-    block: user.block || null,
-  };
-
-  localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
-  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(minimalUser));
-  localStorage.setItem(AUTH_ROLE_KEY, minimalUser.role);
+export function setAuthSession() {
+  clearAuthSession();
 }
 
 /**
@@ -77,19 +37,8 @@ export function setAuthSession(accessToken, user) {
  * @returns {void}
  */
 export function clearAuthSession() {
-  localStorage.removeItem(AUTH_TOKEN_KEY);
-  localStorage.removeItem(AUTH_USER_KEY);
-  localStorage.removeItem(AUTH_ROLE_KEY);
+  LEGACY_AUTH_KEYS.forEach((key) => localStorage.removeItem(key));
 }
-
-// Attach the bearer token to API requests when a session is present.
-API.interceptors.request.use((config) => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 // =========================
 // Auth APIs
@@ -107,7 +56,7 @@ export const requestLoginOtp = () => {
 
 export const verifyLoginOtp = () => {
   // TODO: Wire this to the backend OTP verification endpoint when available.
-  // Expected backend response should match /auth/login: { access_token, token_type, user }.
+  // Expected backend response should match /auth/login: { user }.
   return Promise.reject(
     new Error("OTP login is not configured yet. Backend OTP verification endpoint is required."),
   );
@@ -118,10 +67,10 @@ export const registerUser = (userData) =>
 
 export const getCurrentUser = () => API.get("/auth/me");
 
-export const logoutUser = () => {
-  clearAuthSession();
-  window.location.href = "/";
-};
+export const logoutUser = () =>
+  API.post("/auth/logout").finally(() => {
+    clearAuthSession();
+  });
 
 // =========================
 // Farmer APIs

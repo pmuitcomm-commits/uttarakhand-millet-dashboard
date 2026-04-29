@@ -136,14 +136,14 @@ function Login() {
   };
 
   const completeAuth = (response) => {
-    // Normalize backend roles before storing the session and choosing a route.
-    const { access_token, user } = response.data;
+    // Normalize backend roles before choosing a route.
+    const { user } = response.data;
     const normalizedUser = {
       ...user,
       role: (user.role || "farmer").toLowerCase(),
     };
 
-    setAuthSession(access_token, normalizedUser);
+    setAuthSession(normalizedUser);
     window.location.href = getPostLoginPath(normalizedUser.role);
   };
 

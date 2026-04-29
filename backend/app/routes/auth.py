@@ -10,8 +10,7 @@ reviewed carefully during NIC handover and penetration testing.
 import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -21,7 +20,10 @@ from ..rate_limit import limiter
 from ..security import create_access_token, decode_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-security = HTTPBearer()
+
+AUTH_COOKIE_NAME = "access_token"
+AUTH_COOKIE_SAMESITE = "lax"
+LOCAL_COOKIE_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0"}
 
 # Numeric role identifiers are accepted from legacy clients. Officer roles are
 # stored and returned using the existing lowercase Supabase role strings.
@@ -39,6 +41,31 @@ ROLE_ALIASES = {
     "block_officer": "block",
 }
 PUBLIC_REGISTRATION_ROLE = "farmer"
+
+
+def _cookie_secure(request: Request) -> bool:
+    host = request.url.hostname or ""
+    return host not in LOCAL_COOKIE_HOSTS
+
+
+def _set_auth_cookie(response: Response, request: Request, token: str) -> None:
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        httponly=True,
+        secure=_cookie_secure(request),
+        samesite=AUTH_COOKIE_SAMESITE,
+        path="/",
+    )
+
+
+def _clear_auth_cookie(response: Response, request: Request) -> None:
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        secure=_cookie_secure(request),
+        samesite=AUTH_COOKIE_SAMESITE,
+        path="/",
+    )
 
 
 def _canonical_role_value(role_value) -> str:
@@ -297,23 +324,21 @@ class UpdateUserRoleRequest(BaseModel):
         return value
 
 
-class TokenResponse(BaseModel):
+class AuthResponse(BaseModel):
     """Response contract returned after successful authentication."""
 
-    access_token: str
-    token_type: str
     user: dict
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request,
     db: Session = Depends(get_db),
 ):
     """
-    Resolve the current authenticated user from the bearer token.
+    Resolve the current authenticated user from the session cookie.
 
     Args:
-        credentials (HTTPAuthorizationCredentials): Bearer token credentials.
+        request (Request): Request containing the signed session cookie.
         db (Session): Request-scoped database session.
 
     Returns:
@@ -322,12 +347,18 @@ async def get_current_user(
     Raises:
         HTTPException: When token validation fails or the user is inactive.
     """
-    payload = decode_token(credentials.credentials)
+    token = request.cookies.get(AUTH_COOKIE_NAME)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
+    payload = decode_token(token)
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     username = payload.get("sub")
@@ -335,7 +366,6 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     user = _fetch_user_by_username(db, username)
@@ -343,7 +373,6 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     return user
 
@@ -383,11 +412,11 @@ def require_role(*allowed_roles):
     return check_role
 
 
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register", response_model=AuthResponse)
 @limiter.limit("10/minute")
-def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
+def register(request: Request, response: Response, user_data: UserRegister, db: Session = Depends(get_db)):
     """
-    Register a public farmer account and issue an access token.
+    Register a public farmer account and issue a cookie session.
 
     Public registration is deliberately limited to farmer role creation. This
     prevents self-service creation of administrator or officer accounts.
@@ -398,7 +427,7 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
         db (Session): Request-scoped database session.
 
     Returns:
-        dict: Bearer token and sanitized user details.
+        dict: Sanitized user details.
 
     Raises:
         HTTPException: When the username exists or privileged registration is
@@ -440,16 +469,15 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
 
     user = _fetch_user_by_username(db, user_data.username)
     access_token = create_access_token(data={"sub": user["username"]})
+    _set_auth_cookie(response, request, access_token)
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
         "user": _user_response(user),
     }
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=AuthResponse)
 @limiter.limit("5/minute")
-def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db)):
+def login(request: Request, response: Response, credentials: UserLogin, db: Session = Depends(get_db)):
     """
     Authenticate a user with username and password credentials.
 
@@ -459,7 +487,7 @@ def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db
         db (Session): Request-scoped database session.
 
     Returns:
-        dict: Bearer token and sanitized user details.
+        dict: Sanitized user details.
 
     Raises:
         HTTPException: When credentials are invalid or the account is inactive.
@@ -469,11 +497,16 @@ def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     access_token = create_access_token(data={"sub": user["username"]})
+    _set_auth_cookie(response, request, access_token)
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
         "user": _user_response(user),
     }
+
+
+@router.post("/logout")
+def logout(request: Request, response: Response):
+    _clear_auth_cookie(response, request)
+    return {"message": "Logged out"}
 
 
 @router.get("/me", response_model=dict)

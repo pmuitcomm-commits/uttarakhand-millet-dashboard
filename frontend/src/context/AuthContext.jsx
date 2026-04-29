@@ -1,12 +1,12 @@
 /**
  * AuthContext module - Provides client-side authentication state for MIS pages.
  *
- * The context verifies stored JWT sessions against the backend, exposes logout
+ * The context verifies cookie sessions against the backend, exposes logout
  * behavior, and provides role/scope helpers used by protected dashboard routes.
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { clearAuthSession, getAuthToken, getCurrentUser } from '../services/api';
+import { clearAuthSession, getCurrentUser, logoutUser } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -21,9 +21,8 @@ export const useAuth = () => {
 /**
  * AuthProvider - Hydrates and exposes the current authenticated user session.
  *
- * The provider verifies the stored token through /auth/me before marking a user
- * authenticated, preventing stale localStorage data from unlocking officer
- * screens.
+ * The provider verifies the session cookie through /auth/me before marking a
+ * user authenticated.
  *
  * @component
  * @param {Object} props - Provider properties.
@@ -36,27 +35,23 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check whether a stored token still maps to an active backend user.
+    // Clear legacy bearer-token storage and hydrate from the HttpOnly cookie.
     const checkAuth = async () => {
-      const token = getAuthToken();
+      clearAuthSession();
 
-      if (token) {
-        try {
-          // Verify token is still valid and normalize roles for comparisons.
-          const response = await getCurrentUser();
-          if (response.data.role) {
-            response.data.role = response.data.role.toLowerCase();
-          }
-          setUser(response.data);
-          setIsAuthenticated(true);
-        } catch (error) {
-          // Invalid or expired tokens are removed to avoid false access states.
-          clearAuthSession();
-          setUser(null);
-          setIsAuthenticated(false);
+      try {
+        const response = await getCurrentUser();
+        if (response.data.role) {
+          response.data.role = response.data.role.toLowerCase();
         }
+        setUser(response.data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
@@ -66,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     clearAuthSession();
     setUser(null);
     setIsAuthenticated(false);
+    logoutUser().catch(() => {});
   };
 
   const hasRole = (roles) => {

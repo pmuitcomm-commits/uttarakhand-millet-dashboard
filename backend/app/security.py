@@ -23,7 +23,7 @@ if not SECRET_KEY or SECRET_KEY == "your-secret-key-change-in-production":
     raise ValueError("SECRET_KEY environment variable must be set to a secure value. Do not use the default.")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 # Password hashing context. Argon2 is used for strong password storage and for
 # forward compatibility with newer Python runtimes.
@@ -88,7 +88,7 @@ def decode_token(token: str) -> Optional[dict]:
     Decode and validate a JWT access token.
 
     Args:
-        token (str): Bearer token received from an authenticated API request.
+        token (str): JWT received from an authenticated API request.
 
     Returns:
         Optional[dict]: Token payload when valid; None for expired, malformed,
