@@ -16,29 +16,29 @@ const roleSidebarItems = {
     basePath: "/admin",
     items: [
       "User Management",
+      "Role & Permissions",
       "System Reports",
       "System Settings",
       "All Regions Data",
-      "Role & Permissions",
     ],
   },
   district: {
     basePath: "/district",
     items: [
       "Block Officer Management",
+      "District Monitoring",
       "District Farmers",
       "District Reports",
-      "District Monitoring",
       "District Data",
     ],
   },
   block: {
     basePath: "/block",
     items: [
-      "Block Farmers",
       "Farmer Records",
-      "Block Reports",
       "Block Monitoring",
+      "Block Farmers",
+      "Block Reports",
       "Block Data",
     ],
   },
