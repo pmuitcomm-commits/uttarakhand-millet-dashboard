@@ -19,9 +19,6 @@ import Procurement from "./pages/Procurement";
 import AdminDashboard from "./pages/AdminDashboard";
 import DistrictDashboard from "./pages/DistrictDashboard";
 import BlockDashboard from "./pages/BlockDashboard";
-import AdminLanding from "./pages/AdminLanding";
-import DistrictLanding from "./pages/DistrictLanding";
-import BlockLanding from "./pages/BlockLanding";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -88,23 +85,6 @@ function AppRoutes() {
           )
         }
       />
-      
-      {/* Landing Pages - for officers */}
-      <Route path="/admin-landing" element={
-        <ProtectedOfficerRoute requiredRole="admin">
-          <AdminLanding />
-        </ProtectedOfficerRoute>
-      } />
-      <Route path="/district-landing" element={
-        <ProtectedOfficerRoute requiredRole="district">
-          <DistrictLanding />
-        </ProtectedOfficerRoute>
-      } />
-      <Route path="/block-landing" element={
-        <ProtectedOfficerRoute requiredRole="block">
-          <BlockLanding />
-        </ProtectedOfficerRoute>
-      } />
       
       {/* Public Routes - for farmers */}
       <Route path="/enrollment-status" element={<CheckEnrollment />} />
