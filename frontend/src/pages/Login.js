@@ -17,11 +17,16 @@ import {
   verifyLoginOtp,
 } from "../services/api";
 import { getPostLoginPath } from "../utils/authNavigation";
-
-const LOGIN_METHODS = {
-  PASSWORD: "password",
-  OTP: "otp",
-};
+import {
+  buildRegistrationPayload,
+  getAuthErrorMessage,
+  initialLoginFormData,
+  loginNotifications,
+  LOGIN_METHODS,
+  normalizeAuthUser,
+  validateLoginForm,
+  validateOtpIdentifier,
+} from "./loginFormHelpers";
 
 /**
  * Login - Render authentication form for officers and public farmer accounts.
@@ -33,14 +38,7 @@ const LOGIN_METHODS = {
  * @returns {React.ReactElement} Authentication page.
  */
 function Login() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    email: "",
-    fullName: "",
-    otpIdentifier: "",
-    otpCode: "",
-  });
+  const [formData, setFormData] = useState(initialLoginFormData);
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -50,12 +48,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [otpRequesting, setOtpRequesting] = useState(false);
   const [otpRequested, setOtpRequested] = useState(false);
-
-  const notifications = [
-    "Department notifications and scheme alerts will appear here.",
-    "Live updates section is reserved for scrolling announcements.",
-    "You can later connect this panel to API-based notices or MIS alerts.",
-  ];
 
   const clearFeedback = () => {
     // Clear all transient validation and API messages when the user changes mode.
@@ -85,70 +77,14 @@ function Login() {
     }
   };
 
-  const validatePasswordForm = () => {
-    // Password login and registration share username/password required checks.
-    const newErrors = {};
-
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    }
-
-    if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
-    }
-
-    return newErrors;
-  };
-
-  const validateOtpIdentifier = () => {
-    const newErrors = {};
-
-    if (!formData.otpIdentifier.trim()) {
-      newErrors.otpIdentifier = "Username or mobile number is required";
-    }
-
-    return newErrors;
-  };
-
-  const validateOtpForm = () => {
-    // OTP format is constrained to numeric codes while backend integration is pending.
-    const newErrors = validateOtpIdentifier();
-
-    if (!otpRequested) {
-      newErrors.otpIdentifier = "Please request an OTP before logging in";
-    }
-
-    if (!formData.otpCode.trim()) {
-      newErrors.otpCode = "OTP is required";
-    } else if (!/^\d{4,8}$/.test(formData.otpCode.trim())) {
-      newErrors.otpCode = "Enter a valid OTP";
-    }
-
-    return newErrors;
-  };
-
-  const validateForm = () => {
-    if (isRegistering || loginMethod === LOGIN_METHODS.PASSWORD) {
-      return validatePasswordForm();
-    }
-
-    return validateOtpForm();
-  };
-
   const completeAuth = (response) => {
-    // Normalize backend roles before choosing a route.
-    const { user } = response.data;
-    const normalizedUser = {
-      ...user,
-      role: (user.role || "farmer").toLowerCase(),
-    };
-
+    const normalizedUser = normalizeAuthUser(response.data.user);
     setAuthSession(normalizedUser);
     window.location.href = getPostLoginPath(normalizedUser.role);
   };
 
   const handleRequestOtp = async () => {
-    const validationErrors = validateOtpIdentifier();
+    const validationErrors = validateOtpIdentifier(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -187,7 +123,12 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
+    const validationErrors = validateLoginForm({
+      formData,
+      isRegistering,
+      loginMethod,
+      otpRequested,
+    });
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -200,14 +141,7 @@ function Login() {
       let response;
 
       if (isRegistering) {
-        // Backend defaults public registration to the low-privilege public role.
-        const userData = {
-          username: formData.username,
-          password: formData.password,
-          email: formData.email,
-          full_name: formData.fullName.trim() || null,
-        };
-        response = await registerUser(userData);
+        response = await registerUser(buildRegistrationPayload(formData));
       } else if (loginMethod === LOGIN_METHODS.PASSWORD) {
         response = await loginUser(formData.username, formData.password);
       } else {
@@ -219,11 +153,7 @@ function Login() {
 
       completeAuth(response);
     } catch (error) {
-      const errorMsg =
-        error.response?.data?.detail ||
-        error.message ||
-        "Authentication failed. Please try again.";
-      setAuthError(errorMsg);
+      setAuthError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -245,7 +175,7 @@ function Login() {
 
               <div className={authClasses.notificationMarquee}>
                 <div className={authClasses.notificationTrack}>
-                  {[...notifications, ...notifications].map((item, index) => (
+                  {[...loginNotifications, ...loginNotifications].map((item, index) => (
                     <div key={index} className={authClasses.notificationItem}>
                       <span className={authClasses.notificationDot} />
                       <span>{item}</span>

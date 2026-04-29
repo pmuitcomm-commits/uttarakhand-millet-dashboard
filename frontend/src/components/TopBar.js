@@ -26,9 +26,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { schemes } from "../data/schemes";
 import { getPostLoginPath } from "../utils/authNavigation";
-
-const FONT_SCALE_LEVELS = [0.9, 1, 1.1, 1.2];
-const DEFAULT_FONT_SCALE_INDEX = 1;
+import { useFontScale } from "./useFontScale";
 
 /**
  * TopBar - Persistent navigation header for all MIS pages.
@@ -45,24 +43,7 @@ function TopBar() {
   const { language, toggleLanguage } = useLanguage();
   const headerRef = useRef(null);
   const [openMenu, setOpenMenu] = useState(null);
-  const [fontScaleIndex, setFontScaleIndex] = useState(DEFAULT_FONT_SCALE_INDEX);
-
-  useEffect(() => {
-    // Restore the last selected accessibility font scale for repeat users.
-    const storedIndex = Number(window.localStorage.getItem("appFontScaleIndex"));
-    if (Number.isInteger(storedIndex) && FONT_SCALE_LEVELS[storedIndex]) {
-      setFontScaleIndex(storedIndex);
-    }
-  }, []);
-
-  useEffect(() => {
-    // CSS variable updates let Tailwind-sized text scale consistently.
-    document.documentElement.style.setProperty(
-      "--app-font-scale",
-      String(FONT_SCALE_LEVELS[fontScaleIndex]),
-    );
-    window.localStorage.setItem("appFontScaleIndex", String(fontScaleIndex));
-  }, [fontScaleIndex]);
+  const { decreaseFontSize, increaseFontSize, resetFontSize } = useFontScale();
 
   useEffect(() => {
     // Close menus when users click outside the header or press Escape.
@@ -111,20 +92,6 @@ function TopBar() {
 
   const toggleMenu = (menuName) => {
     setOpenMenu((currentMenu) => (currentMenu === menuName ? null : menuName));
-  };
-
-  const increaseFontSize = () => {
-    setFontScaleIndex((currentIndex) =>
-      Math.min(currentIndex + 1, FONT_SCALE_LEVELS.length - 1),
-    );
-  };
-
-  const decreaseFontSize = () => {
-    setFontScaleIndex((currentIndex) => Math.max(currentIndex - 1, 0));
-  };
-
-  const resetFontSize = () => {
-    setFontScaleIndex(DEFAULT_FONT_SCALE_INDEX);
   };
 
   const handleToggleLanguage = () => {

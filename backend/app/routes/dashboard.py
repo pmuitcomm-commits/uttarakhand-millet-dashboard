@@ -5,13 +5,13 @@ These routes expose state-level KPI values derived from production records so
 the React dashboard can display high-level scheme performance indicators.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-import logging
 
 from ..database import get_db
 from ..models.production import Production
+from .reporting_helpers import query_failed, to_float
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -52,12 +52,8 @@ def get_kpis(db: Session = Depends(get_db)):
         return {
             "total_districts": total_districts or 0,
             "total_millets": total_millets or 0,
-            "total_production": float(total_production or 0),
-            "total_area": float(total_area or 0),
+            "total_production": to_float(total_production),
+            "total_area": to_float(total_area),
         }
     except Exception:
-        logging.error("Error fetching dashboard KPIs", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching dashboard KPIs"
-        )
+        raise query_failed("Error fetching dashboard KPIs")

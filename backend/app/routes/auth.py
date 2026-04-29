@@ -7,124 +7,29 @@ district, and block-level operations. It is security-sensitive and should be
 reviewed carefully during NIC handover and penetration testing.
 """
 
-import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr, field_validator
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..rate_limit import limiter
 from ..security import create_access_token, decode_token, hash_password, verify_password
+from .auth_roles import (
+    PUBLIC_REGISTRATION_ROLE,
+    ROLE_MAP,
+    canonical_role_value as _canonical_role_value,
+    normalize_role as _normalize_role,
+)
+from .auth_schemas import AuthResponse, UpdateUserRoleRequest, UserLogin, UserRegister
+from .auth_session import AUTH_COOKIE_NAME, make_auth_response, make_logout_response
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-AUTH_COOKIE_NAME = "access_token"
-AUTH_COOKIE_SAMESITE = "none"
-
-# Numeric role identifiers are accepted from legacy clients. Officer roles are
-# stored and returned using the existing lowercase Supabase role strings.
-ROLE_MAP = {
-    1: "admin",
-    2: "district",
-    3: "block",
-    4: "farmer",
-}
-
-OFFICER_ROLES = {"admin", "district", "block"}
-VALID_ROLE_VALUES = set(ROLE_MAP.values())
-ROLE_ALIASES = {
-    "district_officer": "district",
-    "block_officer": "block",
-}
-PUBLIC_REGISTRATION_ROLE = "farmer"
-
-
-def _set_auth_cookie(response: Response, token: str) -> None:
-    response.set_cookie(
-        key=AUTH_COOKIE_NAME,
-        value=token,
-        httponly=True,
-        secure=True,
-        samesite=AUTH_COOKIE_SAMESITE,
-        path="/",
-    )
-
-
-def _clear_auth_cookie(response: Response) -> None:
-    response.delete_cookie(
-        key=AUTH_COOKIE_NAME,
-        secure=True,
-        httponly=True,
-        samesite=AUTH_COOKIE_SAMESITE,
-        path="/",
-    )
-
-
-def _auth_response(user, token: str) -> JSONResponse:
-    response = JSONResponse(content={"user": _user_response(user)})
-    _set_auth_cookie(response, token)
-    return response
-
-
-def _canonical_role_value(role_value) -> str:
-    """Return the lowercase app role value, including legacy alias support."""
-    if hasattr(role_value, "value"):
-        role_value = role_value.value
-    role = str(role_value).split(".")[-1].lower()
-    return ROLE_ALIASES.get(role, role)
-
-
-def validate_password_strength(password: str) -> bool:
-    """
-    Validate the minimum password policy for public account creation.
-
-    Args:
-        password (str): Password supplied by a registering user.
-
-    Returns:
-        bool: True when length, uppercase, lowercase, and digit rules pass.
-    """
-    if len(password) < 8:
-        return False
-    if not re.search(r"[A-Z]", password):
-        return False
-    if not re.search(r"[a-z]", password):
-        return False
-    if not re.search(r"\d", password):
-        return False
-    return True
-
-
-def _normalize_role(role_value) -> str:
-    """
-    Normalize stored role values to the frontend/API role naming convention.
-
-    Args:
-        role_value: Role value from SQLAlchemy, raw SQL, or a string payload.
-
-    Returns:
-        str: Known role name, defaulting to the public farmer role.
-    """
-    if role_value is None:
-        return PUBLIC_REGISTRATION_ROLE
-    role = _canonical_role_value(role_value)
-    return role if role in VALID_ROLE_VALUES else PUBLIC_REGISTRATION_ROLE
-
 
 def _active_user(user) -> bool:
-    """
-    Check whether a database user mapping is active.
-
-    Args:
-        user: Mapping containing the ``is_active`` field.
-
-    Returns:
-        bool: True only when ``is_active`` can be interpreted as 1.
-    """
+    """Check whether a database user mapping is active."""
     try:
         return int(user.get("is_active") or 0) == 1
     except (TypeError, ValueError):
@@ -132,15 +37,7 @@ def _active_user(user) -> bool:
 
 
 def _user_response(user) -> dict:
-    """
-    Build the sanitized user object returned to the React client.
-
-    Args:
-        user: Database row mapping for an authenticated or listed user.
-
-    Returns:
-        dict: Non-secret user attributes used by the dashboard.
-    """
+    """Build the sanitized user object returned to the React client."""
     return {
         "id": user["id"],
         "username": user["username"],
@@ -153,16 +50,7 @@ def _user_response(user) -> dict:
 
 
 def _fetch_user_by_username(db: Session, username: str):
-    """
-    Fetch a single user row by username using a parameterized query.
-
-    Args:
-        db (Session): Request-scoped database session.
-        username (str): Username supplied by login or token subject.
-
-    Returns:
-        Mapping | None: User row including hashed password when found.
-    """
+    """Fetch a single user row by username using a parameterized query."""
     return db.execute(
         text(
             """
@@ -177,16 +65,7 @@ def _fetch_user_by_username(db: Session, username: str):
 
 
 def _fetch_user_by_id(db: Session, user_id: int):
-    """
-    Fetch a non-secret user row by internal identifier.
-
-    Args:
-        db (Session): Request-scoped database session.
-        user_id (int): User primary key.
-
-    Returns:
-        Mapping | None: User row without password hash when found.
-    """
+    """Fetch a non-secret user row by internal identifier."""
     return db.execute(
         text(
             """
@@ -201,15 +80,7 @@ def _fetch_user_by_id(db: Session, user_id: int):
 
 
 def _validate_scope_fields(user):
-    """
-    Ensure officer roles have required geographic scope assignments.
-
-    Args:
-        user: Current user mapping.
-
-    Raises:
-        HTTPException: When district or block scoping is missing for an officer.
-    """
+    """Ensure officer roles have required geographic scope assignments."""
     role = _normalize_role(user.get("role"))
     if role in {"district", "block"} and not user.get("district"):
         raise HTTPException(
@@ -224,112 +95,13 @@ def _validate_scope_fields(user):
 
 
 def _password_matches(password: str, hashed_password: Optional[str]) -> bool:
-    """
-    Safely verify a password while treating malformed hashes as login failure.
-
-    Args:
-        password (str): Plain password submitted by the user.
-        hashed_password (Optional[str]): Stored password hash from the database.
-
-    Returns:
-        bool: True when the password matches; otherwise False.
-    """
+    """Safely verify a password while treating malformed hashes as login failure."""
     if not hashed_password:
         return False
     try:
         return verify_password(password, hashed_password)
     except (TypeError, ValueError):
         return False
-
-
-class UserRegister(BaseModel):
-    """
-    Pydantic schema for public account registration.
-
-    Public registration accepts only farmer-level accounts. Privileged officer
-    roles must be provisioned administratively so users cannot self-escalate.
-    """
-
-    username: str
-    password: str
-    email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
-    role_id: Optional[int] = None
-
-    @field_validator("username")
-    @classmethod
-    def validate_username(cls, value: str) -> str:
-        """Validate username length and allowed characters."""
-        value = value.strip()
-        if len(value) < 3 or len(value) > 50:
-            raise ValueError("Username must be between 3 and 50 characters")
-        if not re.match(r"^[a-zA-Z0-9_-]+$", value):
-            raise ValueError("Username can only contain alphanumeric characters, underscores, and hyphens")
-        return value
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, value: str) -> str:
-        """Validate the registration password against the MIS policy."""
-        if not validate_password_strength(value):
-            raise ValueError("Password must be at least 8 characters and contain uppercase, lowercase, and digits")
-        return value
-
-    @field_validator("role_id")
-    @classmethod
-    def validate_role_id(cls, value: Optional[int]) -> Optional[int]:
-        """Reject unknown role identifiers before business-rule checks run."""
-        if value is not None and value not in ROLE_MAP:
-            raise ValueError(f"Invalid role_id. Allowed values: {list(ROLE_MAP.keys())}")
-        return value
-
-    @field_validator("full_name")
-    @classmethod
-    def validate_full_name(cls, value: Optional[str]) -> Optional[str]:
-        """Normalize and validate the optional display name."""
-        if value is None:
-            return value
-        value = value.strip()
-        if len(value) < 1 or len(value) > 100:
-            raise ValueError("Full name must be between 1 and 100 characters")
-        return value
-
-
-class UserLogin(BaseModel):
-    """Pydantic schema for username and password login requests."""
-
-    username: str
-    password: str
-
-    @field_validator("username")
-    @classmethod
-    def validate_username(cls, value: str) -> str:
-        """Trim and require the submitted username."""
-        value = value.strip()
-        if not value:
-            raise ValueError("Username is required")
-        return value
-
-
-class UpdateUserRoleRequest(BaseModel):
-    """Request body for admin-only role updates."""
-
-    new_role: str
-
-    @field_validator("new_role")
-    @classmethod
-    def validate_new_role(cls, value: str) -> str:
-        """Normalize and validate the requested target role."""
-        value = _canonical_role_value(value.strip())
-        if value not in OFFICER_ROLES:
-            raise ValueError(f"Invalid role. Allowed roles: {sorted(OFFICER_ROLES)}")
-        return value
-
-
-class AuthResponse(BaseModel):
-    """Response contract returned after successful authentication."""
-
-    user: dict
 
 
 async def get_current_user(
@@ -471,7 +243,7 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
 
     user = _fetch_user_by_username(db, user_data.username)
     access_token = create_access_token(data={"sub": user["username"]})
-    return _auth_response(user, access_token)
+    return make_auth_response(_user_response(user), access_token)
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -496,14 +268,12 @@ def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     access_token = create_access_token(data={"sub": user["username"]})
-    return _auth_response(user, access_token)
+    return make_auth_response(_user_response(user), access_token)
 
 
 @router.post("/logout")
 def logout():
-    response = JSONResponse(content={"message": "Logged out"})
-    _clear_auth_cookie(response)
-    return response
+    return make_logout_response()
 
 
 @router.get("/me", response_model=dict)

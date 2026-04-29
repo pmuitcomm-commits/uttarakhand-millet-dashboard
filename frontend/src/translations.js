@@ -16,7 +16,6 @@ export const translations = {
     uttarakhandAgriculture: 'Uttarakhand Agriculture',
     dashboard: 'Dashboard',
     procurement: 'Procurement',
-    production: 'Production',
     districtAnalysis: 'District Analysis',
     milletAnalysis: 'Millet Analysis',
     
@@ -155,7 +154,6 @@ export const translations = {
     uttarakhandAgriculture: 'उत्तराखंड कृषि',
     dashboard: 'डैशबोर्ड',
     procurement: 'खरीद',
-    production: 'उत्पादन',
     districtAnalysis: 'जिला विश्लेषण',
     milletAnalysis: 'मिलेट विश्लेषण',
     

@@ -5,13 +5,13 @@ The routes provide raw production records and grouped summaries used by chart
 components, KPI cards, and detailed production tables.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-import logging
 
 from ..database import get_db
 from ..models.production import Production
+from .reporting_helpers import query_failed, to_float
 
 router = APIRouter(prefix="/production", tags=["Production"])
 
@@ -41,17 +41,13 @@ def get_all_production(db: Session = Depends(get_db)):
                 "millet_id": r.millet_id,
                 "season_id": r.season_id,
                 "year": r.year,
-                "area_hectare": float(r.area_hectare) if r.area_hectare is not None else 0,
-                "production": float(r.production_ton) if r.production_ton is not None else 0,
+                "area_hectare": to_float(r.area_hectare),
+                "production": to_float(r.production_ton),
             }
             for r in records
         ]
     except Exception:
-        logging.error("Error fetching production data", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching production data"
-        )
+        raise query_failed("Error fetching production data")
 
 
 @router.get("/district")
@@ -81,16 +77,12 @@ def district_production(db: Session = Depends(get_db)):
         return [
             {
                 "district_id": d,
-                "production": float(p) if p is not None else 0,
+                "production": to_float(p),
             }
             for d, p in data
         ]
     except Exception:
-        logging.error("Error fetching district production", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching district production"
-        )
+        raise query_failed("Error fetching district production")
 
 
 @router.get("/millet")
@@ -120,13 +112,9 @@ def millet_production(db: Session = Depends(get_db)):
         return [
             {
                 "millet_id": m,
-                "production": float(p) if p is not None else 0,
+                "production": to_float(p),
             }
             for m, p in data
         ]
     except Exception:
-        logging.error("Error fetching millet production", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching millet production"
-        )
+        raise query_failed("Error fetching millet production")

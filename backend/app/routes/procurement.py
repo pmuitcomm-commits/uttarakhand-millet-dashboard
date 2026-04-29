@@ -5,13 +5,13 @@ These endpoints publish procurement targets, procurement achievement, centre
 counts, and farmer/SHG coverage used by the procurement monitoring page.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-import logging
 
 from ..database import get_db
 from ..models.procurement import Procurement
+from .reporting_helpers import query_failed
 
 router = APIRouter(prefix="/procurement", tags=["Procurement"])
 
@@ -48,11 +48,7 @@ def get_all_procurement(db: Session = Depends(get_db)):
             for r in records
         ]
     except Exception:
-        logging.error("Error fetching procurement data", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching procurement data"
-        )
+        raise query_failed("Error fetching procurement data")
 
 
 @router.get("/kpis")
@@ -92,8 +88,4 @@ def get_procurement_kpis(db: Session = Depends(get_db)):
             "crop_coverage": crop_coverage,
         }
     except Exception:
-        logging.error("Error fetching procurement KPIs", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching procurement KPIs"
-        )
+        raise query_failed("Error fetching procurement KPIs")

@@ -1,15 +1,10 @@
 /**
  * AdminDashboard page - Administrative overview for system-level MIS users.
- *
- * The page is protected by role routing and presents the administrative
- * capabilities expected for user management and statewide data access.
  */
 
-import React, { useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import { dashboardClasses } from '../components/dashboardStyles';
+import React from "react";
+
+import RoleDashboard from "../components/RoleDashboard";
 
 /**
  * AdminDashboard - Render the admin-only dashboard placeholder.
@@ -18,48 +13,22 @@ import { dashboardClasses } from '../components/dashboardStyles';
  * @returns {React.ReactElement} Admin dashboard view.
  */
 function AdminDashboard() {
-  const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Redirect any authenticated non-admin user away from system-level pages.
-    if (isAuthenticated && user?.role !== 'admin') {
-      navigate('/');
-    }
-  }, [isAuthenticated, user, navigate]);
-
   return (
-    <div className={dashboardClasses.pageWrapper}>
-      <div className={dashboardClasses.dashboardContainer}>
-        <Sidebar />
-        {/* Tailwind layout uses the shared dashboard content area for consistent officer pages. */}
-        <div className={dashboardClasses.mainContent}>
-          <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
-            <h2 className={dashboardClasses.pageHeadingTitle}>Admin Dashboard</h2>
-          </div>
-
-          <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
-            <div className="p-10 text-center">
-              <h3 className="text-xl font-semibold text-[#024b37] dark:text-white">Welcome, {user?.username}</h3>
-              <p className="mt-2 text-[#4a5568] dark:text-slate-200">Admin Dashboard - User Management</p>
-              
-              <div className="mx-auto mt-[30px] max-w-[600px] text-left">
-                <h4 className="font-semibold text-[#024b37] dark:text-white">Admin Features:</h4>
-                <ul className="leading-[1.8] text-[#024b37] dark:text-slate-100">
-                  <li>✓ Manage all users (Admin, District Officers, Block Officers)</li>
-                  <li>✓ View system-wide data</li>
-                  <li>✓ Update user roles and permissions</li>
-                  <li>✓ Access all district and block information</li>
-                  <li>✓ Generate system reports</li>
-                  <li>✓ System configuration and settings</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RoleDashboard
+      requiredRole="admin"
+      title="Admin Dashboard"
+      summary={() => "Admin Dashboard - User Management"}
+      featureTitle="Admin Features:"
+      features={() => [
+        "✓ Manage all users (Admin, District Officers, Block Officers)",
+        "✓ View system-wide data",
+        "✓ Update user roles and permissions",
+        "✓ Access all district and block information",
+        "✓ Generate system reports",
+        "✓ System configuration and settings",
+      ]}
+    />
   );
 }
- 
+
 export default AdminDashboard;
