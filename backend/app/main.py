@@ -25,6 +25,12 @@ load_dotenv()
 
 app = FastAPI()
 
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
 # Frontend origins allowed to call this API. Keep this list narrow in
 # production so browser-based access is restricted to approved MIS hosts.
 allowed_origins = [
