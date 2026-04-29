@@ -14,11 +14,11 @@
 export function getPostLoginPath(role) {
   switch (role) {
     case "admin":
-      return "/admin-dashboard";
+      return "/admin";
     case "district":
-      return "/district-dashboard";
+      return "/district";
     case "block":
-      return "/block-dashboard";
+      return "/block";
     default:
       return "/procurement";
   }

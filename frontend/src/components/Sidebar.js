@@ -13,7 +13,7 @@ import { dashboardClasses } from "./dashboardStyles";
 
 const roleSidebarItems = {
   admin: {
-    basePath: "/admin-dashboard",
+    basePath: "/admin",
     items: [
       "User Management",
       "System Reports",
@@ -23,7 +23,7 @@ const roleSidebarItems = {
     ],
   },
   district: {
-    basePath: "/district-dashboard",
+    basePath: "/district",
     items: [
       "Block Officer Management",
       "District Farmers",
@@ -33,7 +33,7 @@ const roleSidebarItems = {
     ],
   },
   block: {
-    basePath: "/block-dashboard",
+    basePath: "/block",
     items: [
       "Block Farmers",
       "Farmer Records",

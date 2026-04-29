@@ -58,6 +58,28 @@ function ProtectedOfficerRoute({ children, requiredRole = null }) {
   return children;
 }
 
+function DistrictRoute() {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="p-5 text-center">Loading...</div>;
+  }
+
+  if (isAuthenticated && user?.role === "district") {
+    return <DistrictDashboard />;
+  }
+
+  return <Dashboard page="district" />;
+}
+
+function LegacyOfficerRedirect({ role, to }) {
+  return (
+    <ProtectedOfficerRoute requiredRole={role}>
+      <Navigate to={to} replace />
+    </ProtectedOfficerRoute>
+  );
+}
+
 /**
  * AppRoutes - Registers all public and protected dashboard routes.
  *
@@ -93,26 +115,31 @@ function AppRoutes() {
       <Route path="/procurement" element={<Procurement />} />
       <Route path="/dashboard" element={<Dashboard page="dashboard" />} />
       <Route path="/production" element={<Dashboard page="production" />} />
-      <Route path="/district" element={<Dashboard page="district" />} />
+      <Route path="/district" element={<DistrictRoute />} />
       <Route path="/millet" element={<Dashboard page="millet" />} />
       <Route path="/about-programme" element={<AboutPage />} />
 
       {/* Protected Routes - for officers */}
-      <Route path="/admin-dashboard" element={
+      <Route path="/admin" element={
         <ProtectedOfficerRoute requiredRole="admin">
           <AdminDashboard />
         </ProtectedOfficerRoute>
       } />
-      <Route path="/district-dashboard" element={
-        <ProtectedOfficerRoute requiredRole="district">
-          <DistrictDashboard />
-        </ProtectedOfficerRoute>
-      } />
-      <Route path="/block-dashboard" element={
+      <Route path="/block" element={
         <ProtectedOfficerRoute requiredRole="block">
           <BlockDashboard />
         </ProtectedOfficerRoute>
       } />
+      <Route path="/admin-dashboard" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />
+      <Route path="/admin-landing" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />
+      <Route path="/district-dashboard" element={
+        <ProtectedOfficerRoute requiredRole="district">
+          <Navigate to="/district" replace />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/district-landing" element={<LegacyOfficerRedirect role="district" to="/district" />} />
+      <Route path="/block-dashboard" element={<LegacyOfficerRedirect role="block" to="/block" />} />
+      <Route path="/block-landing" element={<LegacyOfficerRedirect role="block" to="/block" />} />
     </Routes>
   );
 }
