@@ -12,9 +12,7 @@ import { authClasses, authInputBase, authInputError } from "../components/authSt
 import {
   loginUser,
   registerUser,
-  requestLoginOtp,
   setAuthSession,
-  verifyLoginOtp,
 } from "../services/api";
 import { getPostLoginPath } from "../utils/authNavigation";
 import {
@@ -25,8 +23,11 @@ import {
   LOGIN_METHODS,
   normalizeAuthUser,
   validateLoginForm,
-  validateOtpIdentifier,
 } from "./loginFormHelpers";
+
+const showComingSoon = () => {
+  window.alert("Coming Soon");
+};
 
 /**
  * Login - Render authentication form for officers and public farmer accounts.
@@ -46,7 +47,6 @@ function Login() {
   const [authError, setAuthError] = useState(null);
   const [authNotice, setAuthNotice] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [otpRequesting, setOtpRequesting] = useState(false);
   const [otpRequested, setOtpRequested] = useState(false);
 
   const clearFeedback = () => {
@@ -84,32 +84,13 @@ function Login() {
   };
 
   const handleRequestOtp = async () => {
-    const validationErrors = validateOtpIdentifier(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setOtpRequesting(true);
-    setAuthError(null);
-    setAuthNotice(null);
-
-    try {
-      await requestLoginOtp(formData.otpIdentifier.trim());
-      setOtpRequested(true);
-      setAuthNotice("OTP sent. Enter the code to continue.");
-    } catch (error) {
-      setOtpRequested(true);
-      setAuthNotice(
-        error.message ||
-          "OTP login UI is ready, but backend OTP sending is not configured yet.",
-      );
-    } finally {
-      setOtpRequesting(false);
-    }
+    showComingSoon();
   };
 
   const handleLoginMethodChange = (method) => {
+    if (method === LOGIN_METHODS.OTP) {
+      showComingSoon();
+    }
     setLoginMethod(method);
     clearFeedback();
   };
@@ -123,6 +104,12 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isRegistering && loginMethod === LOGIN_METHODS.OTP) {
+      showComingSoon();
+      return;
+    }
+
     const validationErrors = validateLoginForm({
       formData,
       isRegistering,
@@ -144,11 +131,6 @@ function Login() {
         response = await registerUser(buildRegistrationPayload(formData));
       } else if (loginMethod === LOGIN_METHODS.PASSWORD) {
         response = await loginUser(formData.username, formData.password);
-      } else {
-        response = await verifyLoginOtp(
-          formData.otpIdentifier.trim(),
-          formData.otpCode.trim(),
-        );
       }
 
       completeAuth(response);
@@ -333,9 +315,9 @@ function Login() {
                       type="button"
                       className={authClasses.otpSendButton}
                       onClick={handleRequestOtp}
-                      disabled={otpRequesting || loading}
+                      disabled={loading}
                     >
-                      {otpRequesting ? "Sending..." : "Send OTP"}
+                      Send OTP
                     </button>
                   </div>
                   {errors.otpIdentifier && (

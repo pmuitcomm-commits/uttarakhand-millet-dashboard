@@ -204,8 +204,8 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
         dict: Sanitized user details.
 
     Raises:
-        HTTPException: When the username exists or privileged registration is
-            attempted.
+        HTTPException: When the username/email exists or privileged registration
+            is attempted.
     """
     requested_role = ROLE_MAP.get(user_data.role_id, PUBLIC_REGISTRATION_ROLE)
     if requested_role != PUBLIC_REGISTRATION_ROLE:
@@ -220,6 +220,14 @@ def register(request: Request, user_data: UserRegister, db: Session = Depends(ge
     ).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
+
+    if user_data.email:
+        existing_email = db.execute(
+            text("SELECT id FROM users WHERE email = :email"),
+            {"email": user_data.email},
+        ).first()
+        if existing_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     db.execute(
         text(
