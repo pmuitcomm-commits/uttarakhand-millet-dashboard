@@ -76,19 +76,17 @@ function Sidebar() {
 
       <nav className={dashboardClasses.sidebarNav}>
         {/* Public menu items remain visible for farmers and unauthenticated visitors. */}
-        <Link className={dashboardClasses.sidebarLink} to="/dashboard" data-aos="fade-right" data-aos-delay="100">{t('dashboard')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/procurement" data-aos="fade-right" data-aos-delay="150">{t('procurement')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/production" data-aos="fade-right" data-aos-delay="200">{t('production')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/district" data-aos="fade-right" data-aos-delay="300">{t('districtAnalysis')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/millet" data-aos="fade-right" data-aos-delay="400">{t('milletAnalysis')}</Link>
+        <Link className={dashboardClasses.sidebarLink} to="/dashboard">{t('dashboard')}</Link>
+        <Link className={dashboardClasses.sidebarLink} to="/procurement">{t('procurement')}</Link>
+        <Link className={dashboardClasses.sidebarLink} to="/production">{t('production')}</Link>
+        <Link className={dashboardClasses.sidebarLink} to="/district">{t('districtAnalysis')}</Link>
+        <Link className={dashboardClasses.sidebarLink} to="/millet">{t('milletAnalysis')}</Link>
 
-        {roleConfig?.items.map((item, index) => (
+        {roleConfig?.items.map((item) => (
           <Link
             key={item}
             className={dashboardClasses.sidebarLink}
             to={roleSidebarRoutes[user?.role]?.[item] || `${roleConfig.basePath}#${slugify(item)}`}
-            data-aos="fade-right"
-            data-aos-delay={String(450 + index * 50)}
           >
             {item}
           </Link>
