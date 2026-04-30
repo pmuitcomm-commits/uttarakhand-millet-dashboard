@@ -10,7 +10,7 @@ TODO: Compare these nullable column definitions with the live Supabase schema
 before introducing migrations. The live schema remains the source of truth.
 """
 
-from sqlalchemy import BigInteger, Column, Date, DateTime, Numeric, String, func
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Numeric, String, func
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from ..database import Base
@@ -40,6 +40,10 @@ class Farmer(Base):
     crops = Column(ARRAY(String), nullable=True)
     estimated_seed_date = Column(Date, nullable=True)
     estimated_yield = Column(String(50), nullable=True)
+
+    consent_accepted = Column(Boolean, nullable=False, default=False)
+    consent_text_version = Column(String(50), nullable=True)
+    consent_accepted_at = Column(DateTime(timezone=True), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 

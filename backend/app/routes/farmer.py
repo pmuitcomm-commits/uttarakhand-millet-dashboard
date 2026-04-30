@@ -7,7 +7,7 @@ parameterized SQL, transaction rollbacks, and role-based access checks are
 documented here for NIC handover and security testing.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -169,7 +169,11 @@ def register_farmer(
     farmer_data = payload.farmer.model_dump()
     farmer_data["mobile"] = _validate_mobile(farmer_data["mobile"])
     farmer_data["bank_ifsc"] = farmer_data["bank_ifsc"].strip().upper()
-    # TODO: persist consent_accepted and consent_text_version after a DB migration adds consent columns.
+    farmer_data["consent_accepted"] = payload.consent_accepted
+    farmer_data["consent_text_version"] = payload.consent_text_version
+    farmer_data["consent_accepted_at"] = (
+        datetime.now(timezone.utc) if payload.consent_accepted else None
+    )
 
     insert_farmer_query = text(
         """
@@ -188,7 +192,10 @@ def register_farmer(
             account_holder_name,
             crops,
             estimated_seed_date,
-            estimated_yield
+            estimated_yield,
+            consent_accepted,
+            consent_text_version,
+            consent_accepted_at
         )
         VALUES (
             :name,
@@ -205,7 +212,10 @@ def register_farmer(
             :account_holder_name,
             :crops,
             :estimated_seed_date,
-            :estimated_yield
+            :estimated_yield,
+            :consent_accepted,
+            :consent_text_version,
+            :consent_accepted_at
         )
         RETURNING farmer_id
         """
