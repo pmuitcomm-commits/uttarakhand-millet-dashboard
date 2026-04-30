@@ -13,6 +13,7 @@ TEXT_PATTERN = re.compile(r"^[A-Za-z0-9\s,./&()#:%'-]+$")
 LAND_ID_PATTERN = re.compile(r"^[A-Za-z0-9/-]{1,50}$")
 CROP_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9\s-]{0,49}$")
 IFSC_PATTERN = re.compile(r"^[A-Za-z]{4}0[A-Za-z0-9]{6}$")
+OTP_PATTERN = re.compile(r"^\d{4,8}$")
 
 
 def _clean_optional(value: Optional[str]) -> Optional[str]:
@@ -126,4 +127,29 @@ class FarmerRegistrationRequest(BaseModel):
     def validate_consent(cls, value: bool) -> bool:
         if value is not True:
             raise ValueError("Privacy consent is required for farmer registration")
+        return value
+
+
+class EnrollmentOtpRequest(BaseModel):
+    """Request body for public enrollment-status OTP delivery."""
+
+    mobile_number: str = Field(pattern=r"^\d{10}$")
+
+    @field_validator("mobile_number", mode="before")
+    @classmethod
+    def validate_mobile_number(cls, value) -> str:
+        return str(value).strip()
+
+
+class EnrollmentOtpVerifyRequest(EnrollmentOtpRequest):
+    """Request body for OTP-gated public enrollment-status verification."""
+
+    otp: str = Field(pattern=r"^\d{4,8}$")
+
+    @field_validator("otp", mode="before")
+    @classmethod
+    def validate_otp(cls, value) -> str:
+        value = str(value).strip()
+        if not OTP_PATTERN.match(value):
+            raise ValueError("OTP must contain 4 to 8 digits")
         return value

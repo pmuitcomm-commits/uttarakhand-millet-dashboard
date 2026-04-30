@@ -78,8 +78,11 @@ export const logoutUser = () =>
 export const registerFarmer = (farmerData) =>
   API.post("/farmers/register", farmerData);
 
-export const checkEnrollmentStatus = (mobile) =>
-  API.get(`/farmers/status/${encodeURIComponent(mobile)}`);
+export const requestEnrollmentStatusOtp = (mobileNumber) =>
+  API.post("/farmers/status/otp/request", { mobile_number: mobileNumber });
+
+export const verifyEnrollmentStatusOtp = (mobileNumber, otp) =>
+  API.post("/farmers/status/otp/verify", { mobile_number: mobileNumber, otp });
 
 // =========================
 // Dashboard APIs

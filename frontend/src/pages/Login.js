@@ -195,7 +195,7 @@ function Login() {
                   }`}
                   onClick={() => handleLoginMethodChange(LOGIN_METHODS.PASSWORD)}
                 >
-                  Username + Password
+                  Login with Password
                 </button>
                 <button
                   type="button"

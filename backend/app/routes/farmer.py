@@ -7,7 +7,12 @@ parameterized SQL, transaction rollbacks, and role-based access checks are
 documented here for NIC handover and security testing.
 """
 
-from datetime import date, datetime, timezone
+import hashlib
+import hmac
+import logging
+import os
+import secrets
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -20,9 +25,18 @@ from ..database import get_db
 from ..models.farmer import Farmer, LandParcel  # noqa: F401 - registers table metadata for create_all
 from ..rate_limit import limiter
 from .auth import require_role
-from .farmer_schemas import FarmerRegistrationRequest
+from .farmer_schemas import (
+    EnrollmentOtpRequest,
+    EnrollmentOtpVerifyRequest,
+    FarmerRegistrationRequest,
+)
 
 router = APIRouter()
+
+OTP_EXPIRY_SECONDS = int(os.getenv("ENROLLMENT_OTP_EXPIRY_SECONDS", "300"))
+OTP_MAX_ATTEMPTS = int(os.getenv("ENROLLMENT_OTP_MAX_ATTEMPTS", "5"))
+OTP_PUBLIC_MESSAGE = "If this mobile number is eligible, an OTP has been sent."
+OTP_STORE = {}
 
 
 def _validate_mobile(mobile: str) -> str:
@@ -45,6 +59,91 @@ def _validate_mobile(mobile: str) -> str:
             detail="Mobile number must be exactly 10 digits",
         )
     return cleaned_mobile
+
+
+def _is_non_production_environment() -> bool:
+    """Allow console OTP delivery only when deployment env is explicitly non-production."""
+    environment = (
+        os.getenv("APP_ENV")
+        or os.getenv("ENVIRONMENT")
+        or os.getenv("ENV")
+        or "production"
+    ).strip().lower()
+    return environment in {"development", "dev", "local", "test", "testing", "staging"}
+
+
+def _generate_otp() -> str:
+    """Generate a six-digit numeric OTP."""
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def _hash_otp(otp: str, salt: str) -> str:
+    """Hash OTPs before storing them in the transient verification cache."""
+    key = f"{os.getenv('SECRET_KEY', '')}:{salt}".encode("utf-8")
+    return hmac.new(key, otp.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def _store_otp(mobile: str, otp: str) -> None:
+    """Store a hashed OTP with expiry and attempt tracking."""
+    salt = secrets.token_hex(16)
+    OTP_STORE[mobile] = {
+        "otp_hash": _hash_otp(otp, salt),
+        "salt": salt,
+        "expires_at": datetime.now(timezone.utc) + timedelta(seconds=OTP_EXPIRY_SECONDS),
+        "attempts": 0,
+    }
+
+
+def _drop_expired_otps() -> None:
+    """Remove expired OTP entries opportunistically during public OTP requests."""
+    now = datetime.now(timezone.utc)
+    expired_mobiles = [
+        mobile for mobile, entry in OTP_STORE.items()
+        if entry["expires_at"] <= now
+    ]
+    for mobile in expired_mobiles:
+        OTP_STORE.pop(mobile, None)
+
+
+def _deliver_enrollment_otp(mobile: str, otp: str) -> bool:
+    """
+    Deliver enrollment OTPs.
+
+    No production SMS provider is configured in this codebase. To avoid fake
+    verification in production, OTPs are logged only when the deployment
+    environment is explicitly non-production.
+    """
+    if _is_non_production_environment():
+        logging.warning("Development enrollment OTP for %s: %s", mobile, otp)
+        return True
+    return False
+
+
+def _verify_stored_otp(mobile: str, otp: str) -> None:
+    """Validate an OTP or raise a public-safe HTTP error."""
+    _drop_expired_otps()
+    entry = OTP_STORE.get(mobile)
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OTP is invalid or expired",
+        )
+
+    entry["attempts"] += 1
+    expected_hash = _hash_otp(otp, entry["salt"])
+    if not hmac.compare_digest(expected_hash, entry["otp_hash"]):
+        if entry["attempts"] >= OTP_MAX_ATTEMPTS:
+            OTP_STORE.pop(mobile, None)
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Maximum OTP attempts exceeded. Request a new OTP.",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OTP is invalid or expired",
+        )
+
+    OTP_STORE.pop(mobile, None)
 
 
 def _serialize_value(value):
@@ -75,19 +174,6 @@ def _serialize_mapping(row) -> dict:
         dict: JSON-ready key/value pairs.
     """
     return {key: _serialize_value(value) for key, value in row.items()}
-
-
-def _mask_mobile(mobile: str) -> str:
-    """
-    Mask a farmer mobile number for public status lookup responses.
-
-    Args:
-        mobile (str): Validated 10-digit mobile number.
-
-    Returns:
-        str: Mobile number with only first and last two digits visible.
-    """
-    return f"{mobile[:2]}******{mobile[-2:]}"
 
 
 def _normalize_role(role_value) -> str:
@@ -279,72 +365,94 @@ def register_farmer(
         ) from exc
 
 
+@router.post("/status/otp/request")
+@limiter.limit("5/minute")
+def request_enrollment_status_otp(
+    request: Request,
+    payload: EnrollmentOtpRequest,
+):
+    """
+    Request an OTP for public enrollment-status verification.
+
+    The response is intentionally generic and does not reveal whether the
+    mobile number exists in the farmer registry.
+    """
+    validated_mobile = _validate_mobile(payload.mobile_number)
+    otp = _generate_otp()
+
+    if not _deliver_enrollment_otp(validated_mobile, otp):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="OTP service is not configured",
+        )
+
+    _drop_expired_otps()
+    _store_otp(validated_mobile, otp)
+    return {"message": OTP_PUBLIC_MESSAGE}
+
+
+@router.post("/status/otp/verify")
+@limiter.limit("10/minute")
+def verify_enrollment_status_otp(
+    request: Request,
+    payload: EnrollmentOtpVerifyRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Verify an OTP before returning only generic enrollment status.
+
+    No farmer metadata is returned from this public endpoint.
+    """
+    validated_mobile = _validate_mobile(payload.mobile_number)
+    _verify_stored_otp(validated_mobile, payload.otp)
+
+    try:
+        enrolled = db.execute(
+            text("SELECT 1 FROM farmers WHERE mobile = :mobile LIMIT 1"),
+            {"mobile": validated_mobile},
+        ).first() is not None
+    except SQLAlchemyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to check enrollment status",
+        ) from exc
+
+    if enrolled:
+        return {
+            "verified": True,
+            "enrolled": True,
+            "message": "This mobile number is registered.",
+        }
+
+    return {
+        "verified": True,
+        "enrolled": False,
+        "message": "No registration found for this mobile number.",
+    }
+
+
 @router.get("/status/{mobile}")
 @limiter.limit("10/minute")
 def check_enrollment_status(
     request: Request,
     mobile: str,
-    db: Session = Depends(get_db),
 ):
     """
-    Return a privacy-preserving enrollment status for public users.
+    Reject legacy public enrollment lookup without OTP verification.
 
     Args:
         request (Request): FastAPI request object used by the rate limiter.
         mobile (str): Mobile number supplied in the URL.
-        db (Session): Request-scoped database session.
-
-    Returns:
-        dict: Found status with masked mobile and district/block metadata.
 
     Raises:
-        HTTPException: When no enrollment exists or lookup fails.
+        HTTPException: Always, because public status now requires OTP
+            verification and must not expose farmer metadata.
     """
-    validated_mobile = _validate_mobile(mobile)
-
-    farmer_query = text(
-        """
-        SELECT
-            farmer_id,
-            mobile,
-            district_name,
-            block_name,
-            created_at
-        FROM farmers
-        WHERE mobile = :mobile
-        LIMIT 1
-        """
+    _validate_mobile(mobile)
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="Public enrollment status requires OTP verification",
     )
-
-    try:
-        farmer_row = db.execute(
-            farmer_query,
-            {"mobile": validated_mobile},
-        ).mappings().first()
-
-        if farmer_row is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No enrollment found for this mobile number",
-            )
-
-        return {
-            "status": "found",
-            "message": "Enrollment found",
-            "farmer": {
-                "masked_mobile": _mask_mobile(farmer_row["mobile"]),
-                "district_name": farmer_row["district_name"],
-                "block_name": farmer_row["block_name"],
-                "created_at": _serialize_value(farmer_row["created_at"]),
-            },
-        }
-    except HTTPException:
-        raise
-    except SQLAlchemyError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch enrollment status",
-        ) from exc
 
 
 @router.get("/status/{mobile}/full")
