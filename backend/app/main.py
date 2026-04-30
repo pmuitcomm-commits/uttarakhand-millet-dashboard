@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 from .database import engine, Base
 from .rate_limit import limiter
@@ -30,6 +31,19 @@ app = FastAPI()
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness_check():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {"status": "ready", "database": "connected"}
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "database": "disconnected"},
+        )
 
 
 # Frontend origins allowed to call this API. Keep this list narrow in
