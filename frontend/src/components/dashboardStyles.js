@@ -16,10 +16,10 @@ export const dashboardClasses = {
   pageHeadingRow: "mb-5 p-4 text-center max-[640px]:mb-3 max-[640px]:p-3",
   pageHeadingTitle: "m-0 break-words text-[1.8rem] font-bold text-black max-[640px]:text-[1.35rem] dark:text-white",
   metricsRow:
-    "mb-6 grid grid-cols-[repeat(4,minmax(0,1fr))] gap-4 p-4 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[640px]:mb-4 max-[640px]:grid-cols-1 max-[640px]:gap-3 max-[640px]:p-2",
+    "mb-3 grid grid-cols-[repeat(4,minmax(0,1fr))] gap-3 p-2 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[640px]:mb-3 max-[640px]:grid-cols-1 max-[640px]:gap-3 max-[640px]:p-2",
   metricValue:
-    "mb-2.5 block min-w-0 break-words text-[2rem] font-extrabold leading-tight text-inherit transition-transform duration-300 group-hover:scale-105 max-[640px]:text-[1.55rem]",
-  metricLabel: "min-w-0 break-words text-[0.95rem] font-semibold leading-snug text-inherit opacity-90 max-[640px]:text-[0.88rem]",
+    "mb-1.5 block min-w-0 break-words text-[1.65rem] font-extrabold leading-tight text-inherit transition-transform duration-300 group-hover:scale-105 max-[640px]:text-[1.35rem]",
+  metricLabel: "min-w-0 break-words text-[0.82rem] font-semibold leading-snug text-inherit opacity-90 max-[640px]:text-[0.78rem]",
   chartRow:
     "mb-6 grid grid-cols-[repeat(3,minmax(0,1fr))] gap-5 p-4 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:grid-cols-1 max-[640px]:mb-4 max-[640px]:gap-3 max-[640px]:p-2",
   chartCard:
@@ -63,7 +63,7 @@ const metricToneClasses = [
  */
 export function metricCardClassName(index) {
   return [
-    "group min-w-0 cursor-pointer rounded-[20px] px-5 py-6 text-center shadow-card transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] max-[640px]:rounded-xl max-[640px]:px-4 max-[640px]:py-4 max-[640px]:hover:translate-y-0 max-[640px]:hover:scale-100",
+    "group min-w-0 cursor-pointer rounded-2xl px-4 py-[1.15rem] text-center shadow-[0_8px_18px_rgba(0,0,0,0.10)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-[0_12px_24px_rgba(0,0,0,0.14)] max-[640px]:rounded-xl max-[640px]:px-4 max-[640px]:py-4 max-[640px]:hover:translate-y-0 max-[640px]:hover:scale-100",
     metricToneClasses[index % metricToneClasses.length],
   ].join(" ");
 }
