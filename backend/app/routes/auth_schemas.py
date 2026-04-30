@@ -86,6 +86,8 @@ class UpdateUserRoleRequest(BaseModel):
     """Request body for admin-only role updates."""
 
     new_role: str
+    district: Optional[str] = None
+    block: Optional[str] = None
 
     @field_validator("new_role")
     @classmethod
@@ -94,6 +96,26 @@ class UpdateUserRoleRequest(BaseModel):
         if value not in OFFICER_ROLES:
             raise ValueError(f"Invalid role. Allowed roles: {sorted(OFFICER_ROLES)}")
         return value
+
+    @field_validator("district", "block", mode="before")
+    @classmethod
+    def validate_optional_scope(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = str(value).strip()
+        return value or None
+
+    def validate_role_scope(self) -> None:
+        """Validate geographic scope required by officer roles."""
+        if self.new_role == "district" and not self.district:
+            raise ValueError("District is required for district officer role")
+        if self.new_role == "block":
+            if not self.district and not self.block:
+                raise ValueError("District and block are required for block officer role")
+            if not self.district:
+                raise ValueError("District is required for block officer role")
+            if not self.block:
+                raise ValueError("Block is required for block officer role")
 
 
 class AuthResponse(BaseModel):

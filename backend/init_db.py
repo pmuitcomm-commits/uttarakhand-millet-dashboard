@@ -1,9 +1,11 @@
 """
 Database initialization script for the Millet MIS backend.
 
-Run this script during controlled setup to create SQLAlchemy-managed tables.
-It is intended for deployment/bootstrap use and exits non-zero when schema
-creation fails.
+Local/development helper for creating SQLAlchemy-managed tables.
+
+Production schema changes must use reviewed Alembic migrations. This script is
+blocked by default unless the environment is explicitly non-production or
+ALLOW_LOCAL_INIT_DB=true is set.
 """
 
 import os
@@ -15,6 +17,18 @@ load_dotenv()
 # Add the backend directory to the Python path so ``app`` imports resolve when
 # the script is launched directly from the repository.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+environment = (
+    os.getenv("APP_ENV")
+    or os.getenv("ENVIRONMENT")
+    or os.getenv("ENV")
+    or "production"
+).strip().lower()
+allow_local_init = os.getenv("ALLOW_LOCAL_INIT_DB", "").strip().lower() in {"1", "true", "yes"}
+if environment not in {"development", "dev", "local", "test", "testing"} and not allow_local_init:
+    print("init_db.py is local/dev only. Use Alembic migrations for production schema changes.")
+    print("Set APP_ENV=development or ALLOW_LOCAL_INIT_DB=true only for controlled local setup.")
+    sys.exit(1)
 
 try:
     from app.database import engine, Base

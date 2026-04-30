@@ -7,6 +7,8 @@ primary runtime surface reviewed during deployment, NIC handover, and API
 security testing.
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -66,12 +68,15 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     """
-    Create database tables during application startup.
+    Optionally create database tables during local bootstrap only.
 
-    SQLAlchemy metadata creation keeps the small MIS schema available in hosted
-    deployments where migrations may not yet be configured. Exceptions are
-    logged to the service console for deployment diagnostics.
+    Production schema changes must be performed with reviewed Alembic
+    migrations. Set AUTO_CREATE_TABLES=true only for controlled local setup.
     """
+    if os.getenv("AUTO_CREATE_TABLES", "").strip().lower() not in {"1", "true", "yes"}:
+        print("Skipping automatic table creation. Use Alembic migrations for schema changes.")
+        return
+
     try:
         Base.metadata.create_all(bind=engine)
         print("✅ Tables created")

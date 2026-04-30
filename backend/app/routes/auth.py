@@ -375,9 +375,24 @@ def update_user_role(
     if target_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+    try:
+        request.validate_role_scope()
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    update_values = {"role": request.new_role, "id": user_id}
+    set_clauses = ["role = :role"]
+    provided_fields = request.model_fields_set
+    if "district" in provided_fields:
+        update_values["district"] = request.district
+        set_clauses.append("district = :district")
+    if "block" in provided_fields:
+        update_values["block"] = request.block
+        set_clauses.append("block = :block")
+
     db.execute(
-        text("UPDATE users SET role = :role WHERE id = :id"),
-        {"role": request.new_role, "id": user_id},
+        text(f"UPDATE users SET {', '.join(set_clauses)} WHERE id = :id"),
+        update_values,
     )
     db.commit()
     return {"message": "Role updated successfully", "new_role": request.new_role}
