@@ -102,10 +102,32 @@ export const getAllProcurement = () => API.get("/procurement/all");
 // =========================
 // Officer Data Entry APIs
 // =========================
-export const getDataEntries = (scopeType) =>
-  API.get(`/data-entries/${encodeURIComponent(scopeType)}`);
+function buildDataEntryParams(filters = {}) {
+  return Object.fromEntries(
+    Object.entries({
+      district: filters.district,
+      block: filters.block,
+      section_key: filters.section_key || filters.sectionKey,
+    }).filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== ""),
+  );
+}
 
-export const saveDataEntries = (scopeType, entries) =>
-  API.post(`/data-entries/${encodeURIComponent(scopeType)}`, { entries });
+export const getDataEntries = (scopeType, filters = {}) =>
+  API.get(`/data-entries/${encodeURIComponent(scopeType)}`, {
+    params: buildDataEntryParams(filters),
+  });
+
+export const saveDataEntries = (scopeType, entries, filters = {}) =>
+  API.post(
+    `/data-entries/${encodeURIComponent(scopeType)}`,
+    { entries },
+    { params: buildDataEntryParams(filters) },
+  );
+
+export const deleteDataEntry = (scopeType, entryId, filters = {}) =>
+  API.delete(
+    `/data-entries/${encodeURIComponent(scopeType)}/${encodeURIComponent(entryId)}`,
+    { params: buildDataEntryParams(filters) },
+  );
 
 export default API;

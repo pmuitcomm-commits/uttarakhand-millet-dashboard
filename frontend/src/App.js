@@ -141,6 +141,11 @@ function AppRoutes() {
           <DataEntryPage scopeType="block" />
         </ProtectedOfficerRoute>
       } />
+      <Route path="/block/data/:sectionSlug" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "block"]}>
+          <DataEntryPage scopeType="block" />
+        </ProtectedOfficerRoute>
+      } />
       <Route path="/admin-dashboard" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />
       <Route path="/admin-landing" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />
       <Route path="/district-dashboard" element={

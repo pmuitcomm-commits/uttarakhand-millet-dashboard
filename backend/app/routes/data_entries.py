@@ -20,6 +20,7 @@ class DataEntryPayload(BaseModel):
     """Editable row payload from the Excel-like data entry table."""
 
     id: Optional[int] = None
+    section_key: Optional[str] = None
     district: Optional[str] = None
     block: Optional[str] = None
     data_type: Optional[str] = None
@@ -62,6 +63,7 @@ def _entry_response(entry: DistrictBlockDataEntry) -> dict:
     return {
         "id": entry.id,
         "scope_type": entry.scope_type,
+        "section_key": entry.section_key,
         "district": entry.district,
         "block": entry.block,
         "data_type": entry.data_type,
@@ -82,12 +84,16 @@ def _query_for_scope(
     current_user,
     district: Optional[str] = None,
     block: Optional[str] = None,
+    section_key: Optional[str] = None,
 ):
     """Build a read query scoped to the current officer role."""
     current_role = normalize_role(current_user.get("role"))
     query = db.query(DistrictBlockDataEntry).filter(
         DistrictBlockDataEntry.scope_type == scope_type
     )
+
+    if section_key:
+        query = query.filter(DistrictBlockDataEntry.section_key == section_key)
 
     if current_role == "admin":
         if district:
@@ -137,17 +143,24 @@ def _save_entries(
     request: SaveDataEntriesRequest,
     current_user,
     db: Session,
+    section_key: Optional[str] = None,
 ) -> dict:
     """Insert new rows and update visible existing rows for one scope."""
     saved_entries = []
+    clean_section_key = _clean_text(section_key, 120) if section_key else None
 
     for row in request.entries:
         district, block = _resolve_write_scope(scope_type, current_user, row)
+        row_section_key = clean_section_key or _clean_text(row.section_key, 120)
 
         if row.id:
-            entry = _query_for_scope(db, scope_type, current_user).filter(
-                DistrictBlockDataEntry.id == row.id
-            ).first()
+            entry_query = _query_for_scope(
+                db,
+                scope_type,
+                current_user,
+                section_key=row_section_key,
+            ).filter(DistrictBlockDataEntry.id == row.id)
+            entry = entry_query.first()
             if entry is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -160,6 +173,7 @@ def _save_entries(
             )
             db.add(entry)
 
+        entry.section_key = row_section_key
         entry.district = district
         entry.block = block
         entry.data_type = _clean_text(row.data_type, 120)
@@ -178,9 +192,36 @@ def _save_entries(
     return {"entries": [_entry_response(entry) for entry in saved_entries]}
 
 
+def _delete_entry(
+    scope_type: str,
+    entry_id: int,
+    current_user,
+    db: Session,
+    section_key: Optional[str] = None,
+) -> dict:
+    """Delete one visible row from the current user's allowed scope."""
+    clean_section_key = _clean_text(section_key, 120) if section_key else None
+    entry = (
+        _query_for_scope(db, scope_type, current_user, section_key=clean_section_key)
+        .filter(DistrictBlockDataEntry.id == entry_id)
+        .first()
+    )
+
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Data entry not found",
+        )
+
+    db.delete(entry)
+    db.commit()
+    return {"deleted_id": entry_id}
+
+
 @router.get("/district")
 def get_district_data_entries(
     district: Optional[str] = Query(default=None),
+    section_key: Optional[str] = Query(default=None),
     current_user=Depends(require_role("admin", "district")),
     db: Session = Depends(get_db),
 ):
@@ -191,7 +232,7 @@ def get_district_data_entries(
     optionally filter by district or fetch all district-scope entries.
     """
     rows = (
-        _query_for_scope(db, "district", current_user, district=district)
+        _query_for_scope(db, "district", current_user, district=district, section_key=section_key)
         .order_by(DistrictBlockDataEntry.id.asc())
         .all()
     )
@@ -201,19 +242,34 @@ def get_district_data_entries(
 @router.post("/district")
 def save_district_data_entries(
     request: SaveDataEntriesRequest,
+    section_key: Optional[str] = Query(default=None),
     current_user=Depends(require_role("admin", "district")),
     db: Session = Depends(get_db),
 ):
     """
     Save district data-entry rows for the current user's allowed district scope.
     """
-    return _save_entries("district", request, current_user, db)
+    return _save_entries("district", request, current_user, db, section_key=section_key)
+
+
+@router.delete("/district/{entry_id}")
+def delete_district_data_entry(
+    entry_id: int,
+    section_key: Optional[str] = Query(default=None),
+    current_user=Depends(require_role("admin", "district")),
+    db: Session = Depends(get_db),
+):
+    """
+    Delete one district data-entry row visible to the current user.
+    """
+    return _delete_entry("district", entry_id, current_user, db, section_key=section_key)
 
 
 @router.get("/block")
 def get_block_data_entries(
     district: Optional[str] = Query(default=None),
     block: Optional[str] = Query(default=None),
+    section_key: Optional[str] = Query(default=None),
     current_user=Depends(require_role("admin", "block")),
     db: Session = Depends(get_db),
 ):
@@ -224,7 +280,14 @@ def get_block_data_entries(
     may optionally filter or fetch all block-scope entries.
     """
     rows = (
-        _query_for_scope(db, "block", current_user, district=district, block=block)
+        _query_for_scope(
+            db,
+            "block",
+            current_user,
+            district=district,
+            block=block,
+            section_key=section_key,
+        )
         .order_by(DistrictBlockDataEntry.id.asc())
         .all()
     )
@@ -234,10 +297,24 @@ def get_block_data_entries(
 @router.post("/block")
 def save_block_data_entries(
     request: SaveDataEntriesRequest,
+    section_key: Optional[str] = Query(default=None),
     current_user=Depends(require_role("admin", "block")),
     db: Session = Depends(get_db),
 ):
     """
     Save block data-entry rows for the current user's allowed block scope.
     """
-    return _save_entries("block", request, current_user, db)
+    return _save_entries("block", request, current_user, db, section_key=section_key)
+
+
+@router.delete("/block/{entry_id}")
+def delete_block_data_entry(
+    entry_id: int,
+    section_key: Optional[str] = Query(default=None),
+    current_user=Depends(require_role("admin", "block")),
+    db: Session = Depends(get_db),
+):
+    """
+    Delete one block data-entry row visible to the current user.
+    """
+    return _delete_entry("block", entry_id, current_user, db, section_key=section_key)

@@ -139,6 +139,7 @@ def _create_district_block_data_entries() -> None:
         "district_block_data_entries",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("scope_type", sa.String(length=20), nullable=False),
+        sa.Column("section_key", sa.String(length=120), nullable=True),
         sa.Column("district", sa.String(length=120), nullable=False),
         sa.Column("block", sa.String(length=120), nullable=True),
         sa.Column("data_type", sa.String(length=120), nullable=True),
@@ -157,6 +158,12 @@ def _create_district_block_data_entries() -> None:
         "ix_district_block_data_entries_scope_type",
         "district_block_data_entries",
         ["scope_type"],
+        unique=False,
+    )
+    op.create_index(
+        "ix_district_block_data_entries_section_key",
+        "district_block_data_entries",
+        ["section_key"],
         unique=False,
     )
     op.create_index(

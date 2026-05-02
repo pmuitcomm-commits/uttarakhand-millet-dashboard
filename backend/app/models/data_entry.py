@@ -17,6 +17,7 @@ class DistrictBlockDataEntry(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     scope_type = Column(String(20), nullable=False, index=True)
+    section_key = Column(String(120), nullable=True, index=True)
     district = Column(String(120), nullable=False, index=True)
     block = Column(String(120), nullable=True, index=True)
     data_type = Column(String(120), nullable=True)
