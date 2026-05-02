@@ -3,17 +3,30 @@
  */
 
 import React, { useMemo } from "react";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, Navigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 
 import DataEntryTable from "../components/DataEntryTable";
 import Sidebar from "../components/Sidebar";
 import { dashboardClasses } from "../components/dashboardStyles";
 import { useAuth } from "../context/AuthContext";
-import { blockDataSections, blockDataSectionsBySlug } from "../data/blockDataSections";
+import {
+  blockDataSections,
+  blockDataSectionsBySlug,
+  defaultBlockDataSectionSlug,
+  getBlockDataSectionRedirectSlug,
+} from "../data/blockDataSections";
 
 const backButtonClass =
   "inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#024b37] bg-white px-3 text-sm font-bold text-[#024b37] transition hover:bg-[#f2f8f6] dark:bg-[#2a2a2a] dark:text-white dark:hover:bg-[#333333]";
+
+const sectionNavLinkClass = (isActive) =>
+  [
+    "inline-flex h-full min-h-12 min-w-0 items-center rounded-md border px-3 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#66b9ac]",
+    isActive
+      ? "border-[#024b37] bg-[#024b37] text-white shadow-sm"
+      : "border-[#d8e3de] bg-white text-[#024b37] hover:border-[#66b9ac] hover:bg-[#f2f8f6] dark:border-[#444444] dark:bg-[#1f2937] dark:text-white dark:hover:bg-[#333333]",
+  ].join(" ");
 
 function ScopeBadges({ scopeType, queryFilters }) {
   const { user } = useAuth();
@@ -55,21 +68,52 @@ function ScopeBadges({ scopeType, queryFilters }) {
   );
 }
 
-function BlockDataSectionList({ search }) {
+function BlockDataBreadcrumbs({ activeSection, search }) {
+  if (!activeSection) {
+    return null;
+  }
+
   return (
-    <ul className="m-0 list-disc space-y-3 pl-6 text-base leading-snug text-black dark:text-white">
-      {blockDataSections.map((section) => (
-        <li key={section.slug} className="pl-1">
-          <Link
-            className="inline-flex min-w-0 items-center gap-1.5 font-medium text-black underline decoration-[1.5px] underline-offset-2 transition hover:text-[#024b37] focus:outline-none focus:ring-2 focus:ring-[#66b9ac] dark:text-white dark:hover:text-[#9de0d5]"
-            to={`/block/data/${section.slug}${search}`}
-          >
-            <span className="min-w-0 break-words">{section.title}</span>
-            <ExternalLink aria-hidden="true" className="mt-0.5 shrink-0" size={14} strokeWidth={2.4} />
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <nav
+      aria-label="Breadcrumb"
+      className="mb-2 flex min-w-0 flex-wrap items-center justify-center gap-2 text-xs font-bold text-[#4a5f58] dark:text-slate-200"
+    >
+      <Link
+        className="text-[#024b37] underline underline-offset-2 dark:text-white"
+        to={`/block/data/${defaultBlockDataSectionSlug}${search}`}
+      >
+        Block Data
+      </Link>
+      <span aria-hidden="true">/</span>
+      <span className="max-w-full truncate" title={activeSection.title}>
+        {activeSection.title}
+      </span>
+    </nav>
+  );
+}
+
+function BlockDataSectionNav({ activeSlug, search }) {
+  return (
+    <nav aria-label="Block data sections" className="mb-4">
+      <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2 xl:grid-cols-4">
+        {blockDataSections.map((section) => {
+          const isActive = section.slug === activeSlug;
+
+          return (
+            <li key={section.slug} className="min-w-0">
+              <Link
+                aria-current={isActive ? "page" : undefined}
+                className={sectionNavLinkClass(isActive)}
+                title={section.title}
+                to={`/block/data/${section.slug}${search}`}
+              >
+                <span className="min-w-0 truncate">{section.title}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 
@@ -88,12 +132,18 @@ function DataEntryPage({ scopeType }) {
     [searchParams],
   );
 
+  if (isBlockData && !sectionSlug) {
+    return <Navigate to={`/block/data/${defaultBlockDataSectionSlug}${location.search}`} replace />;
+  }
+
   if (isBlockData && sectionSlug && !selectedSection) {
-    return <Navigate to={`/block/data${location.search}`} replace />;
+    const redirectSlug = getBlockDataSectionRedirectSlug(sectionSlug) || defaultBlockDataSectionSlug;
+    return <Navigate to={`/block/data/${redirectSlug}${location.search}`} replace />;
   }
 
   const pageTitle = selectedSection?.title || (scopeType === "district" ? "District Data" : "Block Data");
-  const showSectionList = isBlockData && !selectedSection;
+  const showDefaultSectionLink =
+    isBlockData && selectedSection?.slug && selectedSection.slug !== defaultBlockDataSectionSlug;
 
   return (
     <div className={dashboardClasses.pageWrapper}>
@@ -101,26 +151,38 @@ function DataEntryPage({ scopeType }) {
         <Sidebar />
         <div className={dashboardClasses.mainContent}>
           <div className={dashboardClasses.pageHeadingRow} data-aos="fade-up">
-            {selectedSection ? (
+            {showDefaultSectionLink ? (
               <div className="mb-4 flex justify-start">
-                <Link className={backButtonClass} to={`/block/data${location.search}`}>
+                <Link
+                  className={backButtonClass}
+                  to={`/block/data/${defaultBlockDataSectionSlug}${location.search}`}
+                >
                   <ArrowLeft aria-hidden="true" size={16} />
-                  Back to Block Data
+                  First Section
                 </Link>
               </div>
             ) : null}
-            <h2 className={dashboardClasses.pageHeadingTitle}>{pageTitle}</h2>
+            <BlockDataBreadcrumbs activeSection={selectedSection} search={location.search} />
+            <h2 className={dashboardClasses.pageHeadingTitle} title={pageTitle}>
+              {pageTitle}
+            </h2>
             <ScopeBadges scopeType={scopeType} queryFilters={queryFilters} />
           </div>
 
           <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="200">
-            {showSectionList ? (
-              <BlockDataSectionList search={location.search} />
+            {isBlockData ? (
+              <>
+                <BlockDataSectionNav activeSlug={selectedSection.slug} search={location.search} />
+                <DataEntryTable
+                  queryFilters={queryFilters}
+                  scopeType={scopeType}
+                  sectionKey={selectedSection.slug}
+                />
+              </>
             ) : (
               <DataEntryTable
                 queryFilters={queryFilters}
                 scopeType={scopeType}
-                sectionKey={selectedSection?.slug || ""}
               />
             )}
           </div>

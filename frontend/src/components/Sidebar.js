@@ -6,10 +6,11 @@
  */
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { dashboardClasses } from "./dashboardStyles";
+import { defaultBlockDataSectionSlug } from "../data/blockDataSections";
 
 const roleSidebarItems = {
   admin: {
@@ -51,8 +52,21 @@ const roleSidebarRoutes = {
     "District Data": "/district/data",
   },
   block: {
-    "Block Data": "/block/data",
+    "Block Data": `/block/data/${defaultBlockDataSectionSlug}`,
   },
+};
+
+const sidebarLinkClassName = (isActive) =>
+  [
+    dashboardClasses.sidebarLink,
+    isActive ? "bg-[#66b9ac] text-white shadow-[inset_3px_0_0_#fedd56]" : "",
+  ].filter(Boolean).join(" ");
+
+const isSidebarPathActive = (pathname, route) => {
+  if (route.startsWith("/block/data")) {
+    return pathname.startsWith("/block/data");
+  }
+  return pathname === route;
 };
 
 /**
@@ -64,6 +78,7 @@ const roleSidebarRoutes = {
 function Sidebar() {
   const { t } = useLanguage();
   const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
   const roleConfig = isAuthenticated ? roleSidebarItems[user?.role] : null;
 
   return (
@@ -76,21 +91,26 @@ function Sidebar() {
 
       <nav className={dashboardClasses.sidebarNav}>
         {/* Public menu items remain visible for farmers and unauthenticated visitors. */}
-        <Link className={dashboardClasses.sidebarLink} to="/dashboard">{t('dashboard')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/procurement">{t('procurement')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/production">{t('production')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/district">{t('districtAnalysis')}</Link>
-        <Link className={dashboardClasses.sidebarLink} to="/millet">{t('milletAnalysis')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/dashboard")} to="/dashboard">{t('dashboard')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/procurement")} to="/procurement">{t('procurement')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/production")} to="/production">{t('production')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/district")} to="/district">{t('districtAnalysis')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/millet")} to="/millet">{t('milletAnalysis')}</Link>
 
-        {roleConfig?.items.map((item) => (
-          <Link
-            key={item}
-            className={dashboardClasses.sidebarLink}
-            to={roleSidebarRoutes[user?.role]?.[item] || `${roleConfig.basePath}#${slugify(item)}`}
-          >
-            {item}
-          </Link>
-        ))}
+        {roleConfig?.items.map((item) => {
+          const route = roleSidebarRoutes[user?.role]?.[item] || `${roleConfig.basePath}#${slugify(item)}`;
+          const isActive = isSidebarPathActive(location.pathname, route);
+
+          return (
+            <Link
+              key={item}
+              className={sidebarLinkClassName(isActive)}
+              to={route}
+            >
+              {item}
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
