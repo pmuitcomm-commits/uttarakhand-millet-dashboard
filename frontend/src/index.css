@@ -98,6 +98,13 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
   body.dark-theme {
     /* Dark theme baseline used by dashboard class variants. */
     background: #1a1a1a;

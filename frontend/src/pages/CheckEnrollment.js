@@ -25,7 +25,7 @@ const titleClass =
 const subTitleClass = "my-[3px] text-center font-lato text-base font-normal text-[#5c6b5e]";
 const titleThirdClass = "mb-0 mt-[3px] text-center font-lato text-[1.1rem] font-bold text-[#024b37]";
 const contentClass =
-  "flex flex-1 items-start justify-center px-5 py-11 max-[768px]:px-4 max-[768px]:py-7";
+  "flex flex-1 flex-wrap items-start justify-center gap-5 px-5 py-11 max-[768px]:px-4 max-[768px]:py-7";
 const cardClass =
   "w-full max-w-[800px] animate-slide-in-soft rounded-[20px] border border-[#024b37]/[0.07] bg-white shadow-form-card";
 const paddedCardClass =

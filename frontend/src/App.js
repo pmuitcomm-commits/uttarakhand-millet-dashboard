@@ -178,7 +178,7 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         {/* Full-height Tailwind shell keeps the header/footer fixed while page content scrolls responsively. */}
-        <div className="m-0 flex h-screen w-full flex-col overflow-hidden bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
+        <div className="m-0 flex h-screen h-dvh w-full flex-col overflow-hidden bg-[#024b37] p-0 dark:bg-[#1a1a1a]">
           <TopBar />
           <main className="relative z-0 min-h-0 flex-1 overflow-auto">
             <AppRoutes />
