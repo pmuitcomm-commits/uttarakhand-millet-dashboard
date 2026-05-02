@@ -10,7 +10,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { dashboardClasses } from "./dashboardStyles";
-import { defaultBlockDataSectionSlug } from "../data/blockDataSections";
 
 const roleSidebarItems = {
   admin: {
@@ -52,7 +51,7 @@ const roleSidebarRoutes = {
     "District Data": "/district/data",
   },
   block: {
-    "Block Data": `/block/data/${defaultBlockDataSectionSlug}`,
+    "Block Data": "/block/data",
   },
 };
 
