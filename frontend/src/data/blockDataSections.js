@@ -1,7 +1,7 @@
 export const blockDataSections = [
   {
     slug: "inputs-millet-cultivation",
-    title: "Inputs for Millet Cultivation: (Bio-fertilizer / Bio-pesticide / Zinc / Micronutrients – 1600.00 / hectare)",
+    title: "Inputs for Millet Cultivation: (Bio-fertilizer / Bio-pesticide / Zinc / Micronutrients - 1600.00 / hectare)",
   },
   {
     slug: "incentive-sowing",

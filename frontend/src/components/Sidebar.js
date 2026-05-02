@@ -48,9 +48,11 @@ const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 
 const roleSidebarRoutes = {
   district: {
+    "District Monitoring": "/district/monitoring",
     "District Data": "/district/data",
   },
   block: {
+    "Block Monitoring": "/block/monitoring",
     "Block Data": "/block/data",
   },
 };
@@ -62,6 +64,12 @@ const sidebarLinkClassName = (isActive) =>
   ].filter(Boolean).join(" ");
 
 const isSidebarPathActive = (pathname, route) => {
+  if (route === "/district/monitoring") {
+    return pathname.startsWith("/district/monitoring") || pathname.startsWith("/monitoring/district");
+  }
+  if (route === "/block/monitoring") {
+    return pathname.startsWith("/block/monitoring") || pathname.startsWith("/monitoring/block");
+  }
   if (route.startsWith("/block/data")) {
     return pathname.startsWith("/block/data");
   }

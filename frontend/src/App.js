@@ -19,6 +19,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import DistrictDashboard from "./pages/DistrictDashboard";
 import BlockDashboard from "./pages/BlockDashboard";
 import DataEntryPage from "./pages/DataEntryPage";
+import MonitoringDetailPage from "./pages/MonitoringDetailPage";
+import MonitoringOverviewPage from "./pages/MonitoringOverviewPage";
 import RegisterFarmer from "./pages/RegisterFarmer";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -136,6 +138,11 @@ function AppRoutes() {
           <DataEntryPage scopeType="district" />
         </ProtectedOfficerRoute>
       } />
+      <Route path="/district/monitoring" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "district"]}>
+          <MonitoringOverviewPage level="district" />
+        </ProtectedOfficerRoute>
+      } />
       <Route path="/block/data" element={
         <ProtectedOfficerRoute allowedRoles={["admin", "block"]}>
           <DataEntryPage scopeType="block" />
@@ -144,6 +151,16 @@ function AppRoutes() {
       <Route path="/block/data/:sectionSlug" element={
         <ProtectedOfficerRoute allowedRoles={["admin", "block"]}>
           <DataEntryPage scopeType="block" />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/block/monitoring" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "block"]}>
+          <MonitoringOverviewPage level="block" />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/monitoring/:level/:tableName" element={
+        <ProtectedOfficerRoute allowedRoles={["admin", "district", "block"]}>
+          <MonitoringDetailPage />
         </ProtectedOfficerRoute>
       } />
       <Route path="/admin-dashboard" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />

@@ -130,4 +130,31 @@ export const deleteDataEntry = (scopeType, entryId, filters = {}) =>
     { params: buildDataEntryParams(filters) },
   );
 
+// =========================
+// Monitoring APIs
+// =========================
+function buildMonitoringParams(filters = {}) {
+  return Object.fromEntries(
+    Object.entries({
+      district: filters.district,
+      block: filters.block,
+      from: filters.from,
+      to: filters.to,
+    }).filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== ""),
+  );
+}
+
+export const getMonitoringSections = (level, filters = {}) =>
+  API.get(`/monitoring/${encodeURIComponent(level)}/sections`, {
+    params: buildMonitoringParams(filters),
+  });
+
+export const getMonitoringTableRows = (level, tableName, filters = {}) =>
+  API.get(
+    `/monitoring/${encodeURIComponent(level)}/${encodeURIComponent(tableName)}`,
+    {
+      params: buildMonitoringParams(filters),
+    },
+  );
+
 export default API;
