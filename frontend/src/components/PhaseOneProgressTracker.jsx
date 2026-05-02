@@ -620,7 +620,7 @@ function PhaseOneProgressTracker() {
 
       <div style={{ borderBottom: `2.5px solid ${NAVY}`, marginBottom: "1rem", paddingBottom: "0.75rem" }}>
         <div style={{ color: GOLD, fontSize: 10, fontWeight: 500, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>
-          IIMR Nutrihub · Uttarakhand Millet Policy PMU
+          Uttarakhand Millet Policy PMU
         </div>
         <div style={{ color: textPrimary, fontSize: 17, fontWeight: 500 }}>
           Phase 1 Progress Tracker — 7 Districts · 24 Blocks
@@ -700,7 +700,7 @@ function PhaseOneProgressTracker() {
       </div>
 
       <div style={{ borderTop: `0.5px solid ${borderTertiary}`, color: textTertiary, fontSize: 11, marginTop: "1.5rem", paddingTop: "0.75rem" }}>
-        Uttarakhand State Millet Policy · Phase 1 · IIMR Nutrihub PMU · All entered data persists across sessions
+        Uttarakhand State Millet Policy · Phase 1 · All entered data persists across sessions
       </div>
     </section>
   );
