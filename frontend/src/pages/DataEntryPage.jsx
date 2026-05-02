@@ -6,6 +6,7 @@ import React, { useMemo } from "react";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Link, Navigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 
+import BlockDataEntryTable from "../components/BlockDataEntryTable";
 import DataEntryTable from "../components/DataEntryTable";
 import Sidebar from "../components/Sidebar";
 import { dashboardClasses } from "../components/dashboardStyles";
@@ -176,10 +177,9 @@ function DataEntryPage({ scopeType }) {
               <BlockDataSectionList search={location.search} />
             ) : isBlockData ? (
               <>
-                <DataEntryTable
+                <BlockDataEntryTable
                   queryFilters={queryFilters}
-                  scopeType={scopeType}
-                  sectionKey={selectedSection.slug}
+                  tableName={selectedSection.tableName}
                 />
               </>
             ) : (

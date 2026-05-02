@@ -131,6 +131,42 @@ export const deleteDataEntry = (scopeType, entryId, filters = {}) =>
   );
 
 // =========================
+// Block Scheme Data Entry APIs
+// =========================
+function buildBlockDataParams(filters = {}) {
+  return Object.fromEntries(
+    Object.entries({
+      district: filters.district,
+      block: filters.block,
+    }).filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== ""),
+  );
+}
+
+export const getBlockDataSchema = (tableName) =>
+  API.get(`/block-data/${encodeURIComponent(tableName)}/schema`);
+
+export const uploadBlockDataExcel = (tableName, file, filters = {}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return API.post(
+    `/block-data/${encodeURIComponent(tableName)}/upload`,
+    formData,
+    {
+      params: buildBlockDataParams(filters),
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+};
+
+export const saveBlockDataRows = (tableName, rows, filters = {}) =>
+  API.post(
+    `/block-data/${encodeURIComponent(tableName)}`,
+    { rows },
+    { params: buildBlockDataParams(filters) },
+  );
+
+// =========================
 // Monitoring APIs
 // =========================
 function buildMonitoringParams(filters = {}) {
