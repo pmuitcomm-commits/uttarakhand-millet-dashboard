@@ -39,7 +39,7 @@ function MonitoringSkeletonCards() {
   );
 }
 
-function MonitoringSectionCards({ level, countsByTable, search }) {
+function MonitoringSectionCards({ level, countsByTable, countsUnavailable = false, search }) {
   return (
     <nav aria-label={`${level} monitoring sections`}>
       <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2 xl:grid-cols-4">
@@ -59,7 +59,7 @@ function MonitoringSectionCards({ level, countsByTable, search }) {
                   {section.tableName}
                 </span>
                 <span className="mt-3 inline-flex rounded-full bg-[#edf5f2] px-3 py-1 text-xs font-extrabold text-[#024b37] dark:bg-[#2a2a2a] dark:text-white">
-                  {countsByTable[section.tableName] ?? 0} records
+                  {countsUnavailable ? "Count unavailable" : `${countsByTable[section.tableName] ?? 0} records`}
                 </span>
               </span>
               <ExternalLink
@@ -179,18 +179,22 @@ function MonitoringOverviewPage({ level }) {
                   ? "Select a district and block."
                   : "Select a district."}
               </div>
-            ) : error ? (
-              <div className={errorBoxClass} role="alert">
-                {error}
-              </div>
             ) : loading ? (
               <MonitoringSkeletonCards />
             ) : (
-              <MonitoringSectionCards
-                level={normalizedLevel}
-                countsByTable={countsByTable}
-                search={location.search}
-              />
+              <>
+                {error ? (
+                  <div className={`${errorBoxClass} mb-4`} role="alert">
+                    {error}
+                  </div>
+                ) : null}
+                <MonitoringSectionCards
+                  level={normalizedLevel}
+                  countsByTable={countsByTable}
+                  countsUnavailable={Boolean(error)}
+                  search={location.search}
+                />
+              </>
             )}
           </div>
         </div>

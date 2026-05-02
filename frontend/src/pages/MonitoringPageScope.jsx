@@ -11,6 +11,9 @@ const selectorClass =
 
 export function formatApiError(error, fallback = "Unable to fetch monitoring data.") {
   const detail = error?.response?.data?.detail;
+  if (error?.response?.status === 404 && detail === "Not Found") {
+    return "Monitoring data service was not found. Restart the backend with the latest code and try again.";
+  }
   if (Array.isArray(detail)) {
     return detail.map((item) => item.msg || item.detail || fallback).join("; ");
   }
