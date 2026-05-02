@@ -72,6 +72,12 @@ export const logoutUser = () =>
     clearAuthSession();
   });
 
+export const getDistrictBlockOfficers = () =>
+  API.get("/auth/district/block-officers");
+
+export const updateDistrictBlockOfficer = (userId, userData) =>
+  API.put(`/auth/district/block-officers/${encodeURIComponent(userId)}`, userData);
+
 // =========================
 // Farmer APIs
 // =========================

@@ -5,7 +5,7 @@ Pydantic schemas and validation helpers for authentication routes.
 import re
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from .auth_roles import OFFICER_ROLES, ROLE_MAP, canonical_role_value
 
@@ -116,6 +116,44 @@ class UpdateUserRoleRequest(BaseModel):
                 raise ValueError("District is required for block officer role")
             if not self.block:
                 raise ValueError("Block is required for block officer role")
+
+
+class UpdateBlockOfficerRequest(BaseModel):
+    """District officer editable fields for block officer users."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    full_name: str
+    mobile: Optional[str] = None
+    block: str
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 1 or len(value) > 100:
+            raise ValueError("Name must be between 1 and 100 characters")
+        return value
+
+    @field_validator("mobile", mode="before")
+    @classmethod
+    def validate_mobile(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = str(value).strip()
+        if not value:
+            return None
+        if not re.fullmatch(r"\d{10}", value):
+            raise ValueError("Mobile number must be exactly 10 digits")
+        return value
+
+    @field_validator("block")
+    @classmethod
+    def validate_block(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 1 or len(value) > 100:
+            raise ValueError("Block is required")
+        return value
 
 
 class AuthResponse(BaseModel):

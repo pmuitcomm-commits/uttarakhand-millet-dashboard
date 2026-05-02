@@ -22,10 +22,21 @@ from .auth_roles import (
     canonical_role_value as _canonical_role_value,
     normalize_role as _normalize_role,
 )
-from .auth_schemas import AuthResponse, UpdateUserRoleRequest, UserLogin, UserRegister
+from .auth_schemas import (
+    AuthResponse,
+    UpdateBlockOfficerRequest,
+    UpdateUserRoleRequest,
+    UserLogin,
+    UserRegister,
+)
 from .auth_session import AUTH_COOKIE_NAME, make_auth_response, make_logout_response
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+BLOCK_OFFICER_ROLE_SQL = "REPLACE(LOWER(CAST(role AS TEXT)), ' ', '_') IN ('block', 'block_officer')"
+BLOCK_OFFICER_ROLE_SQL_WITH_ALIAS = (
+    "REPLACE(LOWER(CAST(u.role AS TEXT)), ' ', '_') IN ('block', 'block_officer')"
+)
 
 
 def _active_user(user) -> bool:
@@ -47,6 +58,37 @@ def _user_response(user) -> dict:
         "district": user.get("district"),
         "block": user.get("block"),
     }
+
+
+def _block_officer_response(user) -> dict:
+    """Build the limited user object returned to district officers."""
+    return {
+        "id": user["id"],
+        "name": user.get("full_name") or "",
+        "mobile": user.get("mobile") or "",
+        "block": user.get("block") or "",
+        "district": user.get("district") or "",
+    }
+
+
+def _users_table_has_column(db: Session, column_name: str) -> bool:
+    """Check whether an optional users-table column exists without altering schema."""
+    return bool(
+        db.execute(
+            text(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = current_schema()
+                      AND table_name = 'users'
+                      AND column_name = :column_name
+                )
+                """
+            ),
+            {"column_name": column_name},
+        ).scalar()
+    )
 
 
 def _fetch_user_by_username(db: Session, username: str):
@@ -76,6 +118,23 @@ def _fetch_user_by_id(db: Session, user_id: int):
             """
         ),
         {"id": user_id},
+    ).mappings().first()
+
+
+def _fetch_district_block_officer(db: Session, user_id: int, district: str):
+    """Fetch one block officer constrained to the district officer's district."""
+    return db.execute(
+        text(
+            f"""
+            SELECT id, full_name, COALESCE(to_jsonb(u) ->> 'mobile', '') AS mobile, district, block
+            FROM users AS u
+            WHERE id = :id
+              AND district = :district
+              AND {BLOCK_OFFICER_ROLE_SQL_WITH_ALIAS}
+            LIMIT 1
+            """
+        ),
+        {"id": user_id, "district": district},
     ).mappings().first()
 
 
@@ -396,6 +455,92 @@ def update_user_role(
     )
     db.commit()
     return {"message": "Role updated successfully", "new_role": request.new_role}
+
+
+@router.get("/district/block-officers")
+def get_district_block_officers(
+    current_user=Depends(require_role("district")),
+    db: Session = Depends(get_db),
+):
+    """
+    List block officer users assigned to the logged-in district officer's district.
+
+    The response intentionally omits auth fields such as username, email, role,
+    password/hash, and active state.
+    """
+    result = db.execute(
+        text(
+            f"""
+            SELECT id, full_name, COALESCE(to_jsonb(u) ->> 'mobile', '') AS mobile, district, block
+            FROM users AS u
+            WHERE district = :district
+              AND {BLOCK_OFFICER_ROLE_SQL_WITH_ALIAS}
+            ORDER BY full_name ASC NULLS LAST, id ASC
+            """
+        ),
+        {"district": current_user["district"]},
+    )
+    return {"users": [_block_officer_response(user) for user in result.mappings().all()]}
+
+
+@router.put("/district/block-officers/{user_id}")
+def update_district_block_officer(
+    user_id: int,
+    request: UpdateBlockOfficerRequest,
+    current_user=Depends(require_role("district")),
+    db: Session = Depends(get_db),
+):
+    """
+    Update only district-managed editable fields for a block officer user.
+
+    The update is constrained by both target user id and the logged-in district
+    officer's district to prevent cross-district edits.
+    """
+    set_clauses = ["full_name = :full_name", "block = :block"]
+    update_values = {
+        "id": user_id,
+        "district": current_user["district"],
+        "full_name": request.full_name,
+        "block": request.block,
+    }
+
+    if "mobile" in request.model_fields_set:
+        if not _users_table_has_column(db, "mobile"):
+            if request.mobile is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Mobile cannot be updated because users.mobile is not available",
+                )
+        else:
+            set_clauses.append("mobile = :mobile")
+            update_values["mobile"] = request.mobile
+
+    updated_user = db.execute(
+        text(
+            f"""
+            UPDATE users
+            SET {', '.join(set_clauses)}
+            WHERE id = :id
+              AND district = :district
+              AND {BLOCK_OFFICER_ROLE_SQL}
+            RETURNING id
+            """
+        ),
+        update_values,
+    ).mappings().first()
+
+    if updated_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Block officer not found in your district",
+        )
+
+    db.commit()
+    user = _fetch_district_block_officer(db, user_id, current_user["district"])
+    return {
+        "message": "Block officer updated successfully",
+        "user": _block_officer_response(user),
+    }
 
 
 @router.get("/district/users")

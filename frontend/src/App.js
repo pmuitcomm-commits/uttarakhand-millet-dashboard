@@ -18,6 +18,7 @@ import Procurement from "./pages/Procurement";
 import AdminDashboard from "./pages/AdminDashboard";
 import DistrictDashboard from "./pages/DistrictDashboard";
 import BlockDashboard from "./pages/BlockDashboard";
+import BlockUserManagement from "./pages/BlockUserManagement";
 import DataEntryPage from "./pages/DataEntryPage";
 import MonitoringDetailPage from "./pages/MonitoringDetailPage";
 import MonitoringOverviewPage from "./pages/MonitoringOverviewPage";
@@ -141,6 +142,11 @@ function AppRoutes() {
       <Route path="/district/monitoring" element={
         <ProtectedOfficerRoute allowedRoles={["admin", "district"]}>
           <MonitoringOverviewPage level="district" />
+        </ProtectedOfficerRoute>
+      } />
+      <Route path="/district/block-user-management" element={
+        <ProtectedOfficerRoute requiredRole="district">
+          <BlockUserManagement />
         </ProtectedOfficerRoute>
       } />
       <Route path="/block/data" element={
