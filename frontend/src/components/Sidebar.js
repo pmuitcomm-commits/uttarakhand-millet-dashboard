@@ -50,6 +50,7 @@ const roleSidebarRoutes = {
   district: {
     "Block User Management": "/district/block-user-management",
     "District Monitoring": "/district/monitoring",
+    "District Reports": "/district#district-reports",
     "District Data": "/district/data",
   },
   block: {
@@ -64,7 +65,11 @@ const sidebarLinkClassName = (isActive) =>
     isActive ? "bg-[#66b9ac] text-white shadow-[inset_3px_0_0_#fedd56]" : "",
   ].filter(Boolean).join(" ");
 
-const isSidebarPathActive = (pathname, route) => {
+const isSidebarPathActive = (location, route) => {
+  const { pathname, hash } = location;
+  if (route.includes("#")) {
+    return `${pathname}${hash}` === route;
+  }
   if (route === "/district/monitoring") {
     return pathname.startsWith("/district/monitoring") || pathname.startsWith("/monitoring/district");
   }
@@ -102,12 +107,12 @@ function Sidebar() {
         <Link className={sidebarLinkClassName(location.pathname === "/dashboard")} to="/dashboard">{t('dashboard')}</Link>
         <Link className={sidebarLinkClassName(location.pathname === "/procurement")} to="/procurement">{t('procurement')}</Link>
         <Link className={sidebarLinkClassName(location.pathname === "/production")} to="/production">{t('production')}</Link>
-        <Link className={sidebarLinkClassName(location.pathname === "/district")} to="/district">{t('districtAnalysis')}</Link>
+        <Link className={sidebarLinkClassName(location.pathname === "/district" && !location.hash)} to="/district">{t('districtAnalysis')}</Link>
         <Link className={sidebarLinkClassName(location.pathname === "/millet")} to="/millet">{t('milletAnalysis')}</Link>
 
         {roleConfig?.items.map((item) => {
           const route = roleSidebarRoutes[user?.role]?.[item] || `${roleConfig.basePath}#${slugify(item)}`;
-          const isActive = isSidebarPathActive(location.pathname, route);
+          const isActive = isSidebarPathActive(location, route);
 
           return (
             <Link
