@@ -167,7 +167,7 @@ function BlockUserManagement() {
 
     try {
       const response = await updateDistrictBlockOfficer(officer.id, {
-        full_name: draft.name.trim(),
+        name: draft.name.trim(),
         mobile: draft.mobile.trim() || null,
         block: draft.block.trim(),
       });
