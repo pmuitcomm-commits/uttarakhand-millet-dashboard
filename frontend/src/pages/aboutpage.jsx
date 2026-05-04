@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
   BookOpen,
@@ -21,6 +22,13 @@ import {
   Megaphone,
   ArrowRight,
   CheckCircle2,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Send,
+  Camera,
+  Video,
 } from "lucide-react";
 
 import districtGeojsonUrl from "../data/district.geojson";
@@ -389,23 +397,30 @@ const milestones = [
 ];
 
 /**
- * SoftImage - Placeholder visual block for project content sections.
+ * SoftImage - Visual block for project content sections.
  *
  * @component
  * @param {Object} props - Component properties.
- * @param {string} props.label - Placeholder label.
+ * @param {string} props.label - Image alt text or fallback placeholder label.
+ * @param {string} [props.src] - Optional local image source.
  * @param {string} [props.className=""] - Additional Tailwind classes.
  * @returns {React.ReactElement} Styled image placeholder.
  */
-function SoftImage({ label, className = "" }) {
+function SoftImage({ label, src, className = "" }) {
   return (
     <div
       className={`relative overflow-hidden rounded-3xl border border-[#cfddb4] bg-gradient-to-br from-[#d7e4bb] via-[#eef3db] to-[#ccdca6] shadow-md max-[640px]:rounded-2xl ${className}`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,.7),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,90,44,.08),transparent_30%)]" />
-      <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-slate-600 max-[640px]:min-h-[180px] max-[640px]:p-4 max-[640px]:text-base">
-        {label}
-      </div>
+      {src ? (
+        <img src={src} alt={label} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,.7),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,90,44,.08),transparent_30%)]" />
+          <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-slate-600 max-[640px]:min-h-[180px] max-[640px]:p-4 max-[640px]:text-base">
+            {label}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -540,6 +555,8 @@ const components = [
   },
 ];
 
+const contentImageSources = ["/1.png", "/4.jpg", "/5.jpg", "/7.jpg", "/8.jpg", "/9.jpg", "/2.png", "/3.png"];
+
 /**
  * SectionTitle - Shared title block for public information sections.
  *
@@ -578,6 +595,53 @@ const mPassteps = [
   "Consolidated insights support faster decision-making at state level.",
 ];
 
+const footerInformation = [
+  {
+    title: "Privacy Policy",
+    intro:
+      "This policy explains how information connected with the Uttarakhand Millet MIS is handled on this public website and related dashboard workflows.",
+    points: [
+      "The system may collect farmer registration details, contact information, location records and programme data submitted through authorized workflows.",
+      "Information is used for registration, verification, monitoring, reporting, service delivery and communication related to millet development activities.",
+      "Administrative access is role-based. Public pages are not intended to publish sensitive personal information.",
+      "Users should submit accurate information and use the listed contact channels for correction, support or data-related queries.",
+    ],
+  },
+  {
+    title: "Terms of Use",
+    intro:
+      "Use of this website and MIS dashboard is subject to responsible, lawful and authorized use for Uttarakhand Millet Project purposes.",
+    points: [
+      "Website content is provided for public information, programme awareness and dashboard access for authorized users.",
+      "Users must not attempt unauthorized access, impersonation, tampering, automated scraping or misuse of project data.",
+      "Dashboard users are responsible for keeping login credentials confidential and for entering accurate information.",
+      "External links are provided for convenience. Their content and policies are managed by the respective websites.",
+    ],
+  },
+  {
+    title: "Accessibility",
+    intro:
+      "The website aims to provide accessible public information and dashboard entry points for a wide range of users and devices.",
+    points: [
+      "The interface supports keyboard navigation, visible focus states and scalable text controls from the top bar.",
+      "Text, controls and content sections are structured to remain readable across desktop, tablet and mobile screens.",
+      "Images and interactive controls should include meaningful labels where they convey information or perform an action.",
+      "Accessibility issues can be reported through the contact details listed in this footer.",
+    ],
+  },
+  {
+    title: "Screen Reader Access",
+    intro:
+      "The page is structured so screen reader users can navigate headings, links, buttons and content sections in a predictable order.",
+    points: [
+      "Use standard screen reader navigation commands to move through headings, lists, links and form controls.",
+      "Interactive controls are designed to be reachable by keyboard using Tab, Shift+Tab, Enter and Space.",
+      "Allow the page to finish loading before starting screen reader navigation for the most reliable experience.",
+      "If any content is not announced clearly, report the issue through the footer contact details so it can be reviewed.",
+    ],
+  },
+];
+
 /**
  * UttarakhandMilletProjectLandingPage - Render the public about/project page.
  *
@@ -585,6 +649,45 @@ const mPassteps = [
  * @returns {React.ReactElement} Public project information page.
  */
 export default function UttarakhandMilletProjectLandingPage() {
+  const [visitorCount, setVisitorCount] = useState(0);
+  const [activeFooterTopic, setActiveFooterTopic] = useState(null);
+
+  useEffect(() => {
+    const target = 25;
+    let count = 0;
+    const step = Math.ceil(target / 40);
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      setVisitorCount(count);
+      if (count >= target) clearInterval(timer);
+    }, 30);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentYear = new Date().getFullYear();
+
+  const lastUpdated = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const activeFooterDetails = useMemo(
+    () => footerInformation.find((item) => item.title === activeFooterTopic),
+    [activeFooterTopic]
+  );
+
+  useEffect(() => {
+    if (!activeFooterDetails) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setActiveFooterTopic(null);
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [activeFooterDetails]);
+
   return (
     <div className="min-h-full overflow-x-hidden bg-[#efefef] font-dm text-slate-900">
       
@@ -679,18 +782,40 @@ export default function UttarakhandMilletProjectLandingPage() {
             subtitle="Key progress areas of the Uttarakhand Millet Project:"
           />
 
-          <div className="relative mt-12 hidden xl:block">
-            <div className="absolute left-0 right-0 top-1/2 h-6 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#5f8c95] via-[#8ed5da] to-[#d7c965] opacity-80" />
-            <div className="grid grid-cols-6 gap-4">
-              {milestones.map((item, index) => (
-                <div key={item} className={`relative ${index % 2 ? "pt-40" : "pb-40"}`}>
-                  <div className={`absolute left-1/2 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-white bg-[#eef0d3] shadow ${index % 2 ? "top-[calc(50%-12px)]" : "top-[calc(50%-12px)]"}`} />
-                  <div className={`rounded-2xl p-4 text-lg font-semibold text-white shadow-lg ${index % 3 === 0 ? "bg-[#2f7f79]" : index % 3 === 1 ? "bg-[#a78a5a]" : "bg-[#6ca68a]"}`}>
+          <div className="relative mt-12 hidden grid-cols-6 grid-rows-[auto_24px_auto] gap-x-4 gap-y-10 xl:grid">
+            <div
+              style={{ gridColumn: "1 / -1", gridRow: 2 }}
+              className="h-6 rounded-full bg-gradient-to-r from-[#5f8c95] via-[#8ed5da] to-[#d7c965] opacity-80"
+            />
+            {milestones.map((item, index) => {
+              const isBelowLine = index % 2 === 1;
+
+              return (
+                <div
+                  key={item}
+                  style={{ gridColumn: index + 1, gridRow: isBelowLine ? 3 : 1 }}
+                  className={`relative ${isBelowLine ? "self-start" : "self-end"}`}
+                >
+                  <div
+                    className={`absolute left-1/2 h-10 w-[2px] -translate-x-1/2 bg-white/70 ${
+                      isBelowLine ? "-top-10" : "-bottom-10"
+                    }`}
+                  />
+                  <div
+                    className={`absolute left-1/2 z-10 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-white bg-[#eef0d3] shadow ${
+                      isBelowLine ? "-top-3" : "-bottom-3"
+                    }`}
+                  />
+                  <div
+                    className={`rounded-2xl p-4 text-lg font-semibold text-white shadow-lg ${
+                      index % 3 === 0 ? "bg-[#2f7f79]" : index % 3 === 1 ? "bg-[#a78a5a]" : "bg-[#6ca68a]"
+                    }`}
+                  >
                     {item}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:hidden">
@@ -705,7 +830,11 @@ export default function UttarakhandMilletProjectLandingPage() {
 
       {/* ========== SECTION 6: BACKGROUND ========== */}
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:py-16 lg:grid-cols-2 lg:px-8">
-        <SoftImage label="Background / Consultation Photograph" className="min-h-[240px] sm:min-h-[380px]" />
+        <SoftImage
+          label="Background consultation photograph"
+          src={contentImageSources[0]}
+          className="min-h-[240px] sm:min-h-[380px]"
+        />
         <div className="space-y-6 sm:space-y-8">
           <h2 className="text-3xl font-extrabold uppercase md:text-5xl">Background</h2>
           <div className="h-px w-full bg-slate-300" />
@@ -744,16 +873,25 @@ export default function UttarakhandMilletProjectLandingPage() {
             </div>
 
             <div className="flex items-center justify-center">
-              <div className="relative h-[310px] w-full max-w-[520px] sm:h-[460px]">
+              <div className="relative h-[310px] w-full max-w-[520px] [--circle-offset-x:91px] [--circle-offset-y:52.5px] [--circle-radius:105px] sm:h-[460px] sm:[--circle-offset-x:139px] sm:[--circle-offset-y:80px] sm:[--circle-radius:160px]">
                 <div className="absolute left-1/2 top-1/2 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[6px] border-[#d6ac7e] sm:h-[320px] sm:w-[320px]" />
-                <div className="absolute left-1/2 top-7 flex h-24 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:top-12 sm:h-40 sm:w-40">
-                  <Landmark className="h-12 w-12 text-slate-700 sm:h-20 sm:w-20" />
+                <div
+                  style={{ left: "50%", top: "calc(50% - var(--circle-radius))" }}
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                >
+                  <Landmark className="h-8 w-8 text-slate-700 sm:h-14 sm:w-14" />
                 </div>
-                <div className="absolute bottom-8 left-4 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-xl sm:bottom-10 sm:left-10 sm:h-36 sm:w-36">
-                  <Wheat className="h-12 w-12 text-[#317a6f] sm:h-20 sm:w-20" />
+                <div
+                  style={{ left: "calc(50% - var(--circle-offset-x))", top: "calc(50% + var(--circle-offset-y))" }}
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                >
+                  <Wheat className="h-8 w-8 text-[#317a6f] sm:h-14 sm:w-14" />
                 </div>
-                <div className="absolute bottom-8 right-4 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-xl sm:bottom-10 sm:right-10 sm:h-36 sm:w-36">
-                  <BookOpen className="h-12 w-12 text-[#5647a5] sm:h-20 sm:w-20" />
+                <div
+                  style={{ left: "calc(50% + var(--circle-offset-x))", top: "calc(50% + var(--circle-offset-y))" }}
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                >
+                  <BookOpen className="h-8 w-8 text-[#5647a5] sm:h-14 sm:w-14" />
                 </div>
                 <div className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#d48c49] to-[#bb6c29] p-2 shadow-2xl sm:h-52 sm:w-52 sm:p-3">
                   <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#f8d5aa] text-center text-base font-extrabold uppercase text-white sm:text-2xl">
@@ -829,7 +967,11 @@ export default function UttarakhandMilletProjectLandingPage() {
             {components.map((item, idx) => (
               <div key={item.title} className={`grid items-center gap-6 sm:gap-10 ${idx % 2 === 0 ? "lg:grid-cols-[minmax(260px,380px)_1fr]" : "lg:grid-cols-[1fr_minmax(260px,380px)]"}`}>
                 {idx % 2 === 0 ? (
-                  <SoftImage label={`${item.title} / Image`} className="min-h-[220px] sm:min-h-[320px]" />
+                  <SoftImage
+                    label={`${item.title} image`}
+                    src={contentImageSources[(idx + 1) % contentImageSources.length]}
+                    className="min-h-[220px] sm:min-h-[320px]"
+                  />
                 ) : null}
 
                 <div className="py-2 sm:py-4">
@@ -848,7 +990,11 @@ export default function UttarakhandMilletProjectLandingPage() {
                 </div>
 
                 {idx % 2 !== 0 ? (
-                  <SoftImage label={`${item.title} / Image`} className="min-h-[220px] sm:min-h-[320px]" />
+                  <SoftImage
+                    label={`${item.title} image`}
+                    src={contentImageSources[(idx + 1) % contentImageSources.length]}
+                    className="min-h-[220px] sm:min-h-[320px]"
+                  />
                 ) : null}
               </div>
             ))}
@@ -1014,6 +1160,276 @@ export default function UttarakhandMilletProjectLandingPage() {
           </div>
         </div>
       </section>
+
+      <footer style={{ background: "#0d4136", color: "#ffffff" }} className="w-full mt-0">
+        {/* --- TOP BAR: Logos + Branding --- */}
+        <div style={{ borderBottom: "1px solid #2e5a3d" }} className="px-6 py-8 sm:px-10">
+          <div className="flex flex-wrap items-center gap-5 mb-3">
+            <img
+              src="/topbarlogo.png"
+              alt="Uttarakhand Millet Project"
+              className="h-14 w-auto max-w-[220px] object-contain"
+            />
+            <img
+              src="/logo2.png"
+              alt="Agriculture Department Uttarakhand"
+              className="h-14 w-auto object-contain"
+            />
+            <img
+              src="/logo1.png"
+              alt="Ministry of Agriculture and Farmers Welfare"
+              className="h-14 w-auto max-w-[180px] object-contain"
+            />
+            <div style={{ borderLeft: "2px solid #4a8c5c" }} className="pl-4 ml-1">
+              <p style={{ color: "#ffffff" }} className="text-[15.68px] font-semibold leading-snug">
+                Government of Uttarakhand<br />
+                Department of Agriculture &amp; Horticulture
+              </p>
+            </div>
+          </div>
+          <p style={{ color: "#ffffff" }} className="text-[13.44px] italic">
+            Millet Development Programme — Digital Management Information System
+          </p>
+        </div>
+
+        {/* --- MAIN GRID: 4 columns --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Column 1: Contact */}
+          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+            <p
+              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
+            >
+              Contact Us
+            </p>
+
+            {/* Helpline badge */}
+            <div
+              style={{ background: "#1b7039", border: "1px solid #3d7050" }}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 mb-4"
+            >
+              <Phone size={14} style={{ color: "#9fd47a", flexShrink: 0 }} />
+              <div>
+                <p style={{ color: "#ffffff" }} className="text-[10.08px] uppercase tracking-widest">
+                  Kisan Helpline
+                </p>
+                <p style={{ color: "#ffffff" }} className="text-[15.68px] font-semibold tracking-wide">
+                  1800 180 1551
+                </p>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="flex items-start gap-2 mb-3">
+              <MapPin size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 3 }} />
+              <p style={{ color: "#ffffff" }} className="text-[13.44px] leading-relaxed">
+                Directorate of Agriculture (Uttarakhand)<br />
+                Krishi Bhawan, Nanda-Ki-Chowki,<br />
+                Premnagar, Dehradun — 248007
+              </p>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-start gap-2 mb-3">
+              <Phone size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 2 }} />
+              <div>
+                <p style={{ color: "#ffffff" }} className="text-[13.44px]">
+                  0135-2972421 / 2972422
+                </p>
+                <p style={{ color: "#ffffff" }} className="text-[11.2px]">
+                  Fax: 2972425
+                </p>
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="flex items-start gap-2">
+              <Mail size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 2 }} />
+              <div>
+                <a
+                  href="mailto:dir-agri-ua@nic.in"
+                  style={{ color: "#ffffff" }}
+                  className="text-[13.44px] block hover:underline"
+                >
+                  dir-agri-ua@nic.in
+                </a>
+                <a
+                  href="mailto:dir.agri.uttarakhand@gmail.com"
+                  style={{ color: "#ffffff" }}
+                  className="text-[13.44px] block hover:underline"
+                >
+                  dir.agri.uttarakhand@gmail.com
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+            <p
+              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
+            >
+              Quick Links
+            </p>
+            <ul className="space-y-2">
+              {[
+                ["Login", "/login"],
+                ["Contact", "/contact"],
+                ["Disclaimer", "/disclaimer"],
+                ["FAQ", "/faq"],
+                ["About", "/about-programme"],
+                ["Sitemap", "/sitemap"],
+              ].map(([label, href]) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span style={{ background: "#4a8c5c" }} className="w-1 h-1 rounded-full flex-shrink-0" />
+                  <Link
+                    to={href}
+                    style={{ color: "#ffffff" }}
+                    className="text-[13.44px] hover:text-[#ffffff] transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Important Links */}
+          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+            <p
+              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
+            >
+              Important Links
+            </p>
+            <ul className="space-y-2">
+              {[
+                ["india.gov.in", "https://india.gov.in"],
+                ["uk.gov.in", "https://uk.gov.in"],
+                ["agriculture.uk.gov.in", "https://agriculture.uk.gov.in"],
+                ["agricoop.nic.in", "https://agricoop.nic.in"],
+                ["mkisan.gov.in", "https://mkisan.gov.in"],
+              ].map(([label, href]) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span style={{ background: "#4a8c5c" }} className="w-1 h-1 rounded-full flex-shrink-0" />
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#ffffff" }}
+                    className="text-[13.44px] hover:text-[#ffffff] transition-colors"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Connect + Visitor Counter */}
+          <div className="p-6 sm:p-7">
+            <p
+              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
+            >
+              Connect
+            </p>
+
+            {/* Social icons */}
+            <div className="flex gap-2 flex-wrap mb-5">
+              {[
+                [Globe, "Facebook"],
+                [Send, "X / Twitter"],
+                [Camera, "Instagram"],
+                [Video, "YouTube"],
+              ].map(([Icon, label]) => (
+                <button
+                  key={label}
+                  type="button"
+                  title={label}
+                  aria-label={label}
+                  style={{ background: "#2e5a3d", border: "1px solid #3d7050" }}
+                  className="w-9 h-9 rounded-md flex items-center justify-center hover:bg-[#3d7050] transition-colors"
+                >
+                  <Icon size={15} style={{ color: "#9fd47a" }} />
+                </button>
+              ))}
+            </div>
+
+            {/* Visitor counter */}
+            <div style={{ background: "#152f20", border: "1px solid #2e5a3d" }} className="rounded-lg px-4 py-3">
+              <p style={{ color: "#ffffff" }} className="text-[11.2px] uppercase tracking-widest mb-1">
+                Visitors
+              </p>
+              <p style={{ color: "#ffffff" }} className="text-[22.4px] font-semibold tracking-wide tabular-nums">
+                {visitorCount.toLocaleString("en-IN")}
+              </p>
+              <p style={{ color: "#ffffff" }} className="text-[11.2px] mt-1">
+                Last updated: {lastUpdated}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* --- BOTTOM BAR --- */}
+        <div
+          style={{ background: "#122a1d", borderTop: "1px solid #2e5a3d" }}
+          className="px-6 py-4 sm:px-10 flex flex-wrap items-center justify-between gap-3"
+        >
+          <p style={{ color: "#ffffff" }} className="text-[13.44px]">
+            &copy; {currentYear} Government of Uttarakhand — Department of Agriculture &amp; Horticulture. All rights
+            reserved.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            {footerInformation.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => setActiveFooterTopic(item.title)}
+                style={{ color: "#ffffff" }}
+                className="text-left text-[12.32px] hover:text-[#ffffff] hover:underline transition-colors"
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {activeFooterDetails ? (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="footer-info-title"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 px-4 py-6"
+            onClick={() => setActiveFooterTopic(null)}
+          >
+            <div
+              className="max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 text-slate-900 shadow-2xl sm:p-7"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <h2 id="footer-info-title" className="text-2xl font-extrabold text-[#0d4136]">
+                  {activeFooterDetails.title}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setActiveFooterTopic(null)}
+                  className="rounded-md border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  Close
+                </button>
+              </div>
+              <p className="mb-4 text-base leading-7 text-slate-700">{activeFooterDetails.intro}</p>
+              <ul className="list-disc space-y-3 pl-5 text-base leading-7 text-slate-700">
+                {activeFooterDetails.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : null}
+      </footer>
     </div>
   );
 }
