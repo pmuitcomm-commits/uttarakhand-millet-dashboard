@@ -15,6 +15,9 @@ from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from dotenv import load_dotenv
 from sqlalchemy import text
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 from .database import engine, Base
 from .rate_limit import limiter
@@ -30,6 +33,61 @@ from .routes.monitoring import router as monitoring_router
 load_dotenv()
 
 app = FastAPI()
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "img-src 'self' data: "
+            "https://images.unsplash.com "
+            "https://static.pib.gov.in "
+            "https://nfsm.gov.in "
+            "https://cdnbbsr.s3waas.gov.in "
+            "https://www.pib.gov.in "
+            "https://pmfby.gov.in "
+            "https://india.gov.in "
+            "https://uk.gov.in "
+            "https://agriculture.uk.gov.in "
+            "https://agricoop.nic.in "
+            "https://mkisan.gov.in; "
+            "font-src 'self' data: https://fonts.gstatic.com; "
+            "connect-src 'self' "
+            "https://uttarakhand-millet-dashboard.onrender.com "
+            "https://images.unsplash.com "
+            "https://static.pib.gov.in "
+            "https://nfsm.gov.in "
+            "https://cdnbbsr.s3waas.gov.in "
+            "https://www.pib.gov.in "
+            "https://pmfby.gov.in "
+            "https://india.gov.in "
+            "https://uk.gov.in "
+            "https://agriculture.uk.gov.in "
+            "https://agricoop.nic.in "
+            "https://mkisan.gov.in;"
+        )
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Frontend origins allowed to call this API. Keep this list narrow in
+# production so browser-based access is restricted to approved MIS hosts.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://uttarakhand-millet-dashboard.onrender.com"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+)
 
 
 @app.get("/health")
@@ -48,23 +106,6 @@ def readiness_check():
             status_code=503,
             content={"status": "not_ready", "database": "disconnected"},
         )
-
-
-# Frontend origins allowed to call this API. Keep this list narrow in
-# production so browser-based access is restricted to approved MIS hosts.
-allowed_origins = [
-    "https://uttarakhand-millet-dashboard.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 @app.on_event("startup")
