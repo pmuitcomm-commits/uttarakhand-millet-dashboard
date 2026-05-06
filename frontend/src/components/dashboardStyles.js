@@ -13,19 +13,19 @@ export const dashboardClasses = {
     "flex min-h-0 flex-1 gap-4 overflow-hidden bg-white text-[#024b37] max-[900px]:flex-col max-[900px]:gap-3 dark:bg-[#1a1a1a] dark:text-white",
   mainContent:
     "flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-y-auto bg-white p-0 max-[900px]:p-3 max-[640px]:p-2 dark:bg-[#1a1a1a] dark:text-white",
-  pageHeadingRow: "mb-5 p-4 text-center max-[640px]:mb-3 max-[640px]:p-3",
+  pageHeadingRow: "mb-5 shrink-0 p-4 text-center max-[640px]:mb-3 max-[640px]:p-3",
   pageHeadingTitle: "m-0 break-words text-[1.8rem] font-bold text-black max-[640px]:text-[1.35rem] dark:text-white",
   metricsRow:
-    "mb-3 grid grid-cols-[repeat(4,minmax(0,1fr))] gap-3 p-2 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[640px]:mb-3 max-[640px]:grid-cols-1 max-[640px]:gap-3 max-[640px]:p-2",
+    "mb-3 grid shrink-0 grid-cols-[repeat(4,minmax(0,1fr))] gap-3 p-2 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[640px]:mb-3 max-[640px]:grid-cols-1 max-[640px]:gap-3 max-[640px]:p-2",
   metricValue:
     "mb-1.5 block min-w-0 break-words text-[1.65rem] font-extrabold leading-tight text-inherit transition-transform duration-300 group-hover:scale-105 max-[640px]:text-[1.35rem]",
   metricLabel: "min-w-0 break-words text-[0.82rem] font-semibold leading-snug text-inherit opacity-90 max-[640px]:text-[0.78rem]",
   chartRow:
-    "mb-6 grid grid-cols-[repeat(3,minmax(0,1fr))] gap-5 p-4 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:grid-cols-1 max-[640px]:mb-4 max-[640px]:gap-3 max-[640px]:p-2",
+    "mb-6 grid shrink-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-5 p-4 max-[1280px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:grid-cols-1 max-[640px]:mb-4 max-[640px]:gap-3 max-[640px]:p-2",
   chartCard:
     "min-h-[330px] min-w-0 overflow-hidden rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-card max-[640px]:min-h-[280px] max-[640px]:rounded-xl max-[640px]:p-3 dark:border-[#444444] dark:bg-[#2a2a2a] dark:text-white",
   tableCard:
-    "mx-4 mb-4 min-w-0 overflow-hidden rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-card max-[640px]:mx-2 max-[640px]:rounded-xl max-[640px]:p-3 dark:border-[#444444] dark:bg-[#2a2a2a] dark:text-white",
+    "mx-4 mb-4 min-w-0 shrink-0 rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-card max-[640px]:mx-2 max-[640px]:rounded-xl max-[640px]:p-3 dark:border-[#444444] dark:bg-[#2a2a2a] dark:text-white",
   selectorWrapper: "mt-4 max-[640px]:mt-3",
   selector:
     "min-w-[200px] cursor-pointer rounded-lg border-2 border-[#024b37] bg-white px-4 py-2.5 text-base font-medium text-[#024b37] transition-all duration-300 hover:border-[#034d3a] hover:shadow-[0_2px_8px_rgba(2,75,55,0.15)] focus:border-[#034d3a] focus:outline-none focus:ring-4 focus:ring-[#024b37]/10 max-[640px]:w-full max-[640px]:min-w-0",
