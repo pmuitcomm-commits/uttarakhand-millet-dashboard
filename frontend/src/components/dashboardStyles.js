@@ -33,14 +33,17 @@ export const dashboardClasses = {
   dashboardNotice:
     "mb-5 rounded border border-red-200 bg-red-50 p-[15px] text-red-700",
   sidebar:
-    "relative left-0 top-0 z-20 flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden border-r border-[rgba(102,185,172,0.2)] bg-[#024b37] px-[18px] py-[26px] text-white max-[900px]:h-auto max-[900px]:max-h-[40vh] max-[900px]:w-full max-[900px]:border-b max-[900px]:border-r-0 max-[900px]:px-3 max-[900px]:py-3",
-  sidebarLogo: "mb-[35px] shrink-0 text-center max-[900px]:mb-3 max-[900px]:text-left",
-  sidebarLogoTitle: "m-0 text-xl font-bold text-white",
-  sidebarLogoText: "mt-1.5 text-[0.87rem] text-white/75",
+    "relative left-0 top-0 z-20 flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden border-r border-[rgba(102,185,172,0.2)] bg-[#024b37] px-[18px] py-[clamp(0.75rem,2.6vh,1.625rem)] text-white max-[900px]:h-auto max-[900px]:w-full max-[900px]:border-b max-[900px]:border-r-0 max-[900px]:px-3 max-[900px]:py-3",
+  sidebarLogo:
+    "mb-[clamp(0.75rem,3vh,2.1875rem)] shrink-0 text-center max-[900px]:mb-3 max-[900px]:text-left",
+  sidebarLogoTitle:
+    "m-0 text-[clamp(1rem,2.2vh,1.25rem)] font-bold text-white",
+  sidebarLogoText:
+    "mt-1.5 text-[clamp(0.72rem,1.4vh,0.87rem)] text-white/75",
   sidebarNav:
-    "flex min-h-0 flex-1 flex-col overflow-y-auto pr-1 [scrollbar-gutter:stable] max-[900px]:flex-row max-[900px]:gap-2 max-[900px]:overflow-x-auto max-[900px]:overflow-y-hidden max-[900px]:pr-0",
+    "flex min-h-0 flex-1 flex-col gap-[clamp(0.25rem,0.9vh,0.625rem)] overflow-visible max-[900px]:flex-row max-[900px]:flex-wrap max-[900px]:gap-2",
   sidebarLink:
-    "mb-2.5 block shrink-0 rounded-xl px-4 py-3.5 font-semibold text-white/95 no-underline transition duration-200 hover:translate-x-[3px] hover:bg-[#66b9ac] max-[900px]:mb-0 max-[900px]:whitespace-nowrap max-[900px]:px-3 max-[900px]:py-2.5 max-[900px]:text-sm max-[900px]:hover:translate-x-0",
+    "block rounded-xl px-[clamp(0.75rem,1.3vw,1rem)] py-[clamp(0.4rem,1.15vh,0.875rem)] text-[clamp(0.78rem,1.45vh,1rem)] font-semibold leading-tight text-white/95 no-underline transition duration-200 hover:translate-x-[3px] hover:bg-[#66b9ac] max-[900px]:whitespace-nowrap max-[900px]:px-3 max-[900px]:py-2.5 max-[900px]:text-sm max-[900px]:hover:translate-x-0",
 };
 
 // Metric tone classes provide repeatable color rotation for KPI cards while
