@@ -21,7 +21,7 @@ function MilletChart({ data }) {
     labels: data.map((m) => m.millet),
     datasets: [
       {
-        label: "Production (Tons)",
+        label: "Production",
         data: data.map((m) => m.production),
         backgroundColor: [
           '#228B22',

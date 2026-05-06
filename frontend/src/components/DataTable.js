@@ -5,7 +5,8 @@
  * officers and public users receive consistent tabular formatting.
  */
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 // Tailwind utility composition for action buttons, including disabled states
 // and compact max-[480px] sizing for mobile audit/review devices.
@@ -24,6 +25,56 @@ function pageButtonClassName(active) {
     : tableButtonBase;
 }
 
+function parseSortableNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : Number(String(value).replace(/,/g, "").trim());
+
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function compareTableValues(leftValue, rightValue) {
+  const leftMissing = leftValue === null || leftValue === undefined || leftValue === "";
+  const rightMissing = rightValue === null || rightValue === undefined || rightValue === "";
+
+  if (leftMissing && rightMissing) return 0;
+  if (leftMissing) return 1;
+  if (rightMissing) return -1;
+
+  const leftNumber = parseSortableNumber(leftValue);
+  const rightNumber = parseSortableNumber(rightValue);
+
+  if (leftNumber !== null && rightNumber !== null) {
+    return leftNumber - rightNumber;
+  }
+
+  return String(leftValue).localeCompare(String(rightValue), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
+function SortIcon({ active, direction }) {
+  const iconClassName = active
+    ? "h-3.5 w-3.5 shrink-0 text-[#024b37] dark:text-white"
+    : "h-3.5 w-3.5 shrink-0 text-[#718096] dark:text-[#a8b3c2]";
+
+  if (!active) {
+    return <ArrowUpDown aria-hidden="true" className={iconClassName} strokeWidth={2.4} />;
+  }
+
+  if (direction === "asc") {
+    return <ArrowUp aria-hidden="true" className={iconClassName} strokeWidth={2.4} />;
+  }
+
+  return <ArrowDown aria-hidden="true" className={iconClassName} strokeWidth={2.4} />;
+}
+
 /**
  * DataTable - Display an array of MIS records with optional pagination.
  *
@@ -36,24 +87,53 @@ function pageButtonClassName(active) {
  */
 function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState({ column: null, direction: "asc" });
 
   const safeRecordsPerPage =
     Number.isFinite(recordsPerPage) && recordsPerPage > 0
       ? recordsPerPage
       : Math.max(data?.length || 0, 1);
   const columns = data?.length > 0 ? Object.keys(data[0]) : [];
-  const totalPages = Math.max(Math.ceil((data?.length || 0) / safeRecordsPerPage), 1);
+  const sortedData = useMemo(() => {
+    const rows = [...(data || [])];
+
+    if (!sortConfig.column) {
+      return rows;
+    }
+
+    rows.sort((left, right) => {
+      const comparison = compareTableValues(left[sortConfig.column], right[sortConfig.column]);
+      return sortConfig.direction === "asc" ? comparison : -comparison;
+    });
+
+    return rows;
+  }, [data, sortConfig]);
+
+  const totalPages = Math.max(Math.ceil(sortedData.length / safeRecordsPerPage), 1);
 
   const startIndex = (currentPage - 1) * safeRecordsPerPage;
   const endIndex = startIndex + safeRecordsPerPage;
   const currentData =
-    safeRecordsPerPage >= (data?.length || 0) ? data || [] : data?.slice(startIndex, endIndex) || [];
+    safeRecordsPerPage >= sortedData.length ? sortedData : sortedData.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
   const handlePageChange = (page) => {
     // Guard against invalid page indexes from repeated clicks or stale UI state.
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const handleSort = (column) => {
+    setSortConfig((currentSort) => ({
+      column,
+      direction:
+        currentSort.column === column && currentSort.direction === "asc" ? "desc" : "asc",
+    }));
+    setCurrentPage(1);
   };
 
   return (
@@ -66,7 +146,7 @@ function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
         <h2 className="m-0 break-words text-[1.2rem] font-bold text-[#024b37] max-[480px]:text-base dark:text-white">{title}</h2>
         {totalPages > 1 && (
           <div className="text-sm font-medium text-[#666666] dark:text-[#cccccc]">
-            Showing {startIndex + 1} - {Math.min(endIndex, data.length)} of {data.length}
+            Showing {startIndex + 1} - {Math.min(endIndex, sortedData.length)} of {sortedData.length}
           </div>
         )}
       </div>
@@ -78,9 +158,27 @@ function DataTable({ data, title = "Detailed Data", recordsPerPage = 100 }) {
                 {columns.map((column) => (
                   <th
                     key={column}
+                    aria-sort={
+                      sortConfig.column === column
+                        ? sortConfig.direction === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
                     className="whitespace-nowrap border border-[#e2e8f0] bg-[#f5f5f5] px-4 py-3 text-left text-[0.85rem] font-bold uppercase text-[#003366] dark:border-[#444444] dark:bg-[#1a1a1a] dark:text-white"
                   >
-                    {column}
+                    <button
+                      aria-label={`Sort by ${column}`}
+                      className="flex w-full min-w-max items-center justify-between gap-2 border-0 bg-transparent p-0 text-left text-[inherit]"
+                      onClick={() => handleSort(column)}
+                      type="button"
+                    >
+                      <span>{column}</span>
+                      <SortIcon
+                        active={sortConfig.column === column}
+                        direction={sortConfig.direction}
+                      />
+                    </button>
                   </th>
                 ))}
               </tr>

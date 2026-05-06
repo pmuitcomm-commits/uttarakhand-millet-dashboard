@@ -1030,6 +1030,8 @@ function Dashboard({ page = "dashboard" }) {
     return "Production Overview";
   };
 
+  const tableRows = getTableData();
+
   return (
     <div className={dashboardClasses.pageWrapper}>
       <div className={dashboardClasses.dashboardContainer}>
@@ -1085,7 +1087,8 @@ function Dashboard({ page = "dashboard" }) {
 
           <div className={dashboardClasses.tableCard} data-aos="fade-up" data-aos-delay="300">
             <DataTable
-              data={getTableData()}
+              data={tableRows}
+              recordsPerPage={Math.max(tableRows.length, 1)}
               title={getTableTitle()}
             />
           </div>
