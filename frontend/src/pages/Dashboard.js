@@ -2,11 +2,10 @@
  * Dashboard page module - Production, district, millet, and overview analytics.
  *
  * This module builds Chart.js datasets, map models, KPI metrics, and data
- * tables for the public Millet MIS dashboards. It uses live API data when
- * available and page-local fallback data for the broader overview page.
+ * tables for the public Millet MIS dashboards using API-provided data.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,7 +25,6 @@ import MilletChart from "../components/MilletChart";
 import DataTable from "../components/DataTable";
 import { dashboardClasses, metricCardClassName } from "../components/dashboardStyles";
 import { useLanguage } from "../context/LanguageContext";
-import { uttarakhandDistricts } from "../data/districts";
 import {
   CardInsight,
   ChartFrame,
@@ -51,9 +49,9 @@ import {
   enterpriseTypes,
   enterpriseYears,
   getCropDemonstrationRows,
+  getOverviewFinancialYears,
+  getOverviewSeasons,
   milletDemonstrationProgress,
-  overviewFinancialYears,
-  overviewSeasons,
   ragiProcurementProgress,
 } from "./overviewDashboardData";
 import { useProductionDashboardData } from "./useProductionDashboardData";
@@ -68,6 +66,15 @@ ChartJS.register(
   Legend,
   Filler
 );
+
+function uniqueSorted(values) {
+  return [...new Set(values.filter(Boolean))].sort();
+}
+
+function getMilletLabel(record) {
+  if (!record) return "";
+  return record.millet || record.millet_name || record.crop || record.millet_id?.toString() || "";
+}
 
 /**
  * Dashboard - Render the selected Millet MIS analytics page.
@@ -94,9 +101,9 @@ function Dashboard({ page = "dashboard" }) {
   } = useProductionDashboardData(page);
   const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [selectedMillet, setSelectedMillet] = useState("all");
-  const [selectedFinancialYear, setSelectedFinancialYear] = useState("2025-26");
-  const [selectedSeason, setSelectedSeason] = useState("All Seasons");
-  const [selectedEnterpriseYear, setSelectedEnterpriseYear] = useState("2025-26");
+  const [selectedFinancialYear, setSelectedFinancialYear] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState("");
+  const [selectedEnterpriseYear, setSelectedEnterpriseYear] = useState("");
   const [selectedEnterpriseDistrict, setSelectedEnterpriseDistrict] = useState("all");
   const [enterpriseSearch, setEnterpriseSearch] = useState("");
 
@@ -106,6 +113,44 @@ function Dashboard({ page = "dashboard" }) {
     district: t('districtAnalysisTitle'),
     millet: t('milletAnalysisTitle'),
   };
+
+  const districtOptions = useMemo(
+    () =>
+      uniqueSorted(
+        [...districtData, ...tableData].map((record) => record.district)
+      ),
+    [districtData, tableData]
+  );
+
+  const milletOptions = useMemo(
+    () =>
+      uniqueSorted(
+        [...milletData, ...tableData].map((record) => getMilletLabel(record))
+      ),
+    [milletData, tableData]
+  );
+
+  const overviewFinancialYears = useMemo(
+    () => getOverviewFinancialYears(tableData),
+    [tableData]
+  );
+
+  const overviewSeasons = useMemo(
+    () => getOverviewSeasons(tableData),
+    [tableData]
+  );
+
+  useEffect(() => {
+    if (!selectedFinancialYear && overviewFinancialYears.length) {
+      setSelectedFinancialYear(overviewFinancialYears[0]);
+    }
+  }, [overviewFinancialYears, selectedFinancialYear]);
+
+  useEffect(() => {
+    if (!selectedSeason && overviewSeasons.length) {
+      setSelectedSeason(overviewSeasons[0]);
+    }
+  }, [overviewSeasons, selectedSeason]);
 
   // Filter data based on selected district for district analysis.
   const filteredDistrictData = selectedDistrict === "all" 
@@ -119,9 +164,7 @@ function Dashboard({ page = "dashboard" }) {
   // Filter data based on selected millet for crop analysis.
   const filteredMilletData = selectedMillet === "all"
     ? milletData
-    : milletData.filter(item => item.millet === selectedMillet);
-
-  const milletVarieties = ["Mandua", "Jhangora", "Ramdana", "Cheena", "Kauni"];
+    : milletData.filter(item => getMilletLabel(item) === selectedMillet);
 
   const cropDemoRows = useMemo(
     () => getCropDemonstrationRows(tableData, selectedFinancialYear, selectedSeason),
@@ -341,12 +384,16 @@ function Dashboard({ page = "dashboard" }) {
     formatter: (value) => formatCompactNumber(value),
   };
 
-  const ragiPeak = ragiProcurementProgress.reduce((peak, row) =>
-    row.quantityProcured > peak.quantityProcured ? row : peak
-  );
-  const ragiDip = ragiProcurementProgress.reduce((dip, row) =>
-    row.quantityProcured < dip.quantityProcured ? row : dip
-  );
+  const ragiPeak = ragiProcurementProgress.length
+    ? ragiProcurementProgress.reduce((peak, row) =>
+        row.quantityProcured > peak.quantityProcured ? row : peak
+      )
+    : null;
+  const ragiDip = ragiProcurementProgress.length
+    ? ragiProcurementProgress.reduce((dip, row) =>
+        row.quantityProcured < dip.quantityProcured ? row : dip
+      )
+    : null;
 
   const infrastructureChartData = {
     labels: chcCmscProgress.map((row) => row.district),
@@ -623,7 +670,7 @@ function Dashboard({ page = "dashboard" }) {
                       onChange={setSelectedEnterpriseDistrict}
                     >
                       <option value="all">All Districts</option>
-                      {uttarakhandDistricts.map((district) => (
+                      {districtOptions.map((district) => (
                         <option key={district} value={district}>
                           {district}
                         </option>
@@ -714,17 +761,18 @@ function Dashboard({ page = "dashboard" }) {
   const totalProduction = page === "district" 
     ? (dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0)).toFixed(2)
     : kpis.total_production || 0;
-  const totalTarget = Math.max(Math.round(totalProduction * 1.8), 10000);
-  const totalCentres = Math.max(districtData.length * 12, 210);
-  const totalFarmers = 11837;
+  const totalProductionNumber = Number(totalProduction) || 0;
+  const totalTarget = kpis.total_target || 0;
+  const totalCentres = kpis.total_centres || 0;
+  const totalFarmers = kpis.total_farmers || 0;
   const avgProcurement = dataForMetrics.length
     ? (
         dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0) /
         dataForMetrics.length
       ).toFixed(2)
     : 0;
-  const pvtAgencies = Math.round(totalProduction * 0.05);
-  const cropCoverage = 1;
+  const pvtAgencies = kpis.pvt_agencies_procurement || kpis.pvt_agencies || 0;
+  const cropCoverage = kpis.crop_coverage || kpis.total_millets || 0;
 
   const avgDistrictProduction = dataForMetrics.length
     ? (
@@ -754,8 +802,8 @@ function Dashboard({ page = "dashboard" }) {
       dataForMilletMetrics[0])
     : null;
 
-  const topMilletShare = topMilletItem && totalProduction
-    ? ((topMilletItem.production / totalProduction) * 100).toFixed(2)
+  const topMilletShare = topMilletItem && totalProductionNumber
+    ? ((topMilletItem.production / totalProductionNumber) * 100).toFixed(2)
     : "0";
 
   const avgMilletProduction = page === "millet" && filteredMilletData.length
@@ -771,7 +819,7 @@ function Dashboard({ page = "dashboard" }) {
         label: "Procurement %",
         data: dataForMetrics.map((d) => {
           const value = d.production || 0;
-          return totalProduction ? Math.min((value / totalProduction) * 100, 100) : 0;
+          return totalProductionNumber ? Math.min((value / totalProductionNumber) * 100, 100) : 0;
         }),
         borderColor: "#88ce99",
         backgroundColor: "rgba(136, 206, 153, 0.24)",
@@ -846,7 +894,7 @@ function Dashboard({ page = "dashboard" }) {
       { label: t('cropCoverage'), value: cropCoverage },
     ],
     district: [
-      { label: t('totalDistricts'), value: uttarakhandDistricts.length },
+      { label: t('totalDistricts'), value: kpis.total_districts || districtOptions.length },
       { label: t('totalProduction'), value: totalProduction },
       { label: t('avgDistrictProd'), value: avgDistrictProduction },
       {
@@ -970,7 +1018,7 @@ function Dashboard({ page = "dashboard" }) {
     if (page === "millet") {
       return selectedMillet === "all" 
         ? tableData 
-        : tableData.filter(item => item.millet === selectedMillet);
+        : tableData.filter(item => getMilletLabel(item) === selectedMillet);
     }
     return tableData;
   };
@@ -998,7 +1046,7 @@ function Dashboard({ page = "dashboard" }) {
                   className={dashboardClasses.selector}
                 >
                   <option value="all">All Districts</option>
-                  {uttarakhandDistricts.map((district) => (
+                  {districtOptions.map((district) => (
                     <option key={district} value={district}>
                       {district}
                     </option>
@@ -1014,7 +1062,7 @@ function Dashboard({ page = "dashboard" }) {
                   className={dashboardClasses.selector}
                 >
                   <option value="all">All Millets</option>
-                  {milletVarieties.map((millet) => (
+                  {milletOptions.map((millet) => (
                     <option key={millet} value={millet}>
                       {millet}
                     </option>

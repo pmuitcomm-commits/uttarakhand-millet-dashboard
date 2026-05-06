@@ -36,7 +36,7 @@ function DistrictReportsSection() {
 }
 
 /**
- * DistrictDashboard - Render the district officer dashboard placeholder.
+ * DistrictDashboard - Render the district officer dashboard shell.
  *
  * @component
  * @returns {React.ReactElement} District officer dashboard view.
@@ -53,15 +53,6 @@ function DistrictDashboard() {
       requiredRole="district"
       title="District Officer Dashboard"
       summary={(user) => `District: ${user?.district || "Not assigned"}`}
-      featureTitle="District Officer Features:"
-      features={(user) => [
-        `✓ Manage block officers in ${user?.district || "your district"}`,
-        "✓ View district-wise procurement data",
-        "✓ View district-wise production data",
-        "✓ Manage farmers in the district",
-        "✓ Generate district reports",
-        "✓ Monitor block officer activities",
-      ]}
     />
   );
 }

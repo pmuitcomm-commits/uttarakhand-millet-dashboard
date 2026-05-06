@@ -151,7 +151,7 @@ export function buildRegionalProcurementChart(procurementData) {
 
       return acc;
     },
-    { Garhwal: 4324.47, Kumaon: 1061.55 }
+    { Garhwal: 0, Kumaon: 0 }
   );
 
   return {

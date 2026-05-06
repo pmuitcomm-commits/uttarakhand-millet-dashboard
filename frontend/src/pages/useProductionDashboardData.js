@@ -22,6 +22,20 @@ function withDistrictName(record) {
   };
 }
 
+function withMilletLabel(record) {
+  const millet =
+    record.millet ||
+    record.millet_name ||
+    record.crop ||
+    record.millet_id?.toString() ||
+    "";
+
+  return {
+    ...record,
+    millet,
+  };
+}
+
 export function useProductionDashboardData(page) {
   const [kpis, setKpis] = useState({});
   const [districtData, setDistrictData] = useState([]);
@@ -44,13 +58,13 @@ export function useProductionDashboardData(page) {
         setDistrictData((districtRes.data || []).map(withDistrictName));
 
         const milletRes = await getMilletProduction();
-        setMilletData(milletRes.data);
+        setMilletData((milletRes.data || []).map(withMilletLabel));
 
         const tableRes = await getAllProduction();
-        setTableData((tableRes.data || []).map(withDistrictName));
+        setTableData((tableRes.data || []).map((record) => withMilletLabel(withDistrictName(record))));
       } catch {
         setTableData([]);
-        setDataNotice("Live production data is unavailable. Showing page-local placeholder data where needed.");
+        setDataNotice("Live production data is unavailable.");
       } finally {
         setLoading(false);
       }

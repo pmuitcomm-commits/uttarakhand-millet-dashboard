@@ -1,5 +1,5 @@
 /**
- * RoleDashboard component - Shared layout for officer dashboard placeholders.
+ * RoleDashboard component - Shared layout for officer dashboard pages.
  */
 
 import React, { useEffect } from "react";
@@ -9,9 +9,10 @@ import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
 import { dashboardClasses } from "./dashboardStyles";
 
-function RoleDashboard({ requiredRole, title, summary, featureTitle, features }) {
+function RoleDashboard({ requiredRole, title, summary, featureTitle, features = () => [] }) {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const featureItems = features(user);
 
   useEffect(() => {
     if (isAuthenticated && user?.role !== requiredRole) {
@@ -35,14 +36,16 @@ function RoleDashboard({ requiredRole, title, summary, featureTitle, features })
               </h3>
               <p className="mt-2 text-[#4a5568] dark:text-slate-200">{summary(user)}</p>
 
-              <div className="mx-auto mt-[30px] max-w-[600px] text-left max-[640px]:mt-5">
-                <h4 className="font-semibold text-[#024b37] dark:text-white">{featureTitle}</h4>
-                <ul className="leading-[1.8] text-[#024b37] dark:text-slate-100">
-                  {features(user).map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
+              {featureTitle && featureItems.length ? (
+                <div className="mx-auto mt-[30px] max-w-[600px] text-left max-[640px]:mt-5">
+                  <h4 className="font-semibold text-[#024b37] dark:text-white">{featureTitle}</h4>
+                  <ul className="leading-[1.8] text-[#024b37] dark:text-slate-100">
+                    {featureItems.map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
