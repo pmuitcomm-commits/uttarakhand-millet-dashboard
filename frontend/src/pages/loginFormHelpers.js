@@ -6,8 +6,6 @@ export const LOGIN_METHODS = {
 export const initialLoginFormData = {
   username: "",
   password: "",
-  email: "",
-  fullName: "",
   otpIdentifier: "",
   otpCode: "",
 };
@@ -58,8 +56,8 @@ export function validateOtpForm(formData, otpRequested) {
   return newErrors;
 }
 
-export function validateLoginForm({ formData, isRegistering, loginMethod, otpRequested }) {
-  if (isRegistering || loginMethod === LOGIN_METHODS.PASSWORD) {
+export function validateLoginForm({ formData, loginMethod, otpRequested }) {
+  if (loginMethod === LOGIN_METHODS.PASSWORD) {
     return validatePasswordForm(formData);
   }
 
@@ -70,15 +68,6 @@ export function normalizeAuthUser(user) {
   return {
     ...user,
     role: (user.role || "farmer").toLowerCase(),
-  };
-}
-
-export function buildRegistrationPayload(formData) {
-  return {
-    username: formData.username,
-    password: formData.password,
-    email: formData.email,
-    full_name: formData.fullName.trim() || null,
   };
 }
 

@@ -62,9 +62,6 @@ export const verifyLoginOtp = () => {
   );
 };
 
-export const registerUser = (userData) =>
-  API.post("/auth/register", userData);
-
 export const getCurrentUser = () => API.get("/auth/me");
 
 export const logoutUser = () =>

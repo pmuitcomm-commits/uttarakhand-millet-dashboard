@@ -1,8 +1,8 @@
 /**
- * Login page - Officer authentication and public account creation workflow.
+ * Login page - Officer authentication workflow.
  *
- * The page supports username/password login, a future OTP login UI, farmer-level
- * public account registration, and a placeholder password reset modal.
+ * The page supports username/password login, a future OTP login UI, and a
+ * placeholder password reset modal.
  */
 
 import React, { useState } from "react";
@@ -11,12 +11,10 @@ import ForgotPassword from "../components/ForgotPassword";
 import { authClasses, authInputBase, authInputError } from "../components/authStyles";
 import {
   loginUser,
-  registerUser,
   setAuthSession,
 } from "../services/api";
 import { getPostLoginPath } from "../utils/authNavigation";
 import {
-  buildRegistrationPayload,
   getAuthErrorMessage,
   initialLoginFormData,
   loginNotifications,
@@ -30,7 +28,7 @@ const showComingSoon = () => {
 };
 
 /**
- * Login - Render authentication form for officers and public farmer accounts.
+ * Login - Render authentication form for manually managed officer accounts.
  *
  * This component validates required fields, calls authentication APIs, stores
  * successful sessions, and routes users to role-appropriate landing pages.
@@ -42,7 +40,6 @@ function Login() {
   const [formData, setFormData] = useState(initialLoginFormData);
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
   const [loginMethod, setLoginMethod] = useState(LOGIN_METHODS.PASSWORD);
   const [authError, setAuthError] = useState(null);
   const [authNotice, setAuthNotice] = useState(null);
@@ -95,24 +92,16 @@ function Login() {
     clearFeedback();
   };
 
-  const handleRegistrationToggle = () => {
-    setIsRegistering((current) => !current);
-    setLoginMethod(LOGIN_METHODS.PASSWORD);
-    setOtpRequested(false);
-    clearFeedback();
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isRegistering && loginMethod === LOGIN_METHODS.OTP) {
+    if (loginMethod === LOGIN_METHODS.OTP) {
       showComingSoon();
       return;
     }
 
     const validationErrors = validateLoginForm({
       formData,
-      isRegistering,
       loginMethod,
       otpRequested,
     });
@@ -127,9 +116,7 @@ function Login() {
     try {
       let response;
 
-      if (isRegistering) {
-        response = await registerUser(buildRegistrationPayload(formData));
-      } else if (loginMethod === LOGIN_METHODS.PASSWORD) {
+      if (loginMethod === LOGIN_METHODS.PASSWORD) {
         response = await loginUser(formData.username, formData.password);
       }
 
@@ -141,7 +128,7 @@ function Login() {
     }
   };
 
-  const isOtpLogin = !isRegistering && loginMethod === LOGIN_METHODS.OTP;
+  const isOtpLogin = loginMethod === LOGIN_METHODS.OTP;
 
   return (
     <div className={authClasses.container}>
@@ -171,89 +158,50 @@ function Login() {
           <div className={authClasses.loginCard} data-aos="fade-up" data-aos-delay="150">
             <div className={authClasses.loginHeaderText}>
               <h2 className={authClasses.loginHeading}>
-                {isRegistering ? "Create Account" : "Officers Login"}
+                Officers Login
               </h2>
               <p className={authClasses.loginDescription}>
                 Department of Agriculture & Horticulture, Government of Uttarakhand
               </p>
             </div>
 
-            {!isRegistering && (
-              <div
-                className={authClasses.methodSelector}
-                role="tablist"
-                aria-label="Login method"
+            <div
+              className={authClasses.methodSelector}
+              role="tablist"
+              aria-label="Login method"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={loginMethod === LOGIN_METHODS.PASSWORD}
+                className={`${authClasses.methodTabBase} ${
+                  loginMethod === LOGIN_METHODS.PASSWORD
+                    ? authClasses.methodTabActive
+                    : authClasses.methodTabInactive
+                }`}
+                onClick={() => handleLoginMethodChange(LOGIN_METHODS.PASSWORD)}
               >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={loginMethod === LOGIN_METHODS.PASSWORD}
-                  className={`${authClasses.methodTabBase} ${
-                    loginMethod === LOGIN_METHODS.PASSWORD
-                      ? authClasses.methodTabActive
-                      : authClasses.methodTabInactive
-                  }`}
-                  onClick={() => handleLoginMethodChange(LOGIN_METHODS.PASSWORD)}
-                >
-                  Login with Password
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={loginMethod === LOGIN_METHODS.OTP}
-                  className={`${authClasses.methodTabBase} ${
-                    loginMethod === LOGIN_METHODS.OTP
-                      ? authClasses.methodTabActive
-                      : authClasses.methodTabInactive
-                  }`}
-                  onClick={() => handleLoginMethodChange(LOGIN_METHODS.OTP)}
-                >
-                  Login via OTP
-                </button>
-              </div>
-            )}
+                Login with Password
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={loginMethod === LOGIN_METHODS.OTP}
+                className={`${authClasses.methodTabBase} ${
+                  loginMethod === LOGIN_METHODS.OTP
+                    ? authClasses.methodTabActive
+                    : authClasses.methodTabInactive
+                }`}
+                onClick={() => handleLoginMethodChange(LOGIN_METHODS.OTP)}
+              >
+                Login via OTP
+              </button>
+            </div>
 
             {authError && <div className={authClasses.errorBanner}>Warning: {authError}</div>}
             {authNotice && <div className={authClasses.infoBanner}>{authNotice}</div>}
 
             <form onSubmit={handleSubmit} className={authClasses.loginForm}>
-              {isRegistering && (
-                <>
-                  <div className={authClasses.formGroup}>
-                    <label className={authClasses.formLabel} htmlFor="fullName">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="Enter your full name"
-                      className={`${authInputBase} ${errors.fullName ? authInputError : ""}`}
-                    />
-                    {errors.fullName && (
-                      <span className={authClasses.errorText}>{errors.fullName}</span>
-                    )}
-                  </div>
-
-                  <div className={authClasses.formGroup}>
-                    <label className={authClasses.formLabel} htmlFor="email">
-                      Email (Optional)
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email (optional)"
-                      className={authInputBase}
-                    />
-                  </div>
-                </>
-              )}
-
               {!isOtpLogin ? (
                 <>
                   <div className={authClasses.formGroup}>
@@ -354,24 +302,14 @@ function Login() {
               <button type="submit" className={authClasses.loginButton} disabled={loading}>
                 {loading
                   ? "Please wait..."
-                  : isRegistering
-                    ? "Create Account"
-                    : isOtpLogin
-                      ? "Login via OTP"
-                      : "Login"}
+                  : isOtpLogin
+                    ? "Login via OTP"
+                    : "Login"}
               </button>
             </form>
 
             <div className={authClasses.loginFooter}>
-              <button
-                className={authClasses.registerToggle}
-                onClick={handleRegistrationToggle}
-                type="button"
-              >
-                {isRegistering ? "Already have an account? Login" : "Create account"}
-              </button>
-
-              {!isRegistering && loginMethod === LOGIN_METHODS.PASSWORD && (
+              {loginMethod === LOGIN_METHODS.PASSWORD && (
                 <button
                   className={authClasses.forgotLink}
                   onClick={() => setShowForgotPassword(true)}

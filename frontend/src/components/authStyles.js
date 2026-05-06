@@ -76,8 +76,6 @@ export const authClasses = {
     "mt-1.5 w-full cursor-pointer rounded-xl border-0 bg-[#024b37] px-5 py-[11px] font-lato text-[0.9rem] font-bold text-white shadow-[0_2px_8px_rgba(2,75,55,0.22)] transition duration-200 hover:-translate-y-px hover:bg-[#035e47] hover:shadow-[0_4px_14px_rgba(2,75,55,0.28)] active:translate-y-0 active:bg-[#023628] disabled:cursor-not-allowed disabled:bg-[#a8c4b4] disabled:shadow-none disabled:transform-none",
   loginFooter:
     "mt-2.5 flex flex-col items-center gap-[7px] border-t-[1.5px] border-[#eae6de] pt-3",
-  registerToggle:
-    "w-full cursor-pointer rounded-xl border-[1.5px] border-[#024b37] bg-transparent p-[9px] text-center font-lato text-[0.86rem] font-bold text-[#024b37] transition duration-200 hover:bg-[#024b37] hover:text-white",
   forgotLink:
     "cursor-pointer border-0 bg-transparent text-center font-lato text-[0.82rem] font-bold text-[#024b37] underline underline-offset-2 hover:text-[#035e47]",
 };

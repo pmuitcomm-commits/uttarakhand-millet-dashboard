@@ -409,14 +409,23 @@ const milestones = [
 function SoftImage({ label, src, className = "" }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl border border-[#cfddb4] bg-gradient-to-br from-[#d7e4bb] via-[#eef3db] to-[#ccdca6] shadow-md max-[640px]:rounded-2xl ${className}`}
+      className={`group relative overflow-hidden rounded-lg border border-[#0b4f3a]/15 bg-[#f7f3e8] shadow-[0_24px_70px_rgba(11,79,58,0.16)] ${className}`}
     >
       {src ? (
-        <img src={src} alt={label} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        <>
+          <img
+            src={src}
+            alt={label}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0b4f3a]/35 via-transparent to-transparent" />
+        </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,.7),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,90,44,.08),transparent_30%)]" />
-          <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-slate-600 max-[640px]:min-h-[180px] max-[640px]:p-4 max-[640px]:text-base">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(11,79,58,.14)_25%,transparent_25%),linear-gradient(225deg,rgba(242,181,68,.22)_25%,transparent_25%)] bg-[length:38px_38px]" />
+          <div className="relative flex h-full min-h-[220px] items-center justify-center p-6 text-center text-xl font-semibold text-[#0b4f3a] max-[640px]:min-h-[180px] max-[640px]:p-4 max-[640px]:text-base">
             {label}
           </div>
         </>
@@ -476,8 +485,9 @@ const objectives = [
  */
 function MiniBadge({ children }) {
   return (
-    <div className="w-full rounded-2xl bg-[#2f7f79] px-4 py-3 text-center text-sm font-semibold text-white shadow-md md:text-base">
-      {children}
+    <div className="relative w-full overflow-hidden rounded-lg border border-[#0b4f3a]/15 bg-[#0b4f3a] px-4 py-4 text-center text-sm font-semibold text-[#f7f3e8] shadow-[0_14px_30px_rgba(11,79,58,0.18)] transition duration-300 hover:-translate-y-1 md:text-base">
+      <span className="absolute inset-x-0 top-0 h-1 bg-[#f2b544]" />
+      <span className="relative">{children}</span>
     </div>
   );
 }
@@ -556,29 +566,6 @@ const components = [
 ];
 
 const contentImageSources = ["/1.png", "/4.jpg", "/5.jpg", "/7.jpg", "/8.jpg", "/9.jpg", "/2.png", "/3.png"];
-
-/**
- * SectionTitle - Shared title block for public information sections.
- *
- * @component
- * @param {Object} props - Component properties.
- * @param {string} props.title - Section title.
- * @param {string} props.subtitle - Optional supporting text.
- * @returns {React.ReactElement} Section heading.
- */
-function SectionTitle({ title, subtitle }) {
-  return (
-    <div className="mb-10 text-center max-[640px]:mb-7">
-      <h2 className="break-words text-2xl font-extrabold uppercase tracking-wide text-[#0f5a2c] sm:text-3xl md:text-5xl">
-        {title}
-      </h2>
-      {subtitle ? (
-        <p className="mt-3 text-base text-slate-800 md:text-2xl">{subtitle}</p>
-      ) : null}
-      <div className="mx-auto mt-5 h-px w-full max-w-5xl bg-[#b9c89d]" />
-    </div>
-  );
-}
 
 // UK Millet MIS workflow labels and steps for the implementation flow section.
 
@@ -756,145 +743,142 @@ export default function UttarakhandMilletProjectLandingPage() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-10 sm:py-16 lg:px-1">
-        {/* Center line */}
-        <div className="absolute left-0 right-0 top-1/2 hidden h-[2px] bg-gray-300 xl:block"></div>
-
-        <div className="relative grid gap-4 md:grid-cols-2 xl:flex xl:items-center xl:justify-between">
+      <section className="relative isolate bg-[#f7f3e8] px-4 py-12 sm:py-16 lg:px-8">
+        <div className="absolute inset-x-0 top-0 h-px bg-[#0b4f3a]/10" />
+        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recognitions.map((item, index) => (
-            <div
-              key={index}
-              className={`relative w-full rounded-xl bg-[#deebe6] p-4 text-sm leading-relaxed shadow-sm sm:p-5 xl:w-[200px] xl:p-6 xl:text-base ${
-                index % 2 === 0 ? "xl:-translate-y-16" : "xl:translate-y-16"
-              }`}
+            <article
+              key={item}
+              className="group relative min-h-[190px] animate-slide-in-soft overflow-hidden rounded-lg border border-[#0b4f3a]/10 bg-[#f7f3e8] p-5 shadow-[0_18px_46px_rgba(11,79,58,0.08)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544] hover:shadow-[0_24px_58px_rgba(11,79,58,0.16)] sm:p-6"
+              style={{ animationDelay: `${index * 80}ms` }}
             >
-              {item}
-            </div>
+              <div className="mb-5 flex items-center justify-between">
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-[#0b4f3a] text-sm font-black text-[#f7f3e8]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <CheckCircle2 className="h-7 w-7 text-[#f2b544] transition duration-300 group-hover:rotate-12" />
+              </div>
+              <p className="text-base font-medium leading-7 text-[#0b4f3a] sm:text-lg">
+                {item}
+              </p>
+            </article>
           ))}
         </div>
       </section>
       
       {/* ========== SECTION 5: PROJECT MILESTONES ========== */}
-      <section className="mt-8 bg-[#dde3b7] py-12 sm:mt-10 sm:py-16">
+      <section className="bg-[#0b4f3a] py-14 text-[#f7f3e8] sm:py-20">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionTitle
-            title="Project Milestones"
-            subtitle="Key progress areas of the Uttarakhand Millet Project:"
-          />
-
-          <div className="relative mt-12 hidden grid-cols-6 grid-rows-[auto_24px_auto] gap-x-4 gap-y-10 xl:grid">
-            <div
-              style={{ gridColumn: "1 / -1", gridRow: 2 }}
-              className="h-6 rounded-full bg-gradient-to-r from-[#5f8c95] via-[#8ed5da] to-[#d7c965] opacity-80"
-            />
-            {milestones.map((item, index) => {
-              const isBelowLine = index % 2 === 1;
-
-              return (
-                <div
-                  key={item}
-                  style={{ gridColumn: index + 1, gridRow: isBelowLine ? 3 : 1 }}
-                  className={`relative ${isBelowLine ? "self-start" : "self-end"}`}
-                >
-                  <div
-                    className={`absolute left-1/2 h-10 w-[2px] -translate-x-1/2 bg-white/70 ${
-                      isBelowLine ? "-top-10" : "-bottom-10"
-                    }`}
-                  />
-                  <div
-                    className={`absolute left-1/2 z-10 h-6 w-6 -translate-x-1/2 rounded-full border-4 border-white bg-[#eef0d3] shadow ${
-                      isBelowLine ? "-top-3" : "-bottom-3"
-                    }`}
-                  />
-                  <div
-                    className={`rounded-2xl p-4 text-lg font-semibold text-white shadow-lg ${
-                      index % 3 === 0 ? "bg-[#2f7f79]" : index % 3 === 1 ? "bg-[#a78a5a]" : "bg-[#6ca68a]"
-                    }`}
-                  >
-                    {item}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="mb-12 text-center">
+            <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full border border-[#f2b544]/35 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#f2b544]">
+              <span className="h-2 w-2 rounded-full bg-[#f2b544]" />
+              Project Focus
+            </div>
+            <h2 className="break-words font-playfair text-3xl font-black sm:text-4xl md:text-6xl">
+              Project Milestones
+            </h2>
+            <p className="mx-auto mt-4 max-w-3xl text-base font-medium leading-7 text-[#f7f3e8]/80 md:text-xl">
+              Key progress areas of the Uttarakhand Millet Project:
+            </p>
+            <div className="mx-auto mt-6 h-[3px] w-24 rounded-full bg-[#f2b544]" />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:hidden">
-            {milestones.map((item) => (
-              <div key={item} className="rounded-2xl bg-[#70907b] p-4 text-white shadow">
-                {item}
-              </div>
+          <div className="grid gap-5 lg:grid-cols-3">
+            {milestones.map((item, index) => (
+              <article
+                key={item}
+                className="relative animate-slide-in-soft overflow-hidden rounded-lg border border-[#f2b544]/30 bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 sm:p-6"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-[#f2b544]" />
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#0b4f3a] text-sm font-black text-[#f7f3e8]">
+                    {index + 1}
+                  </span>
+                  <div className="h-px flex-1 bg-[#0b4f3a]/20" />
+                  <Wheat className="h-6 w-6 text-[#f2b544]" />
+                </div>
+                <p className="text-base font-semibold leading-7 sm:text-lg">{item}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
       {/* ========== SECTION 6: BACKGROUND ========== */}
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:py-16 lg:grid-cols-2 lg:px-8">
-        <SoftImage
-          label="Background consultation photograph"
-          src={contentImageSources[0]}
-          className="min-h-[240px] sm:min-h-[380px]"
-        />
-        <div className="space-y-6 sm:space-y-8">
-          <h2 className="text-3xl font-extrabold uppercase md:text-5xl">Background</h2>
-          <div className="h-px w-full bg-slate-300" />
-          <p className="text-lg leading-8 sm:text-2xl sm:leading-10">
-            The Uttarakhand Millet Project is a digital agriculture initiative designed to support farmer registry, reporting and decision-making for millet-focused development in the state.
-          </p>
-          <div className="h-px w-full bg-slate-300" />
-          <p className="text-base leading-8 sm:text-xl sm:leading-10">
-            The platform has been structured to help manage farmer data, strengthen monitoring systems and improve access to region-wise insights for administrators and field teams.
-          </p>
-          <div className="h-px w-full bg-slate-300" />
-          <p className="text-base leading-8 sm:text-xl sm:leading-10">
-            It supports a practical, scalable MIS approach for state, district and block-level use, with special emphasis on transparent records and progress tracking.
-          </p>
+      <section className="bg-[#f7f3e8] px-4 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <SoftImage
+            label="Background consultation photograph"
+            src={contentImageSources[0]}
+            className="min-h-[280px] sm:min-h-[440px]"
+          />
+          <article className="relative border-l-4 border-[#f2b544] pl-5 sm:pl-8">
+            <h2 className="font-playfair text-4xl font-black text-[#0b4f3a] md:text-6xl">Background</h2>
+            <div className="mt-6 space-y-5 text-[#0b4f3a] sm:space-y-6">
+              <p className="text-lg font-semibold leading-8 sm:text-2xl sm:leading-10">
+                The Uttarakhand Millet Project is a digital agriculture initiative designed to support farmer registry, reporting and decision-making for millet-focused development in the state.
+              </p>
+              <p className="text-base font-medium leading-8 sm:text-xl sm:leading-9">
+                The platform has been structured to help manage farmer data, strengthen monitoring systems and improve access to region-wise insights for administrators and field teams.
+              </p>
+              <p className="text-base font-medium leading-8 sm:text-xl sm:leading-9">
+                It supports a practical, scalable MIS approach for state, district and block-level use, with special emphasis on transparent records and progress tracking.
+              </p>
+            </div>
+          </article>
         </div>
       </section>
 
       {/* ========== SECTION 7: SYSTEM ARCHITECTURE ========== */}
-      <section className="bg-[#dde6bc] py-12 sm:py-16">
+      <section className="bg-[#0b4f3a] py-14 text-[#f7f3e8] sm:py-20">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="mb-10 text-left">
-            <h2 className="break-words text-3xl font-extrabold uppercase text-[#0f5a2c] md:text-5xl">System Architecture</h2>
-            <div className="mt-5 h-px w-full max-w-xl bg-[#b9c89d]" />
+          <div className="mb-12 max-w-3xl text-left">
+            <div className="mb-4 flex w-fit items-center gap-2 rounded-full border border-[#f2b544]/35 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#f2b544]">
+              <span className="h-2 w-2 rounded-full bg-[#f2b544]" />
+              Project Focus
+            </div>
+            <h2 className="break-words font-playfair text-4xl font-black md:text-6xl">System Architecture</h2>
+            <div className="mt-6 h-[3px] w-24 rounded-full bg-[#f2b544]" />
           </div>
 
           <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr_1fr]">
             <div className="space-y-6">
-              <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-8">
-                <h3 className="mb-4 text-xl font-extrabold sm:text-2xl">{architectureCards[0].title}</h3>
-                <ul className="space-y-3 text-base text-slate-700 sm:text-xl">
+              <div className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.22)] sm:p-8">
+                <h3 className="mb-4 text-xl font-black sm:text-2xl">{architectureCards[0].title}</h3>
+                <ul className="space-y-3 text-base font-medium text-[#0b4f3a] sm:text-xl">
                   {architectureCards[0].points.map((point) => (
-                    <li key={point} className="flex gap-3"><span>•</span><span>{point}</span></li>
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
             </div>
 
             <div className="flex items-center justify-center">
-              <div className="relative h-[310px] w-full max-w-[520px] [--circle-offset-x:91px] [--circle-offset-y:52.5px] [--circle-radius:105px] sm:h-[460px] sm:[--circle-offset-x:139px] sm:[--circle-offset-y:80px] sm:[--circle-radius:160px]">
-                <div className="absolute left-1/2 top-1/2 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[6px] border-[#d6ac7e] sm:h-[320px] sm:w-[320px]" />
+              <div className="relative h-[310px] w-full max-w-[520px] rounded-lg border border-[#f2b544]/30 bg-[#f7f3e8] shadow-[0_24px_70px_rgba(0,0,0,0.24)] [--circle-offset-x:91px] [--circle-offset-y:52.5px] [--circle-radius:105px] sm:h-[460px] sm:[--circle-offset-x:139px] sm:[--circle-offset-y:80px] sm:[--circle-radius:160px]">
+                <div className="absolute left-1/2 top-1/2 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[6px] border-[#f2b544] sm:h-[320px] sm:w-[320px]" />
                 <div
                   style={{ left: "50%", top: "calc(50% - var(--circle-radius))" }}
-                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#0b4f3a] text-[#f2b544] shadow-xl sm:h-28 sm:w-28"
                 >
-                  <Landmark className="h-8 w-8 text-slate-700 sm:h-14 sm:w-14" />
+                  <Landmark className="h-8 w-8 sm:h-14 sm:w-14" />
                 </div>
                 <div
                   style={{ left: "calc(50% - var(--circle-offset-x))", top: "calc(50% + var(--circle-offset-y))" }}
-                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#0b4f3a] text-[#f2b544] shadow-xl sm:h-28 sm:w-28"
                 >
-                  <Wheat className="h-8 w-8 text-[#317a6f] sm:h-14 sm:w-14" />
+                  <Wheat className="h-8 w-8 sm:h-14 sm:w-14" />
                 </div>
                 <div
                   style={{ left: "calc(50% + var(--circle-offset-x))", top: "calc(50% + var(--circle-offset-y))" }}
-                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl sm:h-28 sm:w-28"
+                  className="absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#0b4f3a] text-[#f2b544] shadow-xl sm:h-28 sm:w-28"
                 >
-                  <BookOpen className="h-8 w-8 text-[#5647a5] sm:h-14 sm:w-14" />
+                  <BookOpen className="h-8 w-8 sm:h-14 sm:w-14" />
                 </div>
-                <div className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#d48c49] to-[#bb6c29] p-2 shadow-2xl sm:h-52 sm:w-52 sm:p-3">
-                  <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#f8d5aa] text-center text-base font-extrabold uppercase text-white sm:text-2xl">
+                <div className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#f2b544] p-2 shadow-2xl sm:h-52 sm:w-52 sm:p-3">
+                  <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#0b4f3a]/35 text-center text-base font-black uppercase text-[#0b4f3a] sm:text-2xl">
                     Millet Project
                   </div>
                 </div>
@@ -902,19 +886,25 @@ export default function UttarakhandMilletProjectLandingPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-8">
-                <h3 className="mb-4 text-xl font-extrabold sm:text-2xl">{architectureCards[1].title}</h3>
-                <ul className="space-y-3 text-base text-slate-700 sm:text-xl">
+              <div className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.22)] sm:p-8">
+                <h3 className="mb-4 text-xl font-black sm:text-2xl">{architectureCards[1].title}</h3>
+                <ul className="space-y-3 text-base font-medium text-[#0b4f3a] sm:text-xl">
                   {architectureCards[1].points.map((point) => (
-                    <li key={point} className="flex gap-3"><span>•</span><span>{point}</span></li>
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
-              <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-8">
-                <h3 className="mb-4 text-xl font-extrabold sm:text-2xl">{architectureCards[2].title}</h3>
-                <ul className="space-y-3 text-base text-slate-700 sm:text-xl">
+              <div className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.22)] sm:p-8">
+                <h3 className="mb-4 text-xl font-black sm:text-2xl">{architectureCards[2].title}</h3>
+                <ul className="space-y-3 text-base font-medium text-[#0b4f3a] sm:text-xl">
                   {architectureCards[2].points.map((point) => (
-                    <li key={point} className="flex gap-3"><span>•</span><span>{point}</span></li>
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -924,30 +914,41 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       {/* ========== SECTION 8: OBJECTIVES & FRAMEWORK ========== */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
-          <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">
-            <h2 className="text-center text-2xl font-extrabold uppercase sm:text-3xl md:text-5xl">Objectives and Framework</h2>
-            <div className="my-6 text-center text-xl font-bold uppercase text-[#f0b321] sm:my-8 sm:text-2xl">Core Objectives</div>
-            <div className="overflow-hidden rounded-2xl border border-slate-200">
+      <section className="bg-[#f7f3e8] px-4 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div>
+            <h2 className="text-center font-playfair text-4xl font-black text-[#0b4f3a] sm:text-5xl md:text-6xl">
+              Objectives and Framework
+            </h2>
+            <div className="my-7 text-center text-xl font-black uppercase tracking-[0.16em] text-[#f2b544] sm:my-9 sm:text-2xl">
+              Core Objectives
+            </div>
+            <div className="space-y-3">
               {objectives.map((item, idx) => (
-                <div key={item} className={`px-4 py-4 text-center text-base font-semibold sm:px-6 sm:py-5 sm:text-xl md:text-2xl ${idx !== objectives.length - 1 ? "border-b border-slate-200" : ""}`}>
-                  {item}
+                <div
+                  key={item}
+                  className="flex items-center gap-4 rounded-lg border border-[#0b4f3a]/10 bg-[#f7f3e8] p-4 text-base font-bold text-[#0b4f3a] shadow-[0_12px_34px_rgba(11,79,58,0.08)] transition duration-300 hover:translate-x-1 hover:border-[#f2b544] sm:p-5 sm:text-xl"
+                >
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#0b4f3a] text-xs font-black text-[#f7f3e8]">
+                    {idx + 1}
+                  </span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative flex items-center justify-center rounded-3xl bg-[#f1f4e9] p-4 shadow-inner sm:p-6">
-            <div className="grid w-full max-w-[700px] place-items-center gap-4 sm:gap-6 md:grid-cols-3">
+          <div className="relative rounded-lg border border-[#0b4f3a]/10 bg-[#0b4f3a] p-5 shadow-[0_24px_70px_rgba(11,79,58,0.22)] sm:p-7">
+            <div className="absolute inset-5 rounded-lg border border-dashed border-[#f2b544]/35" />
+            <div className="relative grid place-items-center gap-4 sm:gap-5 md:grid-cols-3">
               <MiniBadge>Farmer registry with district and block mapping</MiniBadge>
               <MiniBadge>Role-based dashboard access for officials</MiniBadge>
               <MiniBadge>Millet-focused regional monitoring and analytics</MiniBadge>
               <MiniBadge>Monthly progress tracking across field teams</MiniBadge>
-              <div className="flex h-44 w-44 items-center justify-center rounded-full bg-gradient-to-br from-[#d48c49] to-[#bb6c29] p-3 shadow-2xl sm:h-56 sm:w-56">
-                <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-[#f8d5aa] text-center text-lg font-extrabold uppercase text-white sm:text-2xl">
+              <div className="grid h-44 w-44 place-items-center rounded-full bg-[#f2b544] p-3 text-center text-lg font-black uppercase text-[#0b4f3a] shadow-[0_18px_44px_rgba(242,181,68,0.35)] sm:h-56 sm:w-56 sm:text-2xl">
+                <span className="grid h-full w-full place-items-center rounded-full border-2 border-[#0b4f3a]/30">
                   Millet Project
-                </div>
+                </span>
               </div>
               <MiniBadge>Scalable digital backbone for future expansion</MiniBadge>
             </div>
@@ -956,84 +957,87 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       {/* ========== SECTION 9: COMPONENTS OF PROJECT ========== */}
-      <section className="bg-[#dce4b5] py-12 sm:py-16">
+      <section className="bg-[#0b4f3a] py-14 text-[#f7f3e8] sm:py-20">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionTitle title="Components of the Project" />
-          <p className="mb-8 text-base leading-8 sm:mb-12 sm:text-xl sm:leading-10 md:text-2xl">
-            <span className="font-extrabold">Implementation Structure:</span> The project is designed for use across state, district and block levels, supporting farmer registration, dashboard reporting, employee monitoring and millet-focused administration.
+          <div className="mb-10 text-center">
+            <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full border border-[#f2b544]/35 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#f2b544]">
+              <span className="h-2 w-2 rounded-full bg-[#f2b544]" />
+              Project Focus
+            </div>
+            <h2 className="font-playfair text-4xl font-black sm:text-5xl md:text-6xl">Components of the Project</h2>
+            <div className="mx-auto mt-6 h-[3px] w-24 rounded-full bg-[#f2b544]" />
+          </div>
+          <p className="mx-auto mb-10 max-w-5xl text-base font-medium leading-8 text-[#f7f3e8]/85 sm:mb-14 sm:text-xl sm:leading-9">
+            <span className="font-black text-[#f2b544]">Implementation Structure:</span> The project is designed for use across state, district and block levels, supporting farmer registration, dashboard reporting, employee monitoring and millet-focused administration.
           </p>
 
-          <div className="grid gap-10 sm:gap-12">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {components.map((item, idx) => (
-              <div key={item.title} className={`grid items-center gap-6 sm:gap-10 ${idx % 2 === 0 ? "lg:grid-cols-[minmax(260px,380px)_1fr]" : "lg:grid-cols-[1fr_minmax(260px,380px)]"}`}>
-                {idx % 2 === 0 ? (
-                  <SoftImage
-                    label={`${item.title} image`}
-                    src={contentImageSources[(idx + 1) % contentImageSources.length]}
-                    className="min-h-[220px] sm:min-h-[320px]"
-                  />
-                ) : null}
-
-                <div className="py-2 sm:py-4">
-                  <div className="mb-4 flex items-start gap-3 text-[#1a1a1a] sm:items-center">
-                    <div className="shrink-0 rounded-2xl bg-white p-3 shadow">{item.icon}</div>
-                    <h3 className="break-words text-2xl md:text-4xl">{item.title} :</h3>
+              <article
+                key={item.title}
+                className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]"
+              >
+                <SoftImage
+                  label={`${item.title} image`}
+                  src={contentImageSources[(idx + 1) % contentImageSources.length]}
+                  className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+                />
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <div className="mb-4 flex items-start gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                      {item.icon}
+                    </div>
+                    <h3 className="break-words text-2xl font-black leading-tight">{item.title} :</h3>
                   </div>
-                  <ul className="space-y-3 text-base leading-8 text-slate-800 sm:text-lg sm:leading-10 md:text-2xl">
+                  <ul className="space-y-3 text-base font-medium leading-7">
                     {item.points.map((point) => (
                       <li key={point} className="flex gap-3">
-                        <CheckCircle2 className="mt-1 h-6 w-6 shrink-0 text-[#0d7b17]" />
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
                         <span>{point}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-
-                {idx % 2 !== 0 ? (
-                  <SoftImage
-                    label={`${item.title} image`}
-                    src={contentImageSources[(idx + 1) % contentImageSources.length]}
-                    className="min-h-[220px] sm:min-h-[320px]"
-                  />
-                ) : null}
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
       {/* ========== SECTION 10: PROJECT DELIVERY MECHANISM ========== */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:px-8">
-        <div className="overflow-hidden rounded-3xl bg-[#a77826] text-white shadow-2xl sm:rounded-[2.5rem]">
+      <section className="bg-[#f7f3e8] px-4 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-lg border border-[#0b4f3a]/15 bg-[#0b4f3a] text-[#f7f3e8] shadow-[0_24px_70px_rgba(11,79,58,0.24)]">
           <div className="grid lg:grid-cols-[1.15fr_1fr]">
-            <div className="relative min-h-[260px] overflow-hidden sm:min-h-[360px]">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517022812141-23620dba5c23?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0c2d14]/45 to-transparent" />
-              <div className="relative p-6 sm:p-8 md:p-14">
-                <h2 className="max-w-xl text-3xl font-bold leading-tight sm:text-4xl md:text-7xl">Project Delivery Mechanism</h2>
+            <div className="relative min-h-[300px] overflow-hidden sm:min-h-[430px]">
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517022812141-23620dba5c23?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center transition duration-700 hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0b4f3a]/85 via-[#0b4f3a]/50 to-transparent" />
+              <div className="relative flex h-full min-h-[300px] items-end p-6 sm:min-h-[430px] sm:p-10 md:p-14">
+                <h2 className="max-w-xl font-playfair text-4xl font-black leading-tight sm:text-5xl md:text-7xl">Project Delivery Mechanism</h2>
               </div>
             </div>
             <div className="p-6 sm:p-8 md:p-12">
-              <div className="mb-6 flex items-start gap-4 text-[#d9b36c] sm:mb-8 sm:items-center">
-                <BadgeIndianRupee className="h-10 w-10 shrink-0 sm:h-14 sm:w-14" />
+              <div className="mb-8 flex items-start gap-4 sm:items-center">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-[#f2b544] text-[#0b4f3a] sm:h-16 sm:w-16">
+                  <BadgeIndianRupee className="h-8 w-8" />
+                </div>
                 <div className="min-w-0">
-                  <div className="break-words text-sm uppercase tracking-[0.15em] text-[#d0ad63] sm:text-lg sm:tracking-[0.35em]">Fund Flow</div>
-                  <h3 className="break-words text-3xl font-semibold text-white md:text-5xl">System Flow Design</h3>
+                  <div className="break-words text-sm font-bold uppercase tracking-[0.25em] text-[#f2b544] sm:text-base">Fund Flow</div>
+                  <h3 className="break-words text-3xl font-black text-[#f7f3e8] md:text-5xl">System Flow Design</h3>
                 </div>
               </div>
-              <div className="space-y-6 text-base leading-8 sm:space-y-8 sm:text-lg sm:leading-10 md:text-2xl">
-                <div>
-                  <h4 className="mb-2 text-2xl font-extrabold sm:text-3xl">Project Data Flow</h4>
+              <div className="space-y-5 text-base leading-8 sm:text-lg sm:leading-9">
+                <article className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8]/10 p-5">
+                  <h4 className="mb-2 text-2xl font-black text-[#f2b544] sm:text-3xl">Project Data Flow</h4>
                   <p>
                     Farmer registration, administrative review and dashboard insights move through a structured digital workflow to support transparent project implementation.
                   </p>
-                </div>
-                <div>
-                  <h4 className="mb-2 text-2xl font-extrabold sm:text-3xl">Monitoring Flow</h4>
+                </article>
+                <article className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8]/10 p-5">
+                  <h4 className="mb-2 text-2xl font-black text-[#f2b544] sm:text-3xl">Monitoring Flow</h4>
                   <p>
                     Progress reports and regional summaries are consolidated to help officials review performance and make timely decisions.
                   </p>
-                </div>
+                </article>
               </div>
             </div>
           </div>
@@ -1041,16 +1045,16 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       {/* ========== IMPLEMENTATION FLOW (Grid Structure) ========== */}
-      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <div className="rounded-3xl bg-white p-4 shadow-2xl sm:p-8 sm:rounded-[2.5rem]">
+      <section className="bg-[#f7f3e8] px-4 pb-14 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-lg border border-[#0b4f3a]/12 bg-[#f7f3e8] p-4 shadow-[0_24px_70px_rgba(11,79,58,0.14)] sm:p-7">
           <div className="grid gap-8 xl:grid-cols-[240px_1fr_1fr] xl:gap-10">
-            <div className="flex flex-col items-center justify-start gap-6 xl:border-r xl:border-slate-200 xl:pr-6">
-              <div className="grid place-items-center rounded-3xl bg-[#eef3d8] p-6 shadow-inner">
-                <Users className="h-20 w-20 text-[#827122]" />
+            <div className="flex flex-col items-center justify-start gap-6 border-[#0b4f3a]/15 xl:border-r xl:pr-6">
+              <div className="grid place-items-center rounded-lg bg-[#0b4f3a] p-6 text-[#f2b544] shadow-[0_18px_44px_rgba(11,79,58,0.2)]">
+                <Users className="h-20 w-20" />
               </div>
 
-              <div className="text-center text-[#7a6a1e]">
-                <p className="text-lg font-semibold sm:text-xl">
+              <div className="text-center text-[#0b4f3a]">
+                <p className="text-lg font-black sm:text-xl">
                   Project implementation happens at three levels:
                 </p>
               </div>
@@ -1059,7 +1063,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                 {flowLevels.map((level) => (
                   <div
                     key={level}
-                    className="flex min-h-[58px] items-center justify-center rounded-xl bg-[#8a7b2a] px-4 py-3 text-center text-lg font-bold leading-snug text-white shadow sm:min-h-[64px] sm:text-xl"
+                    className="flex min-h-[58px] items-center justify-center rounded-lg bg-[#0b4f3a] px-4 py-3 text-center text-lg font-black leading-snug text-[#f7f3e8] shadow sm:min-h-[64px] sm:text-xl"
                   >
                     {level}
                   </div>
@@ -1067,7 +1071,7 @@ export default function UttarakhandMilletProjectLandingPage() {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {[
                 ["State Agriculture Department", "Project Admin", "State Monitoring & Analytics"],
                 ["District Dashboard Team", "District Nodal Officer", "District Reporting Unit"],
@@ -1078,7 +1082,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                   {row.map((box) => (
                     <div
                       key={box}
-                      className="flex min-h-[92px] items-center justify-center rounded-2xl bg-[#7f7923] p-4 text-center text-base font-semibold leading-snug text-white shadow sm:min-h-[118px] sm:text-lg"
+                      className="flex min-h-[92px] items-center justify-center rounded-lg border border-[#0b4f3a]/10 bg-[#0b4f3a] p-4 text-center text-base font-bold leading-snug text-[#f7f3e8] shadow transition duration-300 hover:-translate-y-1 hover:border-[#f2b544] sm:min-h-[110px] sm:text-lg"
                     >
                       {box}
                     </div>
@@ -1087,12 +1091,12 @@ export default function UttarakhandMilletProjectLandingPage() {
               ))}
             </div>
 
-            <div className="space-y-5">
-              <div className="flex min-h-[76px] items-center justify-center rounded-2xl bg-[#8c6120] p-5 text-center text-xl font-semibold leading-snug text-white shadow sm:min-h-[86px] sm:text-2xl">
+            <div className="space-y-4">
+              <div className="flex min-h-[76px] items-center justify-center rounded-lg bg-[#f2b544] p-5 text-center text-xl font-black leading-snug text-[#0b4f3a] shadow sm:min-h-[86px] sm:text-2xl">
                 State Project Administrator
               </div>
 
-              <div className="flex min-h-[76px] items-center justify-center rounded-2xl bg-[#9f6c23] p-5 text-center text-xl font-semibold leading-snug text-white shadow sm:min-h-[86px] sm:text-2xl">
+              <div className="flex min-h-[76px] items-center justify-center rounded-lg bg-[#f2b544] p-5 text-center text-xl font-black leading-snug text-[#0b4f3a] shadow sm:min-h-[86px] sm:text-2xl">
                 District Project Administrator
               </div>
 
@@ -1108,7 +1112,7 @@ export default function UttarakhandMilletProjectLandingPage() {
                 ].map((box) => (
                   <div
                     key={box}
-                    className="flex min-h-[78px] items-center justify-center rounded-2xl bg-[#a17025] p-4 text-center text-base font-semibold leading-snug text-white shadow sm:min-h-[92px] sm:text-lg"
+                    className="flex min-h-[78px] items-center justify-center rounded-lg border border-[#0b4f3a]/10 bg-[#f7f3e8] p-4 text-center text-base font-bold leading-snug text-[#0b4f3a] shadow transition duration-300 hover:-translate-y-1 hover:border-[#f2b544] sm:min-h-[92px] sm:text-lg"
                   >
                     {box}
                   </div>
@@ -1120,50 +1124,53 @@ export default function UttarakhandMilletProjectLandingPage() {
       </section>
 
       {/* ========== SECTION 11: UK MILLET MIS WORKFLOW ========== */}
-      <section className="bg-[#dce4b5] py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 lg:px-1">
+      <section className="bg-[#0b4f3a] py-14 text-[#f7f3e8] sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="mb-10 text-center">
-            <h2 className="break-words text-2xl font-extrabold uppercase sm:text-3xl md:text-5xl">Uttarakhand Millet MIS Workflow</h2>
-            <p className="mt-4 text-xl sm:text-2xl md:text-5xl">Farmer Registry and Dashboard System</p>
+            <h2 className="break-words font-playfair text-4xl font-black sm:text-5xl md:text-6xl">Uttarakhand Millet MIS Workflow</h2>
+            <p className="mt-4 text-xl font-medium text-[#f7f3e8]/80 sm:text-2xl md:text-4xl">Farmer Registry and Dashboard System</p>
           </div>
 
-          <div className="mx-auto mb-8 max-w-4xl rounded-2xl bg-[#06777a] px-4 py-4 text-center text-xl text-slate-900 shadow-lg sm:px-6 sm:py-5 sm:text-2xl md:text-4xl">
+          <div className="mx-auto mb-8 max-w-4xl rounded-lg border border-[#f2b544]/35 bg-[#f2b544] px-4 py-4 text-center text-xl font-black text-[#0b4f3a] shadow-lg sm:px-6 sm:py-5 sm:text-2xl md:text-4xl">
             Process of Farmer Registration and Monitoring
           </div>
 
-          <div className="grid gap-5 sm:gap-8 lg:grid-cols-[260px_1fr_1fr_1fr]">
-            <div className="flex flex-col items-center justify-start gap-5 rounded-3xl bg-[#ebdfc1] p-5 sm:gap-8">
-              <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-[#f6ead1]">
-                <Users className="h-12 w-12 text-[#7f6335]" />
+          <div className="grid gap-5 sm:gap-6 lg:grid-cols-[240px_repeat(3,1fr)]">
+            <div className="flex flex-col items-center justify-center gap-5 rounded-lg border border-[#f2b544]/35 bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.22)]">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#0b4f3a] text-[#f2b544]">
+                <Users className="h-12 w-12" />
               </div>
-              <div className="text-2xl sm:text-3xl">Farmer</div>
+              <div className="text-2xl font-black sm:text-3xl">Farmer</div>
             </div>
 
             {mPassteps.slice(0, 6).map((step, idx) => (
               <div
                 key={step}
-                className={`relative rounded-2xl p-5 text-center text-base shadow sm:p-8 sm:text-lg md:text-2xl ${idx % 3 === 0 ? "bg-[#a8ddd8]" : idx % 3 === 1 ? "bg-[#c9dfc0]" : "bg-[#efdebc]"}`}
+                className="relative flex min-h-[150px] animate-slide-in-soft items-center justify-center rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] p-5 text-center text-base font-bold leading-7 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.18)] transition duration-300 hover:-translate-y-1 sm:p-6 sm:text-lg"
               >
-                <div className="flex h-full items-center justify-center">{step}</div>
-                <ArrowRight className="absolute -right-3 top-1/2 hidden h-6 w-6 -translate-y-1/2 text-white lg:block" />
+                <span className="absolute left-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-[#0b4f3a] text-xs font-black text-[#f7f3e8]">
+                  {idx + 1}
+                </span>
+                <div className="pt-6">{step}</div>
+                <ArrowRight className="absolute -right-3 top-1/2 hidden h-6 w-6 -translate-y-1/2 rounded-full bg-[#f2b544] p-1 text-[#0b4f3a] lg:block" />
               </div>
             ))}
           </div>
 
-          <div className="mt-5 grid gap-5 sm:gap-8 lg:grid-cols-[1fr_1fr]">
-            <div className="rounded-2xl bg-[#d6e5a0] p-5 text-center text-base shadow sm:p-6 sm:text-lg md:text-2xl">
+          <div className="mt-5 grid gap-5 sm:gap-6 lg:grid-cols-[1fr_1fr]">
+            <div className="rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] p-5 text-center text-base font-bold leading-7 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.18)] sm:p-6 sm:text-lg md:text-2xl">
               {mPassteps[6]}
             </div>
-            <div className="rounded-2xl bg-[#8b8b8b] p-5 text-center text-base text-white shadow sm:p-6 sm:text-lg md:text-2xl">
+            <div className="rounded-lg border border-[#f2b544]/35 bg-[#f2b544] p-5 text-center text-base font-black leading-7 text-[#0b4f3a] shadow-[0_20px_55px_rgba(0,0,0,0.18)] sm:p-6 sm:text-lg md:text-2xl">
               {mPassteps[7]}
             </div>
           </div>
         </div>
       </section>
 
-      <footer style={{ background: "#0d4136", color: "#ffffff" }} className="w-full mt-0">
+      <footer style={{ background: "#0b4f3a", color: "#f7f3e8" }} className="w-full mt-0">
         {/* --- TOP BAR: Logos + Branding --- */}
-        <div style={{ borderBottom: "1px solid #2e5a3d" }} className="px-6 py-8 sm:px-10">
+        <div style={{ borderBottom: "1px solid rgba(242, 181, 68, 0.28)" }} className="px-6 py-8 sm:px-10">
           <div className="flex flex-wrap items-center gap-5 mb-3">
             <img
               src="/topbarlogo.png"
@@ -1180,14 +1187,14 @@ export default function UttarakhandMilletProjectLandingPage() {
               alt="Ministry of Agriculture and Farmers Welfare"
               className="h-14 w-auto max-w-[180px] object-contain"
             />
-            <div style={{ borderLeft: "2px solid #4a8c5c" }} className="pl-4 ml-1">
-              <p style={{ color: "#ffffff" }} className="text-[15.68px] font-semibold leading-snug">
+            <div style={{ borderLeft: "2px solid #f2b544" }} className="pl-4 ml-1">
+              <p style={{ color: "#f7f3e8" }} className="text-[15.68px] font-semibold leading-snug">
                 Government of Uttarakhand<br />
                 Department of Agriculture &amp; Horticulture
               </p>
             </div>
           </div>
-          <p style={{ color: "#ffffff" }} className="text-[13.44px] italic">
+          <p style={{ color: "#f7f3e8" }} className="text-[13.44px] italic">
             Millet Development Programme — Digital Management Information System
           </p>
         </div>
@@ -1195,9 +1202,9 @@ export default function UttarakhandMilletProjectLandingPage() {
         {/* --- MAIN GRID: 4 columns --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Contact */}
-          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+          <div style={{ borderRight: "1px solid rgba(242, 181, 68, 0.22)" }} className="p-6 sm:p-7">
             <p
-              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              style={{ color: "#f2b544", borderBottom: "1px solid rgba(242, 181, 68, 0.22)" }}
               className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
             >
               Contact Us
@@ -1205,15 +1212,15 @@ export default function UttarakhandMilletProjectLandingPage() {
 
             {/* Helpline badge */}
             <div
-              style={{ background: "#1b7039", border: "1px solid #3d7050" }}
+              style={{ background: "#f2b544", border: "1px solid rgba(247, 243, 232, 0.35)" }}
               className="flex items-center gap-3 rounded-lg px-3 py-2 mb-4"
             >
-              <Phone size={14} style={{ color: "#9fd47a", flexShrink: 0 }} />
+              <Phone size={14} style={{ color: "#0b4f3a", flexShrink: 0 }} />
               <div>
-                <p style={{ color: "#ffffff" }} className="text-[10.08px] uppercase tracking-widest">
+                <p style={{ color: "#0b4f3a" }} className="text-[10.08px] uppercase tracking-widest">
                   Kisan Helpline
                 </p>
-                <p style={{ color: "#ffffff" }} className="text-[15.68px] font-semibold tracking-wide">
+                <p style={{ color: "#0b4f3a" }} className="text-[15.68px] font-semibold tracking-wide">
                   1800 180 1551
                 </p>
               </div>
@@ -1221,8 +1228,8 @@ export default function UttarakhandMilletProjectLandingPage() {
 
             {/* Address */}
             <div className="flex items-start gap-2 mb-3">
-              <MapPin size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 3 }} />
-              <p style={{ color: "#ffffff" }} className="text-[13.44px] leading-relaxed">
+              <MapPin size={14} style={{ color: "#f2b544", flexShrink: 0, marginTop: 3 }} />
+              <p style={{ color: "#f7f3e8" }} className="text-[13.44px] leading-relaxed">
                 Directorate of Agriculture (Uttarakhand)<br />
                 Krishi Bhawan, Nanda-Ki-Chowki,<br />
                 Premnagar, Dehradun — 248007
@@ -1231,12 +1238,12 @@ export default function UttarakhandMilletProjectLandingPage() {
 
             {/* Phone */}
             <div className="flex items-start gap-2 mb-3">
-              <Phone size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 2 }} />
+              <Phone size={14} style={{ color: "#f2b544", flexShrink: 0, marginTop: 2 }} />
               <div>
-                <p style={{ color: "#ffffff" }} className="text-[13.44px]">
+                <p style={{ color: "#f7f3e8" }} className="text-[13.44px]">
                   0135-2972421 / 2972422
                 </p>
-                <p style={{ color: "#ffffff" }} className="text-[11.2px]">
+                <p style={{ color: "#f7f3e8" }} className="text-[11.2px]">
                   Fax: 2972425
                 </p>
               </div>
@@ -1244,18 +1251,18 @@ export default function UttarakhandMilletProjectLandingPage() {
 
             {/* Email */}
             <div className="flex items-start gap-2">
-              <Mail size={14} style={{ color: "#9fd47a", flexShrink: 0, marginTop: 2 }} />
+              <Mail size={14} style={{ color: "#f2b544", flexShrink: 0, marginTop: 2 }} />
               <div>
                 <a
                   href="mailto:dir-agri-ua@nic.in"
-                  style={{ color: "#ffffff" }}
+                  style={{ color: "#f7f3e8" }}
                   className="text-[13.44px] block hover:underline"
                 >
                   dir-agri-ua@nic.in
                 </a>
                 <a
                   href="mailto:dir.agri.uttarakhand@gmail.com"
-                  style={{ color: "#ffffff" }}
+                  style={{ color: "#f7f3e8" }}
                   className="text-[13.44px] block hover:underline"
                 >
                   dir.agri.uttarakhand@gmail.com
@@ -1265,9 +1272,9 @@ export default function UttarakhandMilletProjectLandingPage() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+          <div style={{ borderRight: "1px solid rgba(242, 181, 68, 0.22)" }} className="p-6 sm:p-7">
             <p
-              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              style={{ color: "#f2b544", borderBottom: "1px solid rgba(242, 181, 68, 0.22)" }}
               className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
             >
               Quick Links
@@ -1282,11 +1289,11 @@ export default function UttarakhandMilletProjectLandingPage() {
                 ["Sitemap", "/sitemap"],
               ].map(([label, href]) => (
                 <li key={label} className="flex items-center gap-2">
-                  <span style={{ background: "#4a8c5c" }} className="w-1 h-1 rounded-full flex-shrink-0" />
+                  <span style={{ background: "#f2b544" }} className="w-1 h-1 rounded-full flex-shrink-0" />
                   <Link
                     to={href}
-                    style={{ color: "#ffffff" }}
-                    className="text-[13.44px] hover:text-[#ffffff] transition-colors"
+                    style={{ color: "#f7f3e8" }}
+                    className="text-[13.44px] transition-colors hover:text-[#f2b544]"
                   >
                     {label}
                   </Link>
@@ -1296,9 +1303,9 @@ export default function UttarakhandMilletProjectLandingPage() {
           </div>
 
           {/* Column 3: Important Links */}
-          <div style={{ borderRight: "1px solid #2e5a3d" }} className="p-6 sm:p-7">
+          <div style={{ borderRight: "1px solid rgba(242, 181, 68, 0.22)" }} className="p-6 sm:p-7">
             <p
-              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              style={{ color: "#f2b544", borderBottom: "1px solid rgba(242, 181, 68, 0.22)" }}
               className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
             >
               Important Links
@@ -1312,13 +1319,13 @@ export default function UttarakhandMilletProjectLandingPage() {
                 ["mkisan.gov.in", "https://mkisan.gov.in"],
               ].map(([label, href]) => (
                 <li key={label} className="flex items-center gap-2">
-                  <span style={{ background: "#4a8c5c" }} className="w-1 h-1 rounded-full flex-shrink-0" />
+                  <span style={{ background: "#f2b544" }} className="w-1 h-1 rounded-full flex-shrink-0" />
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: "#ffffff" }}
-                    className="text-[13.44px] hover:text-[#ffffff] transition-colors"
+                    style={{ color: "#f7f3e8" }}
+                    className="text-[13.44px] transition-colors hover:text-[#f2b544]"
                   >
                     {label}
                   </a>
@@ -1330,7 +1337,7 @@ export default function UttarakhandMilletProjectLandingPage() {
           {/* Column 4: Connect + Visitor Counter */}
           <div className="p-6 sm:p-7">
             <p
-              style={{ color: "#ffffff", borderBottom: "1px solid #2e5a3d" }}
+              style={{ color: "#f2b544", borderBottom: "1px solid rgba(242, 181, 68, 0.22)" }}
               className="text-[11.2px] font-semibold uppercase tracking-widest mb-4 pb-2"
             >
               Connect
@@ -1349,23 +1356,23 @@ export default function UttarakhandMilletProjectLandingPage() {
                   type="button"
                   title={label}
                   aria-label={label}
-                  style={{ background: "#2e5a3d", border: "1px solid #3d7050" }}
-                  className="w-9 h-9 rounded-md flex items-center justify-center hover:bg-[#3d7050] transition-colors"
+                  style={{ background: "#0b4f3a", border: "1px solid rgba(242, 181, 68, 0.35)" }}
+                  className="w-9 h-9 rounded-md flex items-center justify-center transition-colors hover:bg-[#f7f3e8]"
                 >
-                  <Icon size={15} style={{ color: "#9fd47a" }} />
+                  <Icon size={15} style={{ color: "#f2b544" }} />
                 </button>
               ))}
             </div>
 
             {/* Visitor counter */}
-            <div style={{ background: "#152f20", border: "1px solid #2e5a3d" }} className="rounded-lg px-4 py-3">
-              <p style={{ color: "#ffffff" }} className="text-[11.2px] uppercase tracking-widest mb-1">
+            <div style={{ background: "#f7f3e8", border: "1px solid rgba(242, 181, 68, 0.35)" }} className="rounded-lg px-4 py-3">
+              <p style={{ color: "#0b4f3a" }} className="text-[11.2px] uppercase tracking-widest mb-1">
                 Visitors
               </p>
-              <p style={{ color: "#ffffff" }} className="text-[22.4px] font-semibold tracking-wide tabular-nums">
+              <p style={{ color: "#0b4f3a" }} className="text-[22.4px] font-semibold tracking-wide tabular-nums">
                 {visitorCount.toLocaleString("en-IN")}
               </p>
-              <p style={{ color: "#ffffff" }} className="text-[11.2px] mt-1">
+              <p style={{ color: "#0b4f3a" }} className="text-[11.2px] mt-1">
                 Last updated: {lastUpdated}
               </p>
             </div>
@@ -1374,10 +1381,10 @@ export default function UttarakhandMilletProjectLandingPage() {
 
         {/* --- BOTTOM BAR --- */}
         <div
-          style={{ background: "#122a1d", borderTop: "1px solid #2e5a3d" }}
+          style={{ background: "#083f2e", borderTop: "1px solid rgba(242, 181, 68, 0.28)" }}
           className="px-6 py-4 sm:px-10 flex flex-wrap items-center justify-between gap-3"
         >
-          <p style={{ color: "#ffffff" }} className="text-[13.44px]">
+          <p style={{ color: "#f7f3e8" }} className="text-[13.44px]">
             &copy; {currentYear} Government of Uttarakhand — Department of Agriculture &amp; Horticulture. All rights
             reserved.
           </p>
@@ -1387,8 +1394,8 @@ export default function UttarakhandMilletProjectLandingPage() {
                 key={item.title}
                 type="button"
                 onClick={() => setActiveFooterTopic(item.title)}
-                style={{ color: "#ffffff" }}
-                className="text-left text-[12.32px] hover:text-[#ffffff] hover:underline transition-colors"
+                style={{ color: "#f7f3e8" }}
+                className="text-left text-[12.32px] transition-colors hover:text-[#f2b544] hover:underline"
               >
                 {item.title}
               </button>
@@ -1405,23 +1412,23 @@ export default function UttarakhandMilletProjectLandingPage() {
             onClick={() => setActiveFooterTopic(null)}
           >
             <div
-              className="max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 text-slate-900 shadow-2xl sm:p-7"
+              className="max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-lg bg-[#f7f3e8] p-5 text-[#0b4f3a] shadow-2xl sm:p-7"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-4 flex items-start justify-between gap-4">
-                <h2 id="footer-info-title" className="text-2xl font-extrabold text-[#0d4136]">
+                <h2 id="footer-info-title" className="text-2xl font-extrabold text-[#0b4f3a]">
                   {activeFooterDetails.title}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setActiveFooterTopic(null)}
-                  className="rounded-md border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  className="rounded-md border border-[#0b4f3a]/20 px-3 py-1 text-sm font-semibold text-[#0b4f3a] hover:bg-[#f2b544]/20"
                 >
                   Close
                 </button>
               </div>
-              <p className="mb-4 text-base leading-7 text-slate-700">{activeFooterDetails.intro}</p>
-              <ul className="list-disc space-y-3 pl-5 text-base leading-7 text-slate-700">
+              <p className="mb-4 text-base leading-7 text-[#0b4f3a]/80">{activeFooterDetails.intro}</p>
+              <ul className="list-disc space-y-3 pl-5 text-base leading-7 text-[#0b4f3a]/80">
                 {activeFooterDetails.points.map((point) => (
                   <li key={point}>{point}</li>
                 ))}
