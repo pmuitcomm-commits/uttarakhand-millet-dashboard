@@ -380,20 +380,14 @@ def get_current_user_info(current_user=Depends(get_current_user)):
 
 
 @router.get("/block/officer-details", response_model=dict)
-def get_block_officer_details(
-    current_user=Depends(require_role("block")),
-    db: Session = Depends(get_db),
-):
+def get_block_officer_details(current_user=Depends(require_role("block"))):
     """
     Return editable profile details for the logged-in block officer.
 
     The user id comes from the authenticated session, so callers cannot fetch
     another officer's profile by changing request parameters.
     """
-    user = _fetch_user_by_id(db, current_user["id"])
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Block officer not found")
-    return {"user": _user_response(user)}
+    return {"user": _user_response(current_user)}
 
 
 @router.put("/block/officer-details", response_model=dict)
@@ -438,7 +432,6 @@ def update_block_officer_details(
                     mobile = :mobile,
                     email = :email
                 WHERE id = :id
-                  AND {BLOCK_OFFICER_ROLE_SQL}
                 RETURNING id
                 """
             ),
