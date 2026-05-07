@@ -64,16 +64,6 @@ function ProtectedOfficerRoute({ children, requiredRole = null, allowedRoles = n
 }
 
 function DistrictRoute() {
-  const { isAuthenticated, user, loading } = useAuth();
-
-  if (loading) {
-    return <div className="p-5 text-center">Loading...</div>;
-  }
-
-  if (isAuthenticated && user?.role === "district") {
-    return <DistrictDashboard />;
-  }
-
   return <Dashboard page="district" />;
 }
 
@@ -134,6 +124,11 @@ function AppRoutes() {
           <BlockDashboard />
         </ProtectedOfficerRoute>
       } />
+      <Route path="/district/officer" element={
+        <ProtectedOfficerRoute requiredRole="district">
+          <DistrictDashboard />
+        </ProtectedOfficerRoute>
+      } />
       <Route path="/district/data" element={
         <ProtectedOfficerRoute allowedRoles={["admin", "district"]}>
           <DataEntryPage scopeType="district" />
@@ -173,10 +168,10 @@ function AppRoutes() {
       <Route path="/admin-landing" element={<LegacyOfficerRedirect role="admin" to="/admin" />} />
       <Route path="/district-dashboard" element={
         <ProtectedOfficerRoute requiredRole="district">
-          <Navigate to="/district" replace />
+          <Navigate to="/district/officer" replace />
         </ProtectedOfficerRoute>
       } />
-      <Route path="/district-landing" element={<LegacyOfficerRedirect role="district" to="/district" />} />
+      <Route path="/district-landing" element={<LegacyOfficerRedirect role="district" to="/district/officer" />} />
       <Route path="/block-dashboard" element={<LegacyOfficerRedirect role="block" to="/block" />} />
       <Route path="/block-landing" element={<LegacyOfficerRedirect role="block" to="/block" />} />
     </Routes>

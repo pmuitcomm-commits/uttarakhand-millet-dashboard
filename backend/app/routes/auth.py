@@ -27,6 +27,7 @@ from .auth_schemas import (
     AuthResponse,
     UpdateBlockOfficerDetailsRequest,
     UpdateBlockOfficerRequest,
+    UpdateOfficerDetailsRequest,
     UpdateUserRoleRequest,
     UserLogin,
     UserRegister,
@@ -379,6 +380,119 @@ def get_current_user_info(current_user=Depends(get_current_user)):
     return _user_response(current_user)
 
 
+def _update_current_officer_details(
+    request: UpdateOfficerDetailsRequest,
+    current_user,
+    db: Session,
+    officer_label: str,
+):
+    """
+    Update editable profile details on the current user's existing users row.
+
+    This helper intentionally does not create or alter schema. If a deployment
+    does not have users.mobile, callers get a clear validation error instead of
+    an implicit schema change.
+    """
+    email = str(request.email) if request.email is not None else None
+
+    if email:
+        existing_email_user = db.execute(
+            text(
+                """
+                SELECT id
+                FROM users
+                WHERE LOWER(email) = LOWER(:email)
+                  AND id <> :id
+                LIMIT 1
+                """
+            ),
+            {"email": email, "id": current_user["id"]},
+        ).first()
+        if existing_email_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is already assigned to another user",
+            )
+
+    set_clauses = [
+        "full_name = :full_name",
+        "email = :email",
+    ]
+    update_values = {
+        "id": current_user["id"],
+        "full_name": request.full_name,
+        "email": email,
+    }
+
+    if _users_table_has_column(db, "mobile"):
+        set_clauses.insert(1, "mobile = :mobile")
+        update_values["mobile"] = request.mobile
+    elif request.mobile:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mobile cannot be updated because users.mobile is not available",
+        )
+
+    try:
+        updated_user = db.execute(
+            text(
+                f"""
+                UPDATE users
+                SET {', '.join(set_clauses)}
+                WHERE id = :id
+                RETURNING id
+                """
+            ),
+            update_values,
+        ).mappings().first()
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already assigned to another user",
+        ) from exc
+
+    if updated_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{officer_label} not found")
+
+    user = _fetch_user_by_id(db, current_user["id"])
+    return {
+        "message": f"{officer_label} details updated successfully",
+        "user": _user_response(user),
+    }
+
+
+@router.get("/district/officer-details", response_model=dict)
+def get_district_officer_details(current_user=Depends(require_role("district"))):
+    """
+    Return editable profile details for the logged-in district officer.
+
+    The user id comes from the authenticated session, so callers cannot fetch
+    another officer's profile by changing request parameters.
+    """
+    return {"user": _user_response(current_user)}
+
+
+@router.put("/district/officer-details", response_model=dict)
+def update_district_officer_details(
+    request: UpdateOfficerDetailsRequest,
+    current_user=Depends(require_role("district")),
+    db: Session = Depends(get_db),
+):
+    """
+    Update editable profile details for the logged-in district officer.
+
+    Only the current user's row is updated; no new table or column is created.
+    """
+    return _update_current_officer_details(
+        request,
+        current_user,
+        db,
+        "District officer",
+    )
+
+
 @router.get("/block/officer-details", response_model=dict)
 def get_block_officer_details(current_user=Depends(require_role("block"))):
     """
@@ -402,62 +516,12 @@ def update_block_officer_details(
     Only the current user's row is updated, and role/scope are resolved through
     the existing session dependency.
     """
-    email = str(request.email) if request.email is not None else None
-
-    if email:
-        existing_email_user = db.execute(
-            text(
-                """
-                SELECT id
-                FROM users
-                WHERE LOWER(email) = LOWER(:email)
-                  AND id <> :id
-                LIMIT 1
-                """
-            ),
-            {"email": email, "id": current_user["id"]},
-        ).first()
-        if existing_email_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already assigned to another user",
-            )
-
-    try:
-        updated_user = db.execute(
-            text(
-                f"""
-                UPDATE users
-                SET full_name = :full_name,
-                    mobile = :mobile,
-                    email = :email
-                WHERE id = :id
-                RETURNING id
-                """
-            ),
-            {
-                "id": current_user["id"],
-                "full_name": request.full_name,
-                "mobile": request.mobile,
-                "email": email,
-            },
-        ).mappings().first()
-        db.commit()
-    except IntegrityError as exc:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email is already assigned to another user",
-        ) from exc
-
-    if updated_user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Block officer not found")
-
-    user = _fetch_user_by_id(db, current_user["id"])
-    return {
-        "message": "Block officer details updated successfully",
-        "user": _user_response(user),
-    }
+    return _update_current_officer_details(
+        request,
+        current_user,
+        db,
+        "Block officer",
+    )
 
 
 @router.get("/admin/users")

@@ -16,7 +16,7 @@ export function getPostLoginPath(role) {
     case "admin":
       return "/admin";
     case "district":
-      return "/district";
+      return "/district/officer";
     case "block":
       return "/block";
     default:

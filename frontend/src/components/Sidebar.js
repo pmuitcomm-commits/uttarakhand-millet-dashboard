@@ -23,8 +23,9 @@ const roleSidebarItems = {
     ],
   },
   district: {
-    basePath: "/district",
+    basePath: "/district/officer",
     items: [
+      "Officer Profile",
       "Block User Management",
       "District Monitoring",
       "District Farmers",
@@ -48,9 +49,10 @@ const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 
 const roleSidebarRoutes = {
   district: {
+    "Officer Profile": "/district/officer",
     "Block User Management": "/district/block-user-management",
     "District Monitoring": "/district/monitoring",
-    "District Reports": "/district#district-reports",
+    "District Reports": "/district/officer#district-reports",
     "District Data": "/district/data",
   },
   block: {

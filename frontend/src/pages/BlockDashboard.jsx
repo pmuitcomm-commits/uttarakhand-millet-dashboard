@@ -7,6 +7,7 @@ import { Save } from "lucide-react";
 
 import RoleDashboard from "../components/RoleDashboard";
 import { dashboardClasses } from "../components/dashboardStyles";
+import { useAuth } from "../context/AuthContext";
 import {
   getBlockOfficerDetails,
   updateBlockOfficerDetails,
@@ -66,6 +67,7 @@ function validateDetails(details) {
 }
 
 function BlockOfficerDetailsCard() {
+  const { updateUser } = useAuth();
   const [details, setDetails] = useState(emptyDetails);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -127,7 +129,9 @@ function BlockOfficerDetailsCard() {
         mobile: details.mobile.trim(),
         email: details.email.trim() || null,
       });
-      setDetails(makeDetails(response.data?.user));
+      const updatedUser = response.data?.user;
+      setDetails(makeDetails(updatedUser));
+      updateUser(updatedUser);
       setErrors({});
       setStatus({ type: "success", text: "Block officer details updated successfully." });
     } catch (error) {

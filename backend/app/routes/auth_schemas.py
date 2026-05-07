@@ -156,8 +156,8 @@ class UpdateBlockOfficerRequest(BaseModel):
         return value
 
 
-class UpdateBlockOfficerDetailsRequest(BaseModel):
-    """Editable self-profile fields for the logged-in block officer."""
+class UpdateOfficerDetailsRequest(BaseModel):
+    """Editable self-profile fields for the logged-in officer."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -188,6 +188,10 @@ class UpdateBlockOfficerDetailsRequest(BaseModel):
             return None
         value = str(value).strip()
         return value or None
+
+
+class UpdateBlockOfficerDetailsRequest(UpdateOfficerDetailsRequest):
+    """Editable self-profile fields for the logged-in block officer."""
 
 
 class AuthResponse(BaseModel):

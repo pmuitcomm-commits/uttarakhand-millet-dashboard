@@ -75,6 +75,12 @@ export const getBlockOfficerDetails = () =>
 export const updateBlockOfficerDetails = (userData) =>
   API.put("/auth/block/officer-details", userData);
 
+export const getDistrictOfficerDetails = () =>
+  API.get("/auth/district/officer-details");
+
+export const updateDistrictOfficerDetails = (userData) =>
+  API.put("/auth/district/officer-details", userData);
+
 export const getDistrictBlockOfficers = () =>
   API.get("/auth/district/block-officers");
 

@@ -10,6 +10,14 @@ import { clearAuthSession, getCurrentUser, logoutUser } from '../services/api';
 
 const AuthContext = createContext();
 
+function normalizeUser(userData) {
+  if (!userData) return userData;
+  return {
+    ...userData,
+    role: userData.role ? userData.role.toLowerCase() : userData.role,
+  };
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -41,10 +49,7 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const response = await getCurrentUser();
-        if (response.data.role) {
-          response.data.role = response.data.role.toLowerCase();
-        }
-        setUser(response.data);
+        setUser(normalizeUser(response.data));
         setIsAuthenticated(true);
       } catch (error) {
         setUser(null);
@@ -62,6 +67,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     logoutUser().catch(() => {});
+  };
+
+  const updateUser = (userData) => {
+    setUser((currentUser) =>
+      normalizeUser(currentUser ? { ...currentUser, ...userData } : userData)
+    );
   };
 
   const hasRole = (roles) => {
@@ -92,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     isAuthenticated,
     logout,
+    updateUser,
     hasRole,
     canAccessDistrict,
     canAccessBlock,
