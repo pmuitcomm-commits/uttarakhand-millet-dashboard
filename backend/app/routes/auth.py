@@ -11,6 +11,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -24,6 +25,7 @@ from .auth_roles import (
 )
 from .auth_schemas import (
     AuthResponse,
+    UpdateBlockOfficerDetailsRequest,
     UpdateBlockOfficerRequest,
     UpdateUserRoleRequest,
     UserLogin,
@@ -54,6 +56,7 @@ def _user_response(user) -> dict:
         "username": user["username"],
         "email": user.get("email"),
         "full_name": user.get("full_name"),
+        "mobile": user.get("mobile"),
         "role": _normalize_role(user.get("role")),
         "district": user.get("district"),
         "block": user.get("block"),
@@ -96,8 +99,18 @@ def _fetch_user_by_username(db: Session, username: str):
     return db.execute(
         text(
             """
-            SELECT id, username, email, hashed_password, full_name, role, district, block, is_active
-            FROM users
+            SELECT
+                id,
+                username,
+                email,
+                hashed_password,
+                full_name,
+                COALESCE(to_jsonb(u) ->> 'mobile', '') AS mobile,
+                role,
+                district,
+                block,
+                is_active
+            FROM users AS u
             WHERE username = :username
             LIMIT 1
             """
@@ -111,8 +124,17 @@ def _fetch_user_by_id(db: Session, user_id: int):
     return db.execute(
         text(
             """
-            SELECT id, username, email, full_name, role, district, block, is_active
-            FROM users
+            SELECT
+                id,
+                username,
+                email,
+                full_name,
+                COALESCE(to_jsonb(u) ->> 'mobile', '') AS mobile,
+                role,
+                district,
+                block,
+                is_active
+            FROM users AS u
             WHERE id = :id
             LIMIT 1
             """
@@ -355,6 +377,94 @@ def get_current_user_info(current_user=Depends(get_current_user)):
         dict: Non-secret user details for frontend session hydration.
     """
     return _user_response(current_user)
+
+
+@router.get("/block/officer-details", response_model=dict)
+def get_block_officer_details(
+    current_user=Depends(require_role("block")),
+    db: Session = Depends(get_db),
+):
+    """
+    Return editable profile details for the logged-in block officer.
+
+    The user id comes from the authenticated session, so callers cannot fetch
+    another officer's profile by changing request parameters.
+    """
+    user = _fetch_user_by_id(db, current_user["id"])
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Block officer not found")
+    return {"user": _user_response(user)}
+
+
+@router.put("/block/officer-details", response_model=dict)
+def update_block_officer_details(
+    request: UpdateBlockOfficerDetailsRequest,
+    current_user=Depends(require_role("block")),
+    db: Session = Depends(get_db),
+):
+    """
+    Update editable profile details for the logged-in block officer.
+
+    Only the current user's row is updated, and role/scope are resolved through
+    the existing session dependency.
+    """
+    email = str(request.email) if request.email is not None else None
+
+    if email:
+        existing_email_user = db.execute(
+            text(
+                """
+                SELECT id
+                FROM users
+                WHERE LOWER(email) = LOWER(:email)
+                  AND id <> :id
+                LIMIT 1
+                """
+            ),
+            {"email": email, "id": current_user["id"]},
+        ).first()
+        if existing_email_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is already assigned to another user",
+            )
+
+    try:
+        updated_user = db.execute(
+            text(
+                f"""
+                UPDATE users
+                SET full_name = :full_name,
+                    mobile = :mobile,
+                    email = :email
+                WHERE id = :id
+                  AND {BLOCK_OFFICER_ROLE_SQL}
+                RETURNING id
+                """
+            ),
+            {
+                "id": current_user["id"],
+                "full_name": request.full_name,
+                "mobile": request.mobile,
+                "email": email,
+            },
+        ).mappings().first()
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already assigned to another user",
+        ) from exc
+
+    if updated_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Block officer not found")
+
+    user = _fetch_user_by_id(db, current_user["id"])
+    return {
+        "message": "Block officer details updated successfully",
+        "user": _user_response(user),
+    }
 
 
 @router.get("/admin/users")

@@ -156,6 +156,40 @@ class UpdateBlockOfficerRequest(BaseModel):
         return value
 
 
+class UpdateBlockOfficerDetailsRequest(BaseModel):
+    """Editable self-profile fields for the logged-in block officer."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    full_name: str
+    mobile: str
+    email: Optional[EmailStr] = None
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 1 or len(value) > 100:
+            raise ValueError("Name is required")
+        return value
+
+    @field_validator("mobile", mode="before")
+    @classmethod
+    def validate_mobile(cls, value: str) -> str:
+        value = str(value or "").strip()
+        if not re.fullmatch(r"\d{10}", value):
+            raise ValueError("Mobile number must be exactly 10 digits")
+        return value
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def validate_email(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = str(value).strip()
+        return value or None
+
+
 class AuthResponse(BaseModel):
     """Response contract returned after successful authentication."""
 

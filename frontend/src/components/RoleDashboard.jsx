@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
 import { dashboardClasses } from "./dashboardStyles";
 
-function RoleDashboard({ requiredRole, title, summary, featureTitle, features = () => [] }) {
+function RoleDashboard({ requiredRole, title, summary, featureTitle, features = () => [], children }) {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const featureItems = features(user);
@@ -48,6 +48,8 @@ function RoleDashboard({ requiredRole, title, summary, featureTitle, features = 
               ) : null}
             </div>
           </div>
+
+          {children}
         </div>
       </div>
     </div>

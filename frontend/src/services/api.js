@@ -69,6 +69,12 @@ export const logoutUser = () =>
     clearAuthSession();
   });
 
+export const getBlockOfficerDetails = () =>
+  API.get("/auth/block/officer-details");
+
+export const updateBlockOfficerDetails = (userData) =>
+  API.put("/auth/block/officer-details", userData);
+
 export const getDistrictBlockOfficers = () =>
   API.get("/auth/district/block-officers");
 
