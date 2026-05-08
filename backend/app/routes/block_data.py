@@ -8,12 +8,20 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import MetaData, Table, inspect
 from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..services.excel_templates import ExcelTemplate, build_template_workbook
+from ..services.scheme_transactions import (
+    get_virtual_column_aliases,
+    get_virtual_column_metadata,
+    insert_transaction_rows,
+    is_legacy_scheme_table,
+)
 from .auth import require_role
 from .auth_roles import normalize_role
 
@@ -256,6 +264,7 @@ def _parse_excel_rows(
     file_bytes: bytes,
     filename: str,
     insertable_columns: list[str],
+    column_aliases: Optional[dict[str, str]] = None,
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     """Parse one Excel worksheet and keep only columns that exist in the table."""
     lower_filename = filename.lower()
@@ -288,6 +297,8 @@ def _parse_excel_rows(
         _normalize_payload_key(column_name): column_name
         for column_name in insertable_columns
     }
+    if column_aliases:
+        columns_by_key.update(column_aliases)
     matched_headers: list[Optional[str]] = []
     matched_columns: list[str] = []
     ignored_columns: list[str] = []
@@ -446,6 +457,17 @@ def get_block_data_table_schema(
     Return live column metadata for an approved block data table.
     """
     validated_table_name = _validate_table_name(table_name)
+    if is_legacy_scheme_table(validated_table_name):
+        columns = get_virtual_column_metadata(validated_table_name)
+        column_names = [column["name"] for column in columns]
+        return {
+            "table_name": "farmer_scheme_transactions",
+            "source_table_name": validated_table_name,
+            "columns": columns,
+            "district_column": _find_column(column_names, DISTRICT_COLUMN_CANDIDATES),
+            "block_column": _find_column(column_names, BLOCK_COLUMN_CANDIDATES),
+        }
+
     columns = _column_metadata(db, validated_table_name)
     column_names = [column["name"] for column in columns]
 
@@ -455,6 +477,49 @@ def get_block_data_table_schema(
         "district_column": _find_column(column_names, DISTRICT_COLUMN_CANDIDATES),
         "block_column": _find_column(column_names, BLOCK_COLUMN_CANDIDATES),
     }
+
+
+@router.get("/{table_name}/template")
+def download_block_data_template(
+    table_name: str,
+    current_user=Depends(require_role("admin", "block")),
+    db: Session = Depends(get_db),
+):
+    """Download a section-specific Excel template for block data entry."""
+    validated_table_name = _validate_table_name(table_name)
+    columns = (
+        get_virtual_column_metadata(validated_table_name)
+        if is_legacy_scheme_table(validated_table_name)
+        else _column_metadata(db, validated_table_name)
+    )
+    insertable_columns = [
+        column["name"]
+        for column in columns
+        if column["insertable"]
+    ]
+    required_columns = [
+        column["name"]
+        for column in columns
+        if column["required"]
+    ]
+    template = ExcelTemplate(
+        key=f"{validated_table_name}_upload",
+        filename=f"{validated_table_name}_upload.xlsx",
+        columns=tuple(insertable_columns),
+        required_columns=tuple(required_columns),
+        instructions=(
+            "Use one row per beneficiary transaction.",
+            "District and block are filled automatically for block officers.",
+            "Use farmer_id or farmer_code for existing farmers; otherwise provide name, district, and block.",
+        ),
+        dropdowns={},
+    )
+    workbook_bytes = build_template_workbook(template)
+    return StreamingResponse(
+        BytesIO(workbook_bytes),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{template.filename}"'},
+    )
 
 
 @router.post("/{table_name}/upload")
@@ -470,7 +535,11 @@ async def parse_block_data_excel(
     Parse an Excel file and return rows filtered to live table columns.
     """
     validated_table_name = _validate_table_name(table_name)
-    columns = _column_metadata(db, validated_table_name)
+    columns = (
+        get_virtual_column_metadata(validated_table_name)
+        if is_legacy_scheme_table(validated_table_name)
+        else _column_metadata(db, validated_table_name)
+    )
     insertable_columns = [
         column["name"]
         for column in columns
@@ -498,6 +567,9 @@ async def parse_block_data_excel(
         file_bytes,
         file.filename or "",
         insertable_columns,
+        get_virtual_column_aliases(validated_table_name)
+        if is_legacy_scheme_table(validated_table_name)
+        else None,
     )
     scoped_rows = [
         _apply_scope_defaults(
@@ -533,6 +605,37 @@ def save_block_data_rows(
     Insert rows into one approved block data table using reflected columns only.
     """
     validated_table_name = _validate_table_name(table_name)
+    if is_legacy_scheme_table(validated_table_name):
+        try:
+            inserted_rows = insert_transaction_rows(
+                db,
+                request.rows,
+                table_name=validated_table_name,
+                current_user=current_user,
+                district=district,
+                block=block,
+            )
+            db.commit()
+        except HTTPException:
+            db.rollback()
+            raise
+        except SQLAlchemyError as exc:
+            db.rollback()
+            logger.exception("Unable to save normalized block data rows for %s", validated_table_name)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to save block data",
+            ) from exc
+
+        return jsonable_encoder(
+            {
+                "table_name": "farmer_scheme_transactions",
+                "source_table_name": validated_table_name,
+                "inserted_count": len(inserted_rows),
+                "rows": inserted_rows,
+            }
+        )
+
     table = _get_reflected_table(db, validated_table_name)
     columns = _column_metadata(db, validated_table_name)
     prepared_rows = _prepare_insert_rows(

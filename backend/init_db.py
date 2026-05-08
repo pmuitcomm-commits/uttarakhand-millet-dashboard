@@ -33,7 +33,8 @@ if environment not in {"development", "dev", "local", "test", "testing"} and not
 try:
     from app.database import engine, Base
     from app.models.data_entry import DistrictBlockDataEntry
-    from app.models.farmer import Farmer, LandParcel
+    from app.models.farmer import Farmer, FarmerSchemeTransaction, LandParcel
+    from app.models.infrastructure import StorageProcessing
     from app.models.procurement import Procurement
     from app.models.production import Production
     from app.models.user import User
@@ -42,8 +43,10 @@ try:
         User.__tablename__,
         Farmer.__tablename__,
         LandParcel.__tablename__,
+        FarmerSchemeTransaction.__tablename__,
         Production.__tablename__,
         Procurement.__tablename__,
+        StorageProcessing.__tablename__,
         DistrictBlockDataEntry.__tablename__,
     ]
     

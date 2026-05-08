@@ -181,6 +181,43 @@ export const saveBlockDataRows = (tableName, rows, filters = {}) =>
     { params: buildBlockDataParams(filters) },
   );
 
+export const downloadBlockDataTemplate = (tableName) =>
+  API.get(`/block-data/${encodeURIComponent(tableName)}/template`, {
+    responseType: "blob",
+  });
+
+// =========================
+// Standard Excel Import/Export APIs
+// =========================
+export const getExcelTemplates = () => API.get("/excel/templates");
+
+export const downloadExcelTemplate = (templateKey) =>
+  API.get(`/excel/templates/${encodeURIComponent(templateKey)}`, {
+    responseType: "blob",
+  });
+
+export const uploadStandardExcel = (templateKey, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return API.post(
+    `/excel/uploads/${encodeURIComponent(templateKey)}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+};
+
+// =========================
+// Farmer Scheme Transaction APIs
+// =========================
+export const getFarmerSchemeSummary = (filters = {}) =>
+  API.get("/farmer-transactions/summary", {
+    params: buildBlockDataParams(filters),
+  });
+
+export const createFarmerSchemeTransactions = (rows) =>
+  API.post("/farmer-transactions", { rows });
+
 // =========================
 // Monitoring APIs
 // =========================

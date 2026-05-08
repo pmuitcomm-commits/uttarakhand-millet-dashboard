@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Save, Trash2, Upload } from "lucide-react";
+import { Download, Plus, Save, Trash2, Upload } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import {
   getBlockDataSchema,
+  downloadBlockDataTemplate,
   saveBlockDataRows,
   uploadBlockDataExcel,
 } from "../services/api";
@@ -99,6 +100,17 @@ function formatApiError(error) {
   return detail || error?.message || "Unable to save data.";
 }
 
+function saveBlob(blob, filename) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 function BlockDataEntryTable({ tableName, queryFilters = {} }) {
   const { user } = useAuth();
   const fileInputRef = useRef(null);
@@ -107,6 +119,7 @@ function BlockDataEntryTable({ tableName, queryFilters = {} }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [status, setStatus] = useState({ type: "", text: "" });
 
   const insertableColumns = useMemo(
@@ -230,6 +243,19 @@ function BlockDataEntryTable({ tableName, queryFilters = {} }) {
     fileInputRef.current?.click();
   };
 
+  const handleTemplateDownload = async () => {
+    setDownloadingTemplate(true);
+    setStatus({ type: "", text: "" });
+    try {
+      const response = await downloadBlockDataTemplate(tableName);
+      saveBlob(response.data, `${tableName}_upload.xlsx`);
+    } catch (error) {
+      setStatus({ type: "error", text: formatApiError(error) });
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  };
+
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -303,7 +329,7 @@ function BlockDataEntryTable({ tableName, queryFilters = {} }) {
       ? "border-[#b6dfc4] bg-[#f0fff5] text-[#14532d] dark:border-[#2f6b46] dark:bg-[#13251b] dark:text-[#b8f7ca]"
       : "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-[#2b1717] dark:text-red-200";
 
-  const controlsDisabled = loading || saving || uploading || !insertableColumns.length;
+  const controlsDisabled = loading || saving || uploading || downloadingTemplate || !insertableColumns.length;
   const tableMinWidth = Math.max(760, insertableColumns.length * 180 + 130);
 
   return (
@@ -320,6 +346,15 @@ function BlockDataEntryTable({ tableName, queryFilters = {} }) {
             type="file"
             onChange={handleFileChange}
           />
+          <button
+            className={secondaryButtonClass}
+            disabled={controlsDisabled}
+            type="button"
+            onClick={handleTemplateDownload}
+          >
+            <Download aria-hidden="true" size={16} />
+            {downloadingTemplate ? "Preparing..." : "Template"}
+          </button>
           <button
             className={secondaryButtonClass}
             disabled={controlsDisabled}

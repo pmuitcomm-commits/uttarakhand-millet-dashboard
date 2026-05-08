@@ -215,8 +215,8 @@ def _enforce_farmer_scope(current_user, farmer_row):
 
     user_district = current_user.get("district")
     user_block = current_user.get("block")
-    farmer_district = farmer_row.get("district_name")
-    farmer_block = farmer_row.get("block_name")
+    farmer_district = farmer_row.get("district") or farmer_row.get("district_name")
+    farmer_block = farmer_row.get("block") or farmer_row.get("block_name")
 
     if role == "district" and user_district == farmer_district:
         return
@@ -255,6 +255,8 @@ def register_farmer(
     farmer_data = payload.farmer.model_dump()
     farmer_data["mobile"] = _validate_mobile(farmer_data["mobile"])
     farmer_data["bank_ifsc"] = farmer_data["bank_ifsc"].strip().upper()
+    farmer_data["district"] = farmer_data.get("district_name")
+    farmer_data["block"] = farmer_data.get("block_name")
     farmer_data["consent_accepted"] = payload.consent_accepted
     farmer_data["consent_text_version"] = payload.consent_text_version
     farmer_data["consent_accepted_at"] = (
@@ -275,6 +277,8 @@ def register_farmer(
             bank_name_address,
             district_name,
             block_name,
+            district,
+            block,
             account_holder_name,
             crops,
             estimated_seed_date,
@@ -295,6 +299,8 @@ def register_farmer(
             :bank_name_address,
             :district_name,
             :block_name,
+            :district,
+            :block,
             :account_holder_name,
             :crops,
             :estimated_seed_date,
@@ -303,9 +309,21 @@ def register_farmer(
             :consent_text_version,
             :consent_accepted_at
         )
-        RETURNING farmer_id
+        RETURNING id, COALESCE(farmer_id, id) AS farmer_id
         """
     ).bindparams(bindparam("crops", type_=ARRAY(String)))
+
+    normalize_farmer_query = text(
+        """
+        UPDATE farmers
+        SET
+            farmer_id = COALESCE(farmer_id, :id),
+            farmer_code = COALESCE(farmer_code, :farmer_code),
+            district = COALESCE(district, :district),
+            block = COALESCE(block, :block)
+        WHERE id = :id
+        """
+    )
 
     insert_land_query = text(
         """
@@ -335,7 +353,18 @@ def register_farmer(
     try:
         # Farmer and land rows are committed as one transaction so a failed land
         # insert cannot leave a partial farmer enrollment.
-        farmer_id = db.execute(insert_farmer_query, farmer_data).scalar_one()
+        inserted_farmer = db.execute(insert_farmer_query, farmer_data).mappings().one()
+        farmer_id = int(inserted_farmer["id"])
+        public_farmer_id = int(inserted_farmer["farmer_id"] or farmer_id)
+        db.execute(
+            normalize_farmer_query,
+            {
+                "id": farmer_id,
+                "farmer_code": f"FARMER-{farmer_id}",
+                "district": farmer_data.get("district"),
+                "block": farmer_data.get("block"),
+            },
+        )
 
         for parcel in payload.land_parcels:
             parcel_data = parcel.model_dump()
@@ -345,7 +374,7 @@ def register_farmer(
         db.commit()
         return {
             "message": "Farmer registered successfully",
-            "farmer_id": farmer_id,
+            "farmer_id": public_farmer_id,
         }
     except IntegrityError as exc:
         db.rollback()
@@ -484,7 +513,9 @@ def check_enrollment_status_full(
     farmer_query = text(
         """
         SELECT
-            farmer_id,
+            id,
+            COALESCE(farmer_id, id) AS farmer_id,
+            farmer_code,
             name,
             father_husband_name,
             mobile,
@@ -494,6 +525,8 @@ def check_enrollment_status_full(
             bank_account_number,
             bank_ifsc,
             bank_name_address,
+            COALESCE(district, district_name) AS district,
+            COALESCE(block, block_name) AS block,
             district_name,
             block_name,
             account_holder_name,

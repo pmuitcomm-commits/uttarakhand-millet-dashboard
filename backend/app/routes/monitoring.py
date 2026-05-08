@@ -11,6 +11,12 @@ from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..services.scheme_transactions import (
+    count_transactions,
+    get_virtual_output_columns,
+    is_legacy_scheme_table,
+    list_transactions,
+)
 from .auth import require_role
 from .auth_roles import normalize_role
 
@@ -209,6 +215,15 @@ def get_monitoring_sections(
 
     sections = []
     for table_name in ALLOWED_MONITORING_TABLES:
+        if is_legacy_scheme_table(table_name):
+            sections.append(
+                {
+                    "table_name": table_name,
+                    "count": count_transactions(db, table_name, selected_district, selected_block),
+                }
+            )
+            continue
+
         columns = _get_table_columns(db, table_name)
         sections.append(
             {
@@ -259,6 +274,44 @@ def get_monitoring_table_rows(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Monitoring pages must request exactly {PAGE_SIZE} rows",
+        )
+
+    if is_legacy_scheme_table(validated_table_name):
+        try:
+            total_count = count_transactions(
+                db,
+                validated_table_name,
+                selected_district,
+                selected_block,
+            )
+            rows = list_transactions(
+                db,
+                validated_table_name,
+                selected_district,
+                selected_block,
+                limit=limit,
+                offset=from_index,
+            )
+        except SQLAlchemyError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to fetch monitoring data",
+            ) from exc
+
+        return jsonable_encoder(
+            {
+                "level": normalized_level,
+                "table_name": validated_table_name,
+                "district": selected_district,
+                "block": selected_block,
+                "columns": get_virtual_output_columns(validated_table_name),
+                "rows": rows,
+                "total_count": total_count,
+                "from": from_index,
+                "to": to_index,
+                "page_size": PAGE_SIZE,
+                "has_next": to_index + 1 < total_count,
+            }
         )
 
     columns = _get_table_columns(db, validated_table_name)

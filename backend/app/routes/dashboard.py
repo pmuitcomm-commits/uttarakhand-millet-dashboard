@@ -12,6 +12,7 @@ from sqlalchemy import func
 from ..database import get_db
 from ..models.production import Production
 from .reporting_helpers import query_failed, to_float
+from ..services.scheme_transactions import scheme_kpis
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -49,11 +50,16 @@ def get_kpis(db: Session = Depends(get_db)):
             func.sum(Production.area_hectare)
         ).scalar()
 
+        scheme_metrics = scheme_kpis(db)
+
         return {
             "total_districts": total_districts or 0,
             "total_millets": total_millets or 0,
             "total_production": to_float(total_production),
             "total_area": to_float(total_area),
+            "total_incentives": to_float(scheme_metrics.get("total_incentives")),
+            "beneficiary_count": int(scheme_metrics.get("beneficiary_count") or 0),
+            "scheme_transaction_count": int(scheme_metrics.get("scheme_transaction_count") or 0),
         }
     except Exception:
         raise query_failed("Error fetching dashboard KPIs")

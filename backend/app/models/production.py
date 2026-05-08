@@ -12,7 +12,7 @@ from ..database import Base
 class Production(Base):
     """SQLAlchemy mapping for the production reporting table."""
 
-    __tablename__ = "production"
+    __tablename__ = "millet_production"
 
     id = Column(BigInteger, primary_key=True, index=True)
 

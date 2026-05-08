@@ -765,6 +765,9 @@ function Dashboard({ page = "dashboard" }) {
   const totalTarget = kpis.total_target || 0;
   const totalCentres = kpis.total_centres || 0;
   const totalFarmers = kpis.total_farmers || 0;
+  const beneficiaryCount = kpis.beneficiary_count || totalFarmers;
+  const totalIncentives = kpis.total_incentives || 0;
+  const schemeTransactionCount = kpis.scheme_transaction_count || 0;
   const avgProcurement = dataForMetrics.length
     ? (
         dataForMetrics.reduce((sum, item) => sum + (item.production || 0), 0) /
@@ -877,20 +880,20 @@ function Dashboard({ page = "dashboard" }) {
       { label: t('totalDistricts'), value: kpis.total_districts || districtData.length },
       { label: t('totalCentres'), value: totalCentres },
       { label: t('totalTarget'), value: totalTarget },
-      { label: t('totalFarmers'), value: totalFarmers },
+      { label: t('beneficiaryCount'), value: beneficiaryCount },
       { label: t('totalProcurement'), value: totalProduction },
       { label: t('avgProcurement'), value: avgProcurement },
-      { label: t('pvtAgencies'), value: pvtAgencies },
+      { label: t('totalIncentives'), value: totalIncentives },
       { label: t('cropCoverage'), value: cropCoverage },
     ],
     production: [
       { label: t('totalProduction'), value: totalProduction },
       { label: t('totalTarget'), value: totalTarget },
       { label: t('totalCentres'), value: totalCentres },
-      { label: t('totalFarmers'), value: totalFarmers },
+      { label: t('beneficiaryCount'), value: beneficiaryCount },
       { label: t('avgDistrictProd'), value: avgDistrictProduction },
       { label: t('avgProcurement'), value: avgProcurement },
-      { label: t('pvtAgencies'), value: pvtAgencies },
+      { label: t('schemeTransactions'), value: schemeTransactionCount },
       { label: t('cropCoverage'), value: cropCoverage },
     ],
     district: [
