@@ -3,7 +3,7 @@
 from io import BytesIO
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from sqlalchemy import MetaData, Table
@@ -11,6 +11,7 @@ from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..services.activity_logging import STATUS_FAILURE, STATUS_SUCCESS, log_excel_upload
 from ..services.excel_templates import (
     TEMPLATES,
     build_template_workbook,
@@ -23,6 +24,15 @@ from .auth import require_role
 router = APIRouter(prefix="/excel", tags=["Excel Import Export"])
 
 MAX_STANDARD_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+def _exception_message(exc: Exception, fallback: str = "Excel upload failed") -> str:
+    """Return a concise log-safe error message for upload failures."""
+    if isinstance(exc, HTTPException):
+        return str(exc.detail)
+    if isinstance(exc, SQLAlchemyError):
+        return fallback
+    return str(exc) or exc.__class__.__name__
 
 
 def _template_response(template_key: str) -> StreamingResponse:
@@ -117,56 +127,105 @@ def _insert_reflected_rows(db: Session, table_name: str, rows: list[dict[str, An
 @router.post("/uploads/{template_key}")
 async def upload_standard_excel(
     template_key: str,
+    request: Request,
     file: UploadFile = File(...),
     current_user=Depends(require_role("admin", "district", "block")),
     db: Session = Depends(get_db),
 ):
     """Upload a standardized Excel workbook into its normalized target table."""
-    template = get_template(template_key)
-    file_bytes = await file.read()
-    if not file_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Excel file is empty",
-        )
-    if len(file_bytes) > MAX_STANDARD_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Excel file is too large",
-        )
-
-    rows = parse_workbook_rows(file_bytes, file.filename or "", template.columns)
-    _validate_required_rows(rows, template.required_columns)
-
+    file_name = file.filename or ""
     try:
-        if template_key == "farmers_upload":
-            inserted_rows = [{"id": upsert_farmer(db, row)} for row in rows]
-        elif template_key == "farmer_scheme_transactions_upload":
-            inserted_rows = insert_transaction_rows(
-                db,
-                rows,
-                current_user=current_user,
-            )
-        elif template_key == "millet_production_upload":
-            inserted_rows = _insert_reflected_rows(db, "millet_production", rows)
-        elif template_key == "storage_processing_upload":
-            inserted_rows = _insert_reflected_rows(db, "storage_processing", rows)
-        else:
+        template = get_template(template_key)
+        file_bytes = await file.read()
+        if not file_bytes:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Unknown Excel template",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Excel file is empty",
+            )
+        if len(file_bytes) > MAX_STANDARD_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Excel file is too large",
             )
 
-        db.commit()
-    except HTTPException:
+        rows = parse_workbook_rows(file_bytes, file_name, template.columns)
+        _validate_required_rows(rows, template.required_columns)
+
+        try:
+            if template_key == "farmers_upload":
+                inserted_rows = [{"id": upsert_farmer(db, row)} for row in rows]
+            elif template_key == "farmer_scheme_transactions_upload":
+                inserted_rows = insert_transaction_rows(
+                    db,
+                    rows,
+                    current_user=current_user,
+                )
+            elif template_key == "millet_production_upload":
+                inserted_rows = _insert_reflected_rows(db, "millet_production", rows)
+            elif template_key == "storage_processing_upload":
+                inserted_rows = _insert_reflected_rows(db, "storage_processing", rows)
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Unknown Excel template",
+                )
+
+            db.commit()
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_SUCCESS,
+            file_name=file_name,
+            module="standard_excel",
+            details={
+                "template": template_key,
+                "row_count": len(rows),
+                "inserted_count": len(inserted_rows),
+            },
+        )
+    except HTTPException as exc:
         db.rollback()
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_FAILURE,
+            file_name=file_name,
+            module="standard_excel",
+            error_message=_exception_message(exc),
+            details={"template": template_key},
+        )
         raise
     except SQLAlchemyError as exc:
         db.rollback()
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_FAILURE,
+            file_name=file_name,
+            module="standard_excel",
+            error_message=_exception_message(exc, "Unable to import Excel data"),
+            details={"template": template_key},
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to import Excel data",
         ) from exc
+    except Exception as exc:
+        db.rollback()
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_FAILURE,
+            file_name=file_name,
+            module="standard_excel",
+            error_message=_exception_message(exc),
+            details={"template": template_key},
+        )
+        raise
 
     return jsonable_encoder(
         {
@@ -175,4 +234,3 @@ async def upload_standard_excel(
             "rows": inserted_rows,
         }
     )
-

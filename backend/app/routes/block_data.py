@@ -6,7 +6,7 @@ import logging
 from io import BytesIO
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -15,6 +15,7 @@ from sqlalchemy.exc import NoSuchTableError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..services.activity_logging import STATUS_FAILURE, STATUS_SUCCESS, log_excel_upload
 from ..services.excel_templates import ExcelTemplate, build_template_workbook
 from ..services.scheme_transactions import (
     get_virtual_column_aliases,
@@ -43,6 +44,15 @@ ALLOWED_BLOCK_DATA_TABLES = tuple(BLOCK_DATA_TABLES.values())
 DISTRICT_COLUMN_CANDIDATES = ("district", "district_name")
 BLOCK_COLUMN_CANDIDATES = ("block", "block_name")
 MAX_EXCEL_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+def _upload_exception_message(exc: Exception, fallback: str = "Excel upload failed") -> str:
+    """Return a concise log-safe error message for block Excel upload failures."""
+    if isinstance(exc, HTTPException):
+        return str(exc.detail)
+    if isinstance(exc, SQLAlchemyError):
+        return fallback
+    return str(exc) or exc.__class__.__name__
 
 
 class BlockDataRowsRequest(BaseModel):
@@ -525,6 +535,7 @@ def download_block_data_template(
 @router.post("/{table_name}/upload")
 async def parse_block_data_excel(
     table_name: str,
+    request: Request,
     file: UploadFile = File(...),
     district: Optional[str] = Query(default=None),
     block: Optional[str] = Query(default=None),
@@ -534,62 +545,101 @@ async def parse_block_data_excel(
     """
     Parse an Excel file and return rows filtered to live table columns.
     """
-    validated_table_name = _validate_table_name(table_name)
-    columns = (
-        get_virtual_column_metadata(validated_table_name)
-        if is_legacy_scheme_table(validated_table_name)
-        else _column_metadata(db, validated_table_name)
-    )
-    insertable_columns = [
-        column["name"]
-        for column in columns
-        if column["insertable"]
-    ]
-    if not insertable_columns:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"{validated_table_name} does not have insertable columns",
+    file_name = file.filename or ""
+    try:
+        validated_table_name = _validate_table_name(table_name)
+        columns = (
+            get_virtual_column_metadata(validated_table_name)
+            if is_legacy_scheme_table(validated_table_name)
+            else _column_metadata(db, validated_table_name)
         )
+        insertable_columns = [
+            column["name"]
+            for column in columns
+            if column["insertable"]
+        ]
+        if not insertable_columns:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"{validated_table_name} does not have insertable columns",
+            )
 
-    file_bytes = await file.read()
-    if not file_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Excel file is empty",
-        )
-    if len(file_bytes) > MAX_EXCEL_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Excel file is too large",
-        )
+        file_bytes = await file.read()
+        if not file_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Excel file is empty",
+            )
+        if len(file_bytes) > MAX_EXCEL_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Excel file is too large",
+            )
 
-    parsed_rows, matched_columns, ignored_columns = _parse_excel_rows(
-        file_bytes,
-        file.filename or "",
-        insertable_columns,
-        get_virtual_column_aliases(validated_table_name)
-        if is_legacy_scheme_table(validated_table_name)
-        else None,
-    )
-    scoped_rows = [
-        _apply_scope_defaults(
-            row,
+        parsed_rows, matched_columns, ignored_columns = _parse_excel_rows(
+            file_bytes,
+            file_name,
             insertable_columns,
-            current_user,
-            district,
-            block,
+            get_virtual_column_aliases(validated_table_name)
+            if is_legacy_scheme_table(validated_table_name)
+            else None,
         )
-        for row in parsed_rows
-    ]
-
-    return jsonable_encoder(
-        {
+        scoped_rows = [
+            _apply_scope_defaults(
+                row,
+                insertable_columns,
+                current_user,
+                district,
+                block,
+            )
+            for row in parsed_rows
+        ]
+        response_payload = {
             "table_name": validated_table_name,
             "rows": scoped_rows,
             "matched_columns": matched_columns,
             "ignored_columns": ignored_columns,
         }
-    )
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_SUCCESS,
+            file_name=file_name,
+            module="block_data_excel",
+            details={
+                "table_name": validated_table_name,
+                "row_count": len(scoped_rows),
+                "matched_columns": matched_columns,
+                "ignored_columns": ignored_columns,
+                "district": district,
+                "block": block,
+            },
+        )
+        return jsonable_encoder(response_payload)
+    except HTTPException as exc:
+        db.rollback()
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_FAILURE,
+            file_name=file_name,
+            module="block_data_excel",
+            error_message=_upload_exception_message(exc),
+            details={"table_name": table_name, "district": district, "block": block},
+        )
+        raise
+    except Exception as exc:
+        db.rollback()
+        log_excel_upload(
+            current_user=current_user,
+            request=request,
+            status=STATUS_FAILURE,
+            file_name=file_name,
+            module="block_data_excel",
+            error_message=_upload_exception_message(exc, "Unable to parse Excel data"),
+            details={"table_name": table_name, "district": district, "block": block},
+        )
+        raise
 
 
 @router.post("/{table_name}")

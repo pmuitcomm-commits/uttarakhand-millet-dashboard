@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..rate_limit import limiter
 from ..security import create_access_token, decode_token, hash_password, verify_password
+from ..services.activity_logging import log_login_success
 from .auth_roles import (
     PUBLIC_REGISTRATION_ROLE,
     ROLE_MAP,
@@ -358,6 +359,7 @@ def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     access_token = create_access_token(data={"sub": user["username"]})
+    log_login_success(current_user=user, request=request)
     return make_auth_response(_user_response(user), access_token)
 
 
