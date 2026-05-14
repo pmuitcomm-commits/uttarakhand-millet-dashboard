@@ -809,7 +809,7 @@ export default function UttarakhandMilletProjectLandingPage() {
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <SoftImage
             label="Background consultation photograph"
-            src={contentImageSources[0]}
+            src="/background.jpeg"
             className="min-h-[280px] sm:min-h-[440px]"
           />
           <article className="relative border-l-4 border-[#f2b544] pl-5 sm:pl-8">
@@ -972,34 +972,173 @@ export default function UttarakhandMilletProjectLandingPage() {
           </p>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {components.map((item, idx) => (
-              <article
-                key={item.title}
-                className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]"
-              >
-                <SoftImage
-                  label={`${item.title} image`}
-                  src={contentImageSources[(idx + 1) % contentImageSources.length]}
-                  className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
-                />
-                <div className="flex flex-1 flex-col p-5 sm:p-6">
-                  <div className="mb-4 flex items-start gap-3">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
-                      {item.icon}
-                    </div>
-                    <h3 className="break-words text-2xl font-black leading-tight">{item.title} :</h3>
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[0].title} image`}
+                src="/1c.jpeg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[0].icon}
                   </div>
-                  <ul className="space-y-3 text-base font-medium leading-7">
-                    {item.points.map((point) => (
-                      <li key={point} className="flex gap-3">
-                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[0].title} :</h3>
                 </div>
-              </article>
-            ))}
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[0].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[1].title} image`}
+                src="/2c.jpg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[1].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[1].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[1].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[2].title} image`}
+                src="/3c.jpg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[2].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[2].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[2].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[3].title} image`}
+                src="/4c.jpg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[3].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[3].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[3].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[4].title} image`}
+                src="/5c.jpeg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[4].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[4].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[4].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[5].title} image`}
+                src="/6c.jpeg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[5].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[5].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[5].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+
+            <article className="group flex min-h-full animate-slide-in-soft flex-col overflow-hidden rounded-lg border border-[#f2b544]/25 bg-[#f7f3e8] text-[#0b4f3a] shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-[#f2b544]">
+              <SoftImage
+                label={`${components[6].title} image`}
+                src="/7c.jpeg"
+                className="min-h-[190px] rounded-none border-0 shadow-none sm:min-h-[230px]"
+              />
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#0b4f3a] text-[#f2b544] shadow-md">
+                    {components[6].icon}
+                  </div>
+                  <h3 className="break-words text-2xl font-black leading-tight">{components[6].title} :</h3>
+                </div>
+                <ul className="space-y-3 text-base font-medium leading-7">
+                  {components[6].points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-[#f2b544]" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
           </div>
         </div>
       </section>
